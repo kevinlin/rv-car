@@ -124,3 +124,60 @@ export const aabb = (p: Placement) => ({
     p.origin[2].v + p.size[2].v,
   ] as [number, number, number],
 });
+
+export interface Hotspot {
+  readonly id: ZoneId;
+  readonly label: string;
+  /** Metres, in the runtime frame. */
+  readonly camera: {
+    readonly position: readonly [number, number, number];
+    readonly target: readonly [number, number, number];
+  };
+  /** Radians for angles, metres for distance. */
+  readonly orbit: {
+    readonly azimuth: readonly [number, number];
+    readonly polar: readonly [number, number];
+    readonly distance: readonly [number, number];
+  };
+}
+
+const D = Math.PI / 180;
+
+export const HOTSPOTS: readonly Hotspot[] = [
+  {
+    id: 'dinette',
+    label: 'Lounge',
+    camera: { position: [-0.2, 1.35, 2.9], target: [0.55, 0.85, 0.9] },
+    orbit: { azimuth: [-70 * D, 70 * D], polar: [60 * D, 105 * D], distance: [1.2, 3.4] },
+  },
+  {
+    id: 'alcove',
+    label: 'Alcove bed',
+    camera: { position: [0.0, 1.5, 1.5], target: [0.0, 1.35, -0.7] },
+    orbit: { azimuth: [-45 * D, 45 * D], polar: [65 * D, 100 * D], distance: [1.0, 2.6] },
+  },
+  {
+    id: 'sofa',
+    label: 'Slide-out bed',
+    camera: { position: [0.35, 1.3, 2.4], target: [-1.05, 0.6, 1.1] },
+    orbit: { azimuth: [-120 * D, 20 * D], polar: [60 * D, 105 * D], distance: [1.0, 2.8] },
+  },
+  {
+    id: 'galley',
+    label: 'Galley',
+    camera: { position: [0.1, 1.45, 2.2], target: [0.85, 1.0, 3.3] },
+    orbit: { azimuth: [-30 * D, 90 * D], polar: [60 * D, 100 * D], distance: [0.9, 2.4] },
+  },
+  {
+    id: 'washroom',
+    label: 'Washroom',
+    camera: { position: [-0.3, 1.45, 2.2], target: [-0.85, 1.0, 3.1] },
+    orbit: { azimuth: [-90 * D, 30 * D], polar: [60 * D, 100 * D], distance: [0.8, 2.0] },
+  },
+  {
+    id: 'cab',
+    label: 'Cab',
+    camera: { position: [0.0, 1.4, 0.9], target: [0.0, 1.0, -1.3] },
+    orbit: { azimuth: [-50 * D, 50 * D], polar: [65 * D, 100 * D], distance: [1.0, 2.6] },
+  },
+];

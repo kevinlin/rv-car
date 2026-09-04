@@ -7,8 +7,15 @@
     "noUncheckedIndexedAccess": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["vitest/globals"],
-    "outDir": "dist"
+    "types": [
+      "vitest/globals"
+    ],
+    "outDir": "dist",
+    "allowJs": true,
+    "checkJs": false
   },
-  "include": ["src", "tools"]
+  "include": [
+    "src",
+    "tools"
+  ]
 }
