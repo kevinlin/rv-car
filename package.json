@@ -10,7 +10,10 @@
     "dev": "vite",
     "build": "vite build",
     "test": "vitest run",
-    "check": "vitest run && tsc --noEmit"
+    "check": "vitest run && tsc --noEmit",
+    "export": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend -P tools/export_modules.py",
+    "optimize": "npx --yes @gltf-transform/cli optimize dist/raw --output public/models --texture-compress ktx2 --compress draco",
+    "budget": "node tools/check_budget.mjs"
   },
   "keywords": [],
   "author": "",
