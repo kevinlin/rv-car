@@ -351,5 +351,6 @@ height looking forward, kerb wall cut away).
   the bed fills the gap left behind. The aisle would then *widen* to ~1100 mm when deployed,
   which is the usual selling point of a slide-out and fits the brochure's "+27 % space" better.
 
-(b) is more likely on reflection, but it moves the sofa's inboard edge from `−450` to `−1030` and
-changes the lounge proportions, so it should not be switched silently.
+**Resolved 2026-09-05: (a), bed infills inboard.** The data already modelled this, so nothing
+changed. The consequence to keep in mind while modelling: the slide-out buys sleeping width, not
+floor space, and the aisle stays 520 mm deployed.
