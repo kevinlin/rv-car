@@ -16,6 +16,8 @@ export const createScene = (canvas: HTMLCanvasElement): SceneBundle => {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x111111);
@@ -26,12 +28,6 @@ export const createScene = (canvas: HTMLCanvasElement): SceneBundle => {
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(0, 1.0, 1.6);
   controls.enableDamping = true;
-
-  // Placeholder lighting for the grey-box only. Task 14 replaces this entirely.
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 2.0));
-  const key = new THREE.DirectionalLight(0xffffff, 1.5);
-  key.position.set(3, 5, 2);
-  scene.add(key);
 
   const render = () => {
     controls.update();

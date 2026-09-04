@@ -69,3 +69,10 @@ describe('HOTSPOTS', () => {
     }
   });
 });
+
+describe('clamp with a degenerate duration', () => {
+  it('never yields NaN, which would put the camera at an unrenderable position', () => {
+    // tweenTo(bundle, h, 0) computes elapsed/ms; on the first frame that is 0/0.
+    expect(Number.isNaN(clamp(0 / 0, 0, 1))).toBe(false);
+  });
+});

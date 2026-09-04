@@ -7,6 +7,13 @@
     <style>
       html, body { margin: 0; height: 100%; background: #111; overflow: hidden; }
       canvas { display: block; }
+      .ui { position: fixed; left: 16px; bottom: 16px; display: flex; gap: 24px;
+            font: 13px system-ui, sans-serif; }
+      .ui-zones, .ui-finishes { display: flex; gap: 8px; }
+      .ui button { border: 0; border-radius: 6px; padding: 8px 12px; cursor: pointer;
+                   background: rgba(255,255,255,.85); color: #111; }
+      .ui-finishes button { width: 32px; height: 32px; padding: 0;
+                            border: 2px solid rgba(255,255,255,.7); }
     </style>
   </head>
   <body>

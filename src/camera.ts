@@ -3,8 +3,9 @@ import type { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import type { Hotspot } from './data/vehicle';
 import type { SceneBundle } from './scene';
 
+/** NaN-safe: a NaN progress value would propagate into the camera position and blank the frame. */
 export const clamp = (v: number, lo: number, hi: number): number =>
-  v < lo ? lo : v > hi ? hi : v;
+  Number.isNaN(v) ? hi : v < lo ? lo : v > hi ? hi : v;
 
 export const easeInOutCubic = (t: number): number =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -34,6 +35,15 @@ export const tweenTo = (bundle: SceneBundle, h: Hotspot, ms = 900): Promise<void
   controls.minDistance = 0;
   controls.maxDistance = Infinity;
   controls.enabled = false;
+
+  // Zero duration means "place it now" — used for the opening shot.
+  if (ms <= 0) {
+    camera.position.set(...(h.camera.position as [number, number, number]));
+    controls.target.set(...(h.camera.target as [number, number, number]));
+    controls.enabled = true;
+    applyHotspotLimits(controls, h);
+    return Promise.resolve();
+  }
 
   const fromPos = camera.position.clone();
   const fromTgt = controls.target.clone();
