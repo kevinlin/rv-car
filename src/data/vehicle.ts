@@ -58,3 +58,69 @@ export const ZONE_VOLUME: Record<Exclude<ZoneId, 'shell'>, VolumeId> = {
   galley: 'habitation',
   washroom: 'habitation',
 };
+
+export interface Placement {
+  readonly id: string;
+  readonly zone: ZoneId;
+  /** Minimum corner, millimetres. */
+  readonly origin: readonly [Mm, Mm, Mm];
+  /** Positive extents along +X, +Y, +Z, millimetres. */
+  readonly size: readonly [Mm, Mm, Mm];
+  readonly movable: boolean;
+}
+
+const e = (v: number) => mm(v, 'estimated');
+const d = (v: number) => mm(v, 'derived');
+const pub = (v: number) => mm(v, 'published');
+
+const W = 30; // wall / panel thickness for shell boxes
+
+export const PLACEMENTS: readonly Placement[] = [
+  // --- shell (the enclosure; excluded from overlap and containment checks) ---
+  { id: 'floor',    zone: 'shell', origin: [d(-1180), d(-W), d(0)],    size: [d(2360), d(W), d(4050)], movable: false },
+  { id: 'ceiling',  zone: 'shell', origin: [d(-1180), d(2000), d(0)],  size: [d(2360), d(W), d(4050)], movable: false },
+  { id: 'wall_off', zone: 'shell', origin: [d(-1180), d(0), d(0)],     size: [d(W), d(2000), d(4050)], movable: false },
+  { id: 'wall_kerb',zone: 'shell', origin: [d(1150), d(0), d(0)],      size: [d(W), d(2000), d(4050)], movable: false },
+  { id: 'bulkhead', zone: 'shell', origin: [d(-1180), d(0), d(-W)],    size: [d(2360), d(2000), d(W)], movable: false },
+  { id: 'wall_rear',zone: 'shell', origin: [d(-1180), d(0), d(4050)],  size: [d(2360), d(2000), d(W)], movable: false },
+  { id: 'slideout_shell', zone: 'shell', origin: [d(-1760), d(0), d(150)], size: [d(580), d(2000), d(1900)], movable: false },
+
+  // --- cab ---
+  { id: 'cab_seat_off',  zone: 'cab', origin: [e(-900), e(0), e(-1600)], size: [e(550), e(1100), e(550)], movable: false },
+  { id: 'cab_seat_kerb', zone: 'cab', origin: [e(350), e(0), e(-1600)],  size: [e(550), e(1100), e(550)], movable: false },
+
+  // --- alcove: transverse bed, 2200 across x 1400 fore-aft (published) ---
+  { id: 'alcove_bed',     zone: 'alcove', origin: [d(-1100), e(1150), e(-1400)], size: [pub(2200), e(200), pub(1400)], movable: false },
+  { id: 'alcove_lockers', zone: 'alcove', origin: [e(-1100), e(1500), e(-300)],  size: [e(2200), e(400), e(300)],      movable: false },
+
+  // --- dinette: four captain chairs face to face around a pedestal table ---
+  { id: 'dinette_chair_fwd_in',  zone: 'dinette', origin: [e(70), e(0), e(100)],  size: [e(520), e(1150), e(520)], movable: true },
+  { id: 'dinette_chair_fwd_out', zone: 'dinette', origin: [e(630), e(0), e(100)], size: [e(520), e(1150), e(520)], movable: true },
+  { id: 'dinette_chair_aft_in',  zone: 'dinette', origin: [e(70), e(0), e(1360)], size: [e(520), e(1150), e(520)], movable: true },
+  { id: 'dinette_chair_aft_out', zone: 'dinette', origin: [e(630), e(0), e(1360)],size: [e(520), e(1150), e(520)], movable: true },
+  { id: 'dinette_table',         zone: 'dinette', origin: [e(120), e(0), e(640)], size: [e(980), e(720), e(700)],  movable: true },
+  { id: 'lockers_kerb',          zone: 'dinette', origin: [e(700), e(1400), e(100)], size: [e(450), e(450), e(1900)], movable: false },
+
+  // --- side slide-out: bench base plus the 1280 x 1900 bed (published) ---
+  { id: 'slideout_base', zone: 'sofa', origin: [d(-1730), e(0), e(150)],   size: [d(1280), e(400), d(1900)], movable: false },
+  { id: 'slideout_bed',  zone: 'sofa', origin: [d(-1730), e(400), e(150)], size: [pub(1280), e(200), pub(1900)], movable: false },
+  { id: 'lockers_off',   zone: 'sofa', origin: [e(-1730), e(1400), e(150)],size: [e(450), e(450), e(1900)], movable: false },
+
+  // --- storage band between lounge and wet zone ---
+  { id: 'fridge',   zone: 'storage', origin: [e(-1150), e(0), e(2100)], size: [e(600), e(1800), e(400)], movable: false },
+  { id: 'wardrobe', zone: 'storage', origin: [e(600), e(0), e(2100)],   size: [e(550), e(1900), e(400)], movable: false },
+
+  // --- rear wet zone. Which side is which is open question 5 in the spec. ---
+  { id: 'galley_run',      zone: 'galley', origin: [e(550), e(0), e(2550)],    size: [e(600), e(900), e(1450)], movable: false },
+  { id: 'galley_overhead', zone: 'galley', origin: [e(550), e(1350), e(2550)], size: [e(600), e(450), e(1450)], movable: false },
+  { id: 'washroom_pod',    zone: 'washroom', origin: [e(-1150), e(0), e(2550)],size: [e(1000), e(1950), e(1100)], movable: false },
+];
+
+export const aabb = (p: Placement) => ({
+  min: [p.origin[0].v, p.origin[1].v, p.origin[2].v] as [number, number, number],
+  max: [
+    p.origin[0].v + p.size[0].v,
+    p.origin[1].v + p.size[1].v,
+    p.origin[2].v + p.size[2].v,
+  ] as [number, number, number],
+});
