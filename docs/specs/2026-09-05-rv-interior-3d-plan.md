@@ -2561,3 +2561,36 @@ git commit -m "feat: add hotspot navigation UI and the wood finish swap"
 **Type consistency.** `Mm`, `Confidence`, `Placement`, `Box`, `ZoneId`, `VolumeId`, `Hotspot`, `Role`, `Registry`, `MaterialParams`, `Variant`, `SceneBundle`, `CoveSpec`, `Violation` are each defined once and used with the same shape throughout. `aabb()`, `toM()`, `toMTriple()`, `roleOf()`, `applyFinishes()`, `bindPlacements()`, `checkAll()`, `minAisleWidth()`, `tweenTo()`, `applyHotspotLimits()`, `coveLightSpecs()`, `installLighting()`, `loadModules()`, `buildGreybox()`, `buildUi()` keep one signature each.
 
 **Known crossing:** `src/budget.test.ts` imports from `tools/check_budget.mjs`, so `vitest.config.ts`'s `include` covers `src/**/*.test.ts` while `tsconfig.json` includes both `src` and `tools`. Deliberate — it keeps every test under one directory.
+
+---
+
+## Execution log (2026-09-05, branch `feat/interior-3d`)
+
+Tasks 1–11, 14 and 15 complete. Tasks 12–13 need Blender modelling and are the handover point.
+
+### Deviations from the plan as written
+
+1. **`minAisleWidth` silently skipped centreline-straddling boxes.** A box spanning `X = 0` landed
+   in neither the off-side nor kerb-side bucket, so the one geometry that blocks the aisle
+   outright was the one case the check ignored. It now returns 0. Caught by Task 5's own test.
+2. **`tweenTo(h, 0)` blanked the frame.** The opening shot passes `ms = 0`, so the first frame
+   computes `0 / 0`; `clamp` passed the NaN into `lerpVectors` and the camera position became
+   NaN. Zero duration now snaps directly and `clamp` is NaN-safe. Only found by running the app.
+3. **`loadModules` returns `{ root, loaded, missing }` instead of throwing.** Modules arrive one
+   at a time as they are modelled, and the app has to stay runnable throughout. `bindPlacements`
+   still enforces the naming contract, but only once every module is present.
+4. **The grey-box keeps flat lighting.** It has no emissive LED strips and no window apertures,
+   so the real rig renders a sealed box as near-black and the environment probe has nothing to
+   bootstrap from. `main.ts` picks the rig by whether any module loaded.
+5. **`allowJs: true`** in `tsconfig.json`, so `tsc` resolves `tools/check_budget.mjs`, which
+   `src/budget.test.ts` imports. The plan flagged that crossing but did not handle it.
+6. **`PCFSoftShadowMap` is removed in three r185.** Using `PCFShadowMap`.
+7. **Task 12's loader was pulled forward** into Task 15, because `main.ts` cannot run without it.
+
+### State
+
+- 77 tests passing, `tsc --noEmit` clean, `npm run check` green.
+- `npm run dev` serves the grey-box with working hotspot navigation and wood swatches.
+- `npm run budget` passes trivially — no models yet.
+- Blender 5.2.1 LTS, Node 24.15, Python 3.13 all present; export script verified to reject a
+  file that breaks the material naming contract.
