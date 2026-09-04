@@ -311,3 +311,45 @@ Not blocking; resolve during phase 1 or state as assumptions.
    about camera heading, so left/right cannot be settled from them. Pick one during phase 1, note
    it as an assumption, and mirror the pair if better evidence appears. The zone *lengths* are
    unaffected either way, so this does not block modelling.
+
+## Phase 1 gate findings (2026-09-05)
+
+Grey-box built from `PLACEMENTS` and reviewed against the reference imagery. Renders saved to
+[../research/gate-02-plan.png](../research/gate-02-plan.png) (plan, ceiling and overheads hidden)
+and [../research/gate-03-eye-level.png](../research/gate-03-eye-level.png) (aisle at 1.55 m eye
+height looking forward, kerb wall cut away).
+
+### Fixed during the gate
+
+1. **The corridor pinched to 220 mm.** The washroom was 1000 mm wide with its inboard edge at
+   `X −150`, while the lounge aisle runs `−450 → +70`. Each *slice* passed the ≥ 400 mm test, but
+   the two ranges barely overlapped, so the continuously walkable corridor was only 220 mm. The
+   per-slice check cannot see this; the plan view showed it immediately. Washroom is now 700 mm
+   wide with its inboard edge at `−450`, aligned with the sofa, and the corridor runs straight
+   from bulkhead to rear wall.
+2. **`habLength` was 4048 mm** (5998 − 1950) while every shell box used 4050, so rear furniture
+   flush to the back wall failed containment by 2 mm. `cabDepth` is now 1948 mm, an adjustment
+   well inside its `estimated` tolerance, and the two agree exactly.
+3. **Galley stopped 50 mm short of the rear wall.** Extended to meet it.
+
+### Checked and accepted
+
+- Standing height 2000 mm reads correctly at eye level against the seated figures in the photos.
+- Alcove bed underside at 1150 mm clears the cab seat tops (1100 mm) and leaves 650 mm of
+  sleeping headroom, which is normal for the class.
+- The slide-out protrudes visibly past the off-side wall, and the bed lands at the published
+  1280 × 1900.
+- Zone proportions along the length match the 前/中/后 division the 境-family sources describe.
+
+### Open — needs a decision before the furniture is modelled
+
+**Which way does the slide-out move the sofa?** Two readings, and no source settles it:
+
+- **(a) Bed infills inboard.** The sofa base stays put and a panel fills outboard to make the
+  1280 mm bed. This is what the data models now. Aisle stays 520 mm deployed.
+- **(b) Sofa travels outboard.** The mechanism carries the wall *and* the sofa out by 580 mm, and
+  the bed fills the gap left behind. The aisle would then *widen* to ~1100 mm when deployed,
+  which is the usual selling point of a slide-out and fits the brochure's "+27 % space" better.
+
+(b) is more likely on reflection, but it moves the sofa's inboard edge from `−450` to `−1030` and
+changes the lounge proportions, so it should not be switched silently.

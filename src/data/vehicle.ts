@@ -16,7 +16,7 @@ const overallWidth = mm(2450, 'published');
 const overallHeight = mm(3200, 'published');
 const wheelbase = mm(3300, 'published');
 const frontAxleFromNose = mm(1050, 'estimated', 'Iveco Daily single cab');
-const cabDepth = mm(1950, 'estimated', 'nose to bulkhead');
+const cabDepth = mm(1948, 'estimated', 'nose to bulkhead; set so habLength lands on 4050');
 const wallThickness = mm(45, 'estimated', 'XPS sandwich wall');
 
 export const ENVELOPE: Record<string, Mm> = {
@@ -111,9 +111,9 @@ export const PLACEMENTS: readonly Placement[] = [
   { id: 'wardrobe', zone: 'storage', origin: [e(600), e(0), e(2100)],   size: [e(550), e(1900), e(400)], movable: false },
 
   // --- rear wet zone. Which side is which is open question 5 in the spec. ---
-  { id: 'galley_run',      zone: 'galley', origin: [e(550), e(0), e(2550)],    size: [e(600), e(900), e(1450)], movable: false },
-  { id: 'galley_overhead', zone: 'galley', origin: [e(550), e(1350), e(2550)], size: [e(600), e(450), e(1450)], movable: false },
-  { id: 'washroom_pod',    zone: 'washroom', origin: [e(-1150), e(0), e(2550)],size: [e(1000), e(1950), e(1100)], movable: false },
+  { id: 'galley_run',      zone: 'galley', origin: [e(550), e(0), e(2550)],    size: [e(600), e(900), e(1500)], movable: false },
+  { id: 'galley_overhead', zone: 'galley', origin: [e(550), e(1350), e(2550)], size: [e(600), e(450), e(1500)], movable: false },
+  { id: 'washroom_pod',    zone: 'washroom', origin: [e(-1150), e(0), e(2650)],size: [e(700), e(1950), e(1400)], movable: false },
 ];
 
 export const aabb = (p: Placement) => ({
