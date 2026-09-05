@@ -127,7 +127,7 @@ spec's palette table calls the seat "cream leather"; the photographs show neutra
 - Consumes: `DEFAULT_REGISTRY`, `Role` from `src/data/finishes.ts`
 - Produces: nothing new. `upholstery.seat` and `floor` colours change value only.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/data/finishes.test.ts`:
 
@@ -171,12 +171,12 @@ describe('neutral roles', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `pnpm exec vitest run src/data/finishes.test.ts`
 Expected: FAIL on `floor/grey-vinyl` (0.088) and `upholstery.seat/cream` (0.082).
 
-- [ ] **Step 3: Correct the two colours**
+- [x] **Step 3: Correct the two colours**
 
 In `src/data/finishes.ts`, replace the `upholstery.seat` and `floor` entries:
 
@@ -191,13 +191,13 @@ In `src/data/finishes.ts`, replace the `upholstery.seat` and `floor` entries:
   'floor':             one('grey-vinyl', 'Grey vinyl', { color: 0x8f9094, roughness: 0.75, metalness: 0 }),
 ```
 
-- [ ] **Step 4: Run the tests and make sure they pass**
+- [x] **Step 4: Run the tests and make sure they pass**
 
 Run: `pnpm check`
 Expected: PASS, TypeScript clean. The existing `finishes.test.ts` seam test still passes because
 it asserts which roles change on a wood swap, not their values.
 
-- [ ] **Step 5: Update the palette tables that now disagree**
+- [x] **Step 5: Update the palette tables that now disagree**
 
 In `docs/specs/design_rv-interior-3d.md` §3, change the `upholstery.seat` row from
 "Cream leather / `#E8E1D5`" to "Grey leather / `#C9CAC9`" and the `floor` row's hex to `#8F9094`.

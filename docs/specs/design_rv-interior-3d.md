@@ -177,11 +177,11 @@ From the reference imagery. Values are estimated by eye and are a starting point
 |---|---|---|
 | `wood.cabinet` | Dark walnut veneer, satin; gloss on galley overheads | `#5A3A24` |
 | `panel.wall`, `panel.locker` | Warm cream / bone, soft-touch | `#EFE7DA` |
-| `upholstery.seat` | Cream leather | `#E8E1D5` |
+| `upholstery.seat` | Grey leather | `#C9CAC9` |
 | `upholstery.bolster` | Camel tan, with piping | `#B08052` |
 | `upholstery.sofa` | White-cream leather | `#F2EDE4` |
 | `worktop` | Pale grey stone-look | `#C9C6BE` |
-| `floor` | Mid-grey vinyl, herringbone texture, aluminium trim strips | `#7C8288` |
+| `floor` | Mid-grey vinyl, herringbone texture, aluminium trim strips | `#8F9094` |
 | `washroom.shell` | Gloss white moulded GRP | `#F7F7F5` |
 | `washroom.duckboard` | Teak slats | `#9A6B3C` |
 | `metal.brushed` / `metal.chrome` / `metal.dark` | Aluminium, chrome, black mixer | `#B8BCC0` / `#1E1E1E` |

@@ -46,11 +46,14 @@ export const DEFAULT_REGISTRY: Registry = {
   },
   'panel.wall':        one('bone', 'Bone', { color: 0xefe7da, roughness: 0.8, metalness: 0 }),
   'panel.locker':      one('bone-gloss', 'Bone gloss', { color: 0xefe7da, roughness: 0.25, metalness: 0 }),
-  'upholstery.seat':   one('cream', 'Cream leather', { color: 0xe8e1d5, roughness: 0.7, metalness: 0 }),
+  // Photographs sample #808182 in shadow; the albedo is lighter than the pixel.
+  'upholstery.seat':   one('grey', 'Grey leather', { color: 0xc9cac9, roughness: 0.7, metalness: 0 }),
   'upholstery.bolster':one('camel', 'Camel leather', { color: 0xb08052, roughness: 0.7, metalness: 0 }),
   'upholstery.sofa':   one('white-cream', 'White cream leather', { color: 0xf2ede4, roughness: 0.7, metalness: 0 }),
   'worktop':           one('grey-stone', 'Grey stone', { color: 0xc9c6be, roughness: 0.35, metalness: 0 }),
-  'floor':             one('grey-vinyl', 'Grey vinyl', { color: 0x7c8288, roughness: 0.75, metalness: 0 }),
+  // Sampled from the reference aisle shot at #8f9094 — a cool neutral, not the warm grey
+  // the first palette pass estimated by eye.
+  'floor':             one('grey-vinyl', 'Grey vinyl', { color: 0x8f9094, roughness: 0.75, metalness: 0 }),
   'washroom.shell':    one('gloss-white', 'Gloss white GRP', { color: 0xf7f7f5, roughness: 0.15, metalness: 0 }),
   'washroom.duckboard':one('teak', 'Teak', { color: 0x9a6b3c, roughness: 0.6, metalness: 0 }),
   'metal.brushed':     one('aluminium', 'Brushed aluminium', { color: 0xb8bcc0, roughness: 0.35, metalness: 1 }),

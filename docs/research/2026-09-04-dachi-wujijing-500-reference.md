@@ -94,13 +94,15 @@ palette, not measured values.
 |---|---|---|
 | Cabinet faces, ceiling trim, plinths | Dark walnut veneer, satin, strong figure; gloss variant on the galley overheads | `#5A3A24` |
 | Wall panels, locker doors (lounge / alcove) | Warm cream / bone, soft-touch, gloss on some doors | `#EFE7DA` |
-| Seat upholstery | Cream leather main panels, camel-tan bolsters and piping | `#E8E1D5` / `#B08052` |
+| Seat upholstery | Grey leather main panels, camel-tan bolsters and piping | `#C9CAC9` / `#B08052` |
 | Bench sofa cushions | White-cream leather | `#F2EDE4` |
 | Worktop | Pale grey stone-look | `#C9C6BE` |
 | Floor | Mid-grey vinyl, herringbone / chevron texture, brushed aluminium trim strips | `#7C8288` |
 | Washroom | Gloss white moulded GRP, teak duckboard | `#F7F7F5` / `#9A6B3C` |
 | Metalwork | Brushed aluminium and chrome; black for the kitchen mixer | `#B8BCC0` / `#1E1E1E` |
 | Textiles | Sand / taupe curtains and blinds; accent scatter cushions in ochre, rust, teal, slate | — |
+
+Corrected 2026-09-05 from pixel samples; the original values were estimated by eye.
 
 Lighting, which does most of the work in these photos: recessed ceiling downlights, continuous
 warm LED cove strips along both ceiling edges, under-locker strips, a **floor-level plinth strip
