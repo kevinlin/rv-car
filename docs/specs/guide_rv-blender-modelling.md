@@ -2,8 +2,8 @@
 
 - Date: 2026-09-05
 - Audience: whoever is modelling `model/rv.blend`
-- Covers: [the plan](2026-09-05-rv-interior-3d-plan.md) Tasks 12 and 13, the only two that cannot be done headless
-- Design: [2026-09-05-rv-interior-3d-design.md](2026-09-05-rv-interior-3d-design.md)
+- Covers: [the plan](plan_rv-interior-3d.md) Tasks 12 and 13, the only two that cannot be done headless
+- Design: [design_rv-interior-3d.md](design_rv-interior-3d.md)
 
 `model/rv.blend` is **generated**, not built by hand. All 25 objects already exist at the right
 size, in the right place, in the right collection, under the right name, with a role material

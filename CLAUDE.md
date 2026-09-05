@@ -5,8 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 A Three.js walkthrough of the interior of a 大驰 无极境500 C-type motorhome. Portfolio piece,
-not a product. Design spec: [docs/specs/2026-09-05-rv-interior-3d-design.md](docs/specs/2026-09-05-rv-interior-3d-design.md).
-Implementation plan and execution log: [docs/specs/2026-09-05-rv-interior-3d-plan.md](docs/specs/2026-09-05-rv-interior-3d-plan.md).
+not a product. Design spec: [docs/specs/design_rv-interior-3d.md](docs/specs/design_rv-interior-3d.md).
+Implementation plan and execution log: [docs/specs/plan_rv-interior-3d.md](docs/specs/plan_rv-interior-3d.md).
 
 Read the design spec before making architectural changes: it records decisions (no lightmaps,
 slide-out deployed only, AO-only bakes) that the code depends on and that should not be

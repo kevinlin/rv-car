@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript, Vite, Vitest, Three.js (vanilla, no framework), Blender 5.2.1 LTS with `bpy` export scripting, `@gltf-transform/cli` for Draco + KTX2 optimisation.
 
-**Spec:** [2026-09-05-rv-interior-3d-design.md](2026-09-05-rv-interior-3d-design.md)
+**Spec:** [design_rv-interior-3d.md](design_rv-interior-3d.md)
 **Evidence:** [../research/2026-09-04-dachi-wujijing-500-reference.md](../research/2026-09-04-dachi-wujijing-500-reference.md)
 
 ## Global Constraints
@@ -2014,7 +2014,7 @@ git commit -m "feat: add hotspot camera tweening with per-hotspot orbit limits"
 ---
 
 > **Tasks 12 and 13 have a standalone guide:**
-> [2026-09-05-rv-blender-modelling-guide.md](2026-09-05-rv-blender-modelling-guide.md).
+> [guide_rv-blender-modelling.md](guide_rv-blender-modelling.md).
 > `model/rv.blend` is now generated from the placement data by `npm run starter`, so both tasks
 > start from a correctly scaled block-out rather than an empty file. Follow the guide; the two
 > tasks below record the original intent.
