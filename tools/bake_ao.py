@@ -96,7 +96,10 @@ report={'type':'AMBIENT_OCCLUSION','isolatedObjects':True,'uv':'UV2','resolution
         'objects':len(objects),'minimum':float(values.min()),'maximum':float(values.max()),
         'nonwhitePixels':int(np.count_nonzero(values<.98)),'atlas':'ao.png'}
 (HERE/'model/ao-bake.json').write_text(json.dumps(report,indent=2)+'\n')
-from surface_textures import add_surface_maps
-add_surface_maps()
+# Surface maps are no longer packed into the materials here: data/finishes.ts owns appearance
+# now, and src/textures.ts resolves it at runtime. strip_surface_maps() unwires what earlier
+# bakes left behind, so the .glb carries geometry and this AO atlas and nothing else.
+from surface_textures import strip_surface_maps
+strip_surface_maps()
 bpy.ops.wm.save_as_mainfile(filepath=str(HERE/'model/rv.blend'))
 print(json.dumps(report))

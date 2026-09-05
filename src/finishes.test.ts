@@ -116,7 +116,9 @@ describe('texture resolution', () => {
 
   it('leaves an existing map alone when the registry supplies none', () => {
     // The .glb-authored maps must survive until the registry replaces them role by role.
-    const mesh = meshWithMaterial('role.floor');
+    // metal.chrome rather than floor: floor now carries a map, and a polished metal is the
+    // role least likely to acquire one later and quietly turn this test green for free.
+    const mesh = meshWithMaterial('role.metal.chrome');
     const existing = new THREE.Texture();
     (mesh.material as THREE.MeshStandardMaterial).map = existing;
 

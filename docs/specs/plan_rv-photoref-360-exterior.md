@@ -976,7 +976,7 @@ const resolveTexture = createTextureResolver();
 applyFinishes(vehicle, registry, resolveTexture);
 ```
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/textures.ts src/data/finishes.ts src/finishes.ts src/finishes.test.ts src/main.ts
@@ -993,7 +993,7 @@ git commit -m "feat: resolve textures from the finish registry at runtime"
 - Consumes: `TextureSpec` (Task 5), the rectifier CLI (Task 4)
 - Produces: nine `.webp` maps plus three wood-variant maps, referenced from `DEFAULT_REGISTRY`
 
-- [ ] **Step 1: Extend the manifest to every textured role**
+- [x] **Step 1: Extend the manifest to every textured role**
 
 Add entries to `model/textures.json` for `wood.trim` (reuse the walnut source at a different
 crop), `floor`, `worktop`, `upholstery.seat`, `upholstery.bolster`, `upholstery.sofa`,
@@ -1011,12 +1011,12 @@ crop), `floor`, `worktop`, `upholstery.seat`, `upholstery.bolster`, `upholstery.
 | `grp-ribbed` | `washroom.shell` | `underseat-drawers-washroom.jpg` | A ribbed wall panel |
 | `damask` | `textile.curtain` | `underseat-drawers-washroom.jpg` | The shower curtain |
 
-- [ ] **Step 2: Generate and inspect each one**
+- [x] **Step 2: Generate and inspect each one**
 
 Run one at a time: `pnpm exec npm run textures <out-name>`. Apply the step 7 check from Task 4 to
 each — grain straight, no residual hotspot, quadrants meeting cleanly.
 
-- [ ] **Step 3: Reference them from the registry**
+- [x] **Step 3: Reference them from the registry**
 
 For each role, add a `map` to its variant params. `repeat` is in UV units, so it depends on the
 texel density measured in Task 3 — start from the values below and correct them in step 5:
@@ -1047,25 +1047,25 @@ Give the three wood variants their own grain, which is the point of moving maps 
 One grain image tinted three ways, at a coarser repeat for ash. Authoring three separate grain
 photographs is the upgrade if the tint alone does not convince.
 
-- [ ] **Step 4: Retire the Blender-side maps**
+- [x] **Step 4: Retire the Blender-side maps**
 
 The four roles `surface_textures.py` textures are now driven from the registry. Delete the
 `add_surface_maps()` call from the module build in `tools/model_interior.py`, leave the function
 itself in place with a comment saying the runtime owns these now, then re-run
 `pnpm exec npm run export && pnpm exec npm run optimize` so the `.glb`s stop carrying the images.
 
-- [ ] **Step 5: Correct every `repeat` against the render**
+- [x] **Step 5: Correct every `repeat` against the render**
 
 Run `pnpm dev` and visit each hotspot. A tiling map is right when the grain, weave or joint
 spacing matches the reference photograph at the same apparent distance. Adjust `repeat` and
 reload. This is the step that consumes the time; budget for several passes.
 
-- [ ] **Step 6: Confirm the wood swap now changes grain**
+- [x] **Step 6: Confirm the wood swap now changes grain**
 
 Click through walnut, oak and ash. The tint changes, and ash's grain reads coarser. Capture
 screenshots to `docs/research/textured/`.
 
-- [ ] **Step 7: Check the budget**
+- [x] **Step 7: Check the budget**
 
 Run: `pnpm exec npm run budget && du -sh public/textures`
 Expected: triangles and `.glb` bytes both fall, since the images left the `.glb`s. Record the

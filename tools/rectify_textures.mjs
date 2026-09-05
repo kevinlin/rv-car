@@ -19,6 +19,13 @@ import sharp from 'sharp';
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 /**
+ * Mean level a modulation map is normalised to. High, because the map multiplies the registry
+ * colour: at 230 a surface renders at 90 % of its palette value, which keeps the tables
+ * honest, and leaves 25 levels of headroom before a bright grain band clips.
+ */
+const MODULATION_MEAN = 230;
+
+/**
  * Solve the 8 unknowns of a 3x3 homography (h8 fixed at 1) from four point correspondences,
  * by Gaussian elimination with partial pivoting on the 8x8 system.
  */
@@ -123,6 +130,29 @@ const rectify = async (entry) => {
       const lit = illumination[i] || 1;
       corrected[i] = Math.min(255, Math.max(0, Math.round((flat[i] / lit) * means[i % 3])));
     }
+  }
+
+  // Modulation, not colour. THREE multiplies map by the material's colour, so a map carrying
+  // its own hue tints twice: the camel bolster photograph has a mean of (125,82,46), and
+  // multiplied by the registry's own 0xb08052 it rendered brick red. Flattening to luminance
+  // around a fixed mean leaves the registry owning hue — which is what the palette tables in
+  // both specs describe, and what the greyscale maps this pipeline replaces already did.
+  // "colour": true keeps the photograph's own colour, for decals whose material is white.
+  if (!entry.colour) {
+    let sum = 0;
+    const luminance = new Float32Array(corrected.length / 3);
+    for (let i = 0, p = 0; i < corrected.length; i += 3, p++) {
+      luminance[p] = 0.2126 * corrected[i] + 0.7152 * corrected[i + 1] + 0.0722 * corrected[i + 2];
+      sum += luminance[p];
+    }
+    const mean = sum / luminance.length;
+    const gain = entry.contrast ?? 1;
+    const mono = Buffer.alloc(corrected.length);
+    for (let p = 0; p < luminance.length; p++) {
+      const v = Math.min(255, Math.max(0, Math.round(MODULATION_MEAN + (luminance[p] - mean) * gain)));
+      mono[p * 3] = v; mono[p * 3 + 1] = v; mono[p * 3 + 2] = v;
+    }
+    corrected = mono;
   }
 
   // Mirror-tile into 2x2 so opposite edges match exactly.

@@ -1,4 +1,10 @@
-"""Small seamless grayscale surface maps, multiplied by runtime finish colours."""
+"""Small seamless grayscale surface maps, multiplied by runtime finish colours.
+
+The runtime owns these now. data/finishes.ts carries a TextureSpec per role and
+src/textures.ts resolves it, so a finish variant can carry its own map rather than sharing one
+packed into the material. add_surface_maps() is kept for reference; the pipeline calls
+strip_surface_maps() instead, which unwires what earlier bakes packed in.
+"""
 import math
 from pathlib import Path
 import bpy
@@ -51,3 +57,24 @@ def add_surface_maps():
             mix.inputs[2].default_value = bsdf.inputs['Base Color'].default_value
             links.new(tex.outputs['Color'],mix.inputs[1])
             links.new(mix.outputs[0],bsdf.inputs['Base Color'])
+
+
+def strip_surface_maps():
+    """Undo add_surface_maps(): unwire the grain nodes and drop the packed images."""
+    for mat in bpy.data.materials:
+        if not mat.use_nodes:
+            continue
+        nodes, links = mat.node_tree.nodes, mat.node_tree.links
+        bsdf = nodes.get('Principled BSDF')
+        tint = nodes.get('Finish tint')
+        if bsdf and tint:
+            # Restore the flat colour the tint node was multiplying the grain into.
+            bsdf.inputs['Base Color'].default_value = tint.inputs[2].default_value
+        for name in ('Surface grain', 'Surface UV', 'Finish tint'):
+            node = nodes.get(name)
+            if node:
+                nodes.remove(node)
+    for label in ('walnut_grain', 'herringbone', 'woven_fabric'):
+        image = bpy.data.images.get(label)
+        if image:
+            bpy.data.images.remove(image)

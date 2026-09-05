@@ -1,9 +1,10 @@
 {
-  "note": "Rectifier manifest. Corners are source pixels, ordered top-left, top-right, bottom-right, bottom-left. Run: pnpm exec npm run textures [out-name ...]",
+  "note": "Rectifier manifest. Corners are source pixels, ordered top-left, top-right, bottom-right, bottom-left. Several reference slices stack three photographs vertically, so corners are absolute pixels in the slice, not in a sub-photo. Run: pnpm exec npm run textures [out-name ...]",
   "textures": [
     {
       "out": "walnut",
       "role": "wood.cabinet",
+      "note": "Galley base-cabinet door face: flat, evenly lit, strong vertical figure, no hardware.",
       "source": "docs/research/reference/galley-wardrobe-dinette.jpg",
       "corners": [
         [
@@ -25,6 +26,186 @@
       ],
       "size": 512,
       "quality": 88
+    },
+    {
+      "out": "herringbone",
+      "role": "floor",
+      "source": "docs/research/reference/underseat-drawers-washroom.jpg",
+      "corners": [
+        [
+          330,
+          810
+        ],
+        [
+          430,
+          810
+        ],
+        [
+          430,
+          910
+        ],
+        [
+          330,
+          910
+        ]
+      ],
+      "size": 512,
+      "quality": 88
+    },
+    {
+      "out": "stone",
+      "role": "worktop",
+      "source": "docs/research/reference/galley-detail.jpg",
+      "corners": [
+        [
+          314,
+          982
+        ],
+        [
+          424,
+          982
+        ],
+        [
+          424,
+          1092
+        ],
+        [
+          314,
+          1092
+        ]
+      ],
+      "size": 512,
+      "quality": 88,
+      "note": "Bare worktop left of the plate: the flattest on-colour window in the slice.",
+      "contrast": 0.5
+    },
+    {
+      "out": "leather-grey",
+      "role": "upholstery.seat",
+      "source": "docs/research/reference/underseat-drawers-washroom.jpg",
+      "corners": [
+        [
+          784,
+          388
+        ],
+        [
+          874,
+          388
+        ],
+        [
+          874,
+          478
+        ],
+        [
+          784,
+          478
+        ]
+      ],
+      "size": 512,
+      "quality": 88,
+      "note": "Seat back, not a dinette chair face: the chairs are panelled everywhere, and this window samples 152,149,150 \u2014 the neutral grey the spec quotes as #808182 in shadow."
+    },
+    {
+      "out": "leather-camel",
+      "role": "upholstery.bolster",
+      "source": "docs/research/reference/dinette-and-slideout-bed.jpg",
+      "corners": [
+        [
+          165,
+          1240
+        ],
+        [
+          245,
+          1240
+        ],
+        [
+          245,
+          1320
+        ],
+        [
+          165,
+          1320
+        ]
+      ],
+      "size": 512,
+      "quality": 88
+    },
+    {
+      "out": "leather-cream",
+      "role": "upholstery.sofa",
+      "source": "docs/research/reference/dinette-and-slideout-bed.jpg",
+      "corners": [
+        [
+          125,
+          1490
+        ],
+        [
+          235,
+          1490
+        ],
+        [
+          235,
+          1600
+        ],
+        [
+          125,
+          1600
+        ]
+      ],
+      "size": 512,
+      "quality": 88
+    },
+    {
+      "out": "grp-ribbed",
+      "role": "washroom.shell",
+      "source": "docs/research/reference/underseat-drawers-washroom.jpg",
+      "corners": [
+        [
+          140,
+          1445
+        ],
+        [
+          240,
+          1445
+        ],
+        [
+          240,
+          1545
+        ],
+        [
+          140,
+          1545
+        ]
+      ],
+      "size": 512,
+      "quality": 88
+    },
+    {
+      "out": "damask",
+      "role": "textile.curtain",
+      "source": "docs/research/reference/underseat-drawers-washroom.jpg",
+      "corners": [
+        [
+          810,
+          1118
+        ],
+        [
+          880,
+          1118
+        ],
+        [
+          880,
+          1188
+        ],
+        [
+          810,
+          1188
+        ]
+      ],
+      "size": 512,
+      "quality": 88,
+      "note": "Shower curtain. The pattern itself is high contrast, so the mirror tile keeps a visible motif; that is the material, not an artefact.",
+      "contrast": 0.5
     }
   ]
 }

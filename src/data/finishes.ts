@@ -47,38 +47,55 @@ const one = (id: string, label: string, params: MaterialParams) => ({
 
 /** Colours are estimated from the reference imagery — see the research note's palette table. */
 export const DEFAULT_REGISTRY: Registry = {
+  // One grain photograph tinted three ways, at a coarser repeat for ash. This is what moving
+  // maps into the registry buys: a variant can carry its own grain, not only its own tint.
+  // wood.trim shares the image because the reference shows one veneer on both the cabinets and
+  // the ceiling band.
   'wood.cabinet': {
     active: 'walnut',
     variants: [
-      { id: 'walnut', label: 'Walnut',    params: { color: 0x5a3a24, roughness: 0.45, metalness: 0 } },
-      { id: 'oak',    label: 'Oak',       params: { color: 0xa97f4f, roughness: 0.55, metalness: 0 } },
-      { id: 'ash',    label: 'Light ash', params: { color: 0xd8c3a0, roughness: 0.6,  metalness: 0 } },
+      { id: 'walnut', label: 'Walnut',    params: { color: 0x5a3a24, roughness: 0.45, metalness: 0,
+        map: { url: '/textures/walnut.webp', repeat: [2, 2] } } },
+      { id: 'oak',    label: 'Oak',       params: { color: 0xa97f4f, roughness: 0.55, metalness: 0,
+        map: { url: '/textures/walnut.webp', repeat: [2, 2] } } },
+      { id: 'ash',    label: 'Light ash', params: { color: 0xd8c3a0, roughness: 0.6,  metalness: 0,
+        map: { url: '/textures/walnut.webp', repeat: [2.6, 2.6] } } },
     ],
   },
   'wood.trim': {
     active: 'walnut',
     variants: [
-      { id: 'walnut', label: 'Walnut',    params: { color: 0x5a3a24, roughness: 0.35, metalness: 0 } },
-      { id: 'oak',    label: 'Oak',       params: { color: 0xa97f4f, roughness: 0.45, metalness: 0 } },
-      { id: 'ash',    label: 'Light ash', params: { color: 0xd8c3a0, roughness: 0.5,  metalness: 0 } },
+      { id: 'walnut', label: 'Walnut',    params: { color: 0x5a3a24, roughness: 0.35, metalness: 0,
+        map: { url: '/textures/walnut.webp', repeat: [2, 2] } } },
+      { id: 'oak',    label: 'Oak',       params: { color: 0xa97f4f, roughness: 0.45, metalness: 0,
+        map: { url: '/textures/walnut.webp', repeat: [2, 2] } } },
+      { id: 'ash',    label: 'Light ash', params: { color: 0xd8c3a0, roughness: 0.5,  metalness: 0,
+        map: { url: '/textures/walnut.webp', repeat: [2.6, 2.6] } } },
     ],
   },
   'panel.wall':        one('bone', 'Bone', { color: 0xefe7da, roughness: 0.8, metalness: 0 }),
   'panel.locker':      one('bone-gloss', 'Bone gloss', { color: 0xefe7da, roughness: 0.25, metalness: 0 }),
   // Photographs sample #808182 in shadow; the albedo is lighter than the pixel.
-  'upholstery.seat':   one('grey', 'Grey leather', { color: 0xc9cac9, roughness: 0.7, metalness: 0 }),
-  'upholstery.bolster':one('camel', 'Camel leather', { color: 0xb08052, roughness: 0.7, metalness: 0 }),
-  'upholstery.sofa':   one('white-cream', 'White cream leather', { color: 0xf2ede4, roughness: 0.7, metalness: 0 }),
-  'worktop':           one('grey-stone', 'Grey stone', { color: 0xc9c6be, roughness: 0.35, metalness: 0 }),
+  'upholstery.seat':   one('grey', 'Grey leather', { color: 0xc9cac9, roughness: 0.7, metalness: 0,
+    map: { url: '/textures/leather-grey.webp', repeat: [4, 4] } }),
+  'upholstery.bolster':one('camel', 'Camel leather', { color: 0xb08052, roughness: 0.7, metalness: 0,
+    map: { url: '/textures/leather-camel.webp', repeat: [4, 4] } }),
+  'upholstery.sofa':   one('white-cream', 'White cream leather', { color: 0xf2ede4, roughness: 0.7, metalness: 0,
+    map: { url: '/textures/leather-cream.webp', repeat: [3, 3] } }),
+  'worktop':           one('grey-stone', 'Grey stone', { color: 0xc9c6be, roughness: 0.35, metalness: 0,
+    map: { url: '/textures/stone.webp', repeat: [1.5, 1.5] } }),
   // Sampled from the reference aisle shot at #8f9094 — a cool neutral, not the warm grey
   // the first palette pass estimated by eye.
-  'floor':             one('grey-vinyl', 'Grey vinyl', { color: 0x8f9094, roughness: 0.75, metalness: 0 }),
-  'washroom.shell':    one('gloss-white', 'Gloss white GRP', { color: 0xf7f7f5, roughness: 0.15, metalness: 0 }),
+  'floor':             one('grey-vinyl', 'Grey vinyl', { color: 0x8f9094, roughness: 0.75, metalness: 0,
+    map: { url: '/textures/herringbone.webp', repeat: [4, 4] } }),
+  'washroom.shell':    one('gloss-white', 'Gloss white GRP', { color: 0xf7f7f5, roughness: 0.15, metalness: 0,
+    map: { url: '/textures/grp-ribbed.webp', repeat: [2, 2] } }),
   'washroom.duckboard':one('teak', 'Teak', { color: 0x9a6b3c, roughness: 0.6, metalness: 0 }),
   'metal.brushed':     one('aluminium', 'Brushed aluminium', { color: 0xb8bcc0, roughness: 0.35, metalness: 1 }),
   'metal.chrome':      one('chrome', 'Chrome', { color: 0xffffff, roughness: 0.05, metalness: 1 }),
   'metal.dark':        one('black', 'Matt black', { color: 0x1e1e1e, roughness: 0.4, metalness: 0.8 }),
-  'textile.curtain':   one('sand', 'Sand', { color: 0xd9cfbe, roughness: 0.95, metalness: 0 }),
+  'textile.curtain':   one('sand', 'Sand', { color: 0xd9cfbe, roughness: 0.95, metalness: 0,
+    map: { url: '/textures/damask.webp', repeat: [6, 6] } }),
   'led.cove': {
     active: 'warm',
     variants: [
