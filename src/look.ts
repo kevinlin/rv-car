@@ -21,8 +21,11 @@ export const headingOf = (
   const dx = to[0] - from[0];
   const dy = to[1] - from[1];
   const dz = to[2] - from[2];
+  // A THREE Euler rotation about +Y by yaw sends the default -Z forward vector to
+  // (-sin yaw, 0, -cos yaw), so a target on the kerb side (+X) is NEGATIVE yaw. Signing this
+  // the intuitive way instead pointed every stop at the mirror image of its target.
   return {
-    yaw: Math.atan2(dx, -dz),
+    yaw: Math.atan2(-dx, -dz),
     pitch: Math.atan2(dy, Math.hypot(dx, dz)),
   };
 };
@@ -89,8 +92,10 @@ export const createLook = (
 
   function onMove(e: PointerEvent) {
     if (!dragging || !controls.enabled) return;
-    // Drag left to look left: the world should follow the pointer.
-    yaw -= (e.clientX - lastX) * SPEED;
+    // Grab-the-world, as OrbitControls and Street View do: drag right and the scene moves
+    // right, which turns the camera left. With forward.x = -sin(yaw) that means yaw rises.
+    // Pitch matches: drag down, the world drops, you look up.
+    yaw += (e.clientX - lastX) * SPEED;
     pitch = clampPitch(pitch + (e.clientY - lastY) * SPEED, pitchLimits);
     lastX = e.clientX;
     lastY = e.clientY;
