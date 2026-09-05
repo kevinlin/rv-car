@@ -1826,7 +1826,7 @@ Expected: PASS. The cab hotspot sits at `[0, 1.05, -0.05]`; `cab_tunnel` reaches
 Blender's frame. If the test now reports the cab camera inside a placement, move the hotspot
 rather than shrinking the geometry.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tools/model_furniture.py model/rv.blend public/models dist/raw \
@@ -1848,7 +1848,7 @@ read as a lived-in vehicle rather than a showroom shell.
 - Produces: two new roles `graphic.print` and `graphic.screen`; four new placements
   `entry_door`, `washer`, `oven`, `systems_panel`
 
-- [ ] **Step 1: Add the two graphic roles**
+- [x] **Step 1: Add the two graphic roles**
 
 In `src/data/finishes.ts`, extend the `Role` union with `'graphic.print' | 'graphic.screen'` and
 add the entries. Both are decal-flat, so both carry a map and `transparent`:
@@ -1865,7 +1865,7 @@ add the entries. Both are decal-flat, so both carry a map and `transparent`:
   }),
 ```
 
-- [ ] **Step 2: Add the four placements**
+- [x] **Step 2: Add the four placements**
 
 In `src/data/vehicle.ts`, in the `storage` and `galley` zones:
 
@@ -1878,14 +1878,14 @@ In `src/data/vehicle.ts`, in the `storage` and `galley` zones:
   { id: 'systems_panel', zone: 'galley', origin: [e(1100), e(1500), e(2700)],size: [e(30), e(180), e(260)], movable: false },
 ```
 
-- [ ] **Step 3: Run the dimensional checks and fix any overlap**
+- [x] **Step 3: Run the dimensional checks and fix any overlap**
 
 Run: `pnpm check`
 Expected: FAIL if any of the four overlaps `galley_run` or `galley_overhead`. `galley_run` spans
 X 550–1150, Z 2550–4050; `galley_overhead` spans X 550–1150, Y 1350–1800, Z 2550–4050. Adjust the
 new origins until `checkAll` is clean, and do not move `galley_run`.
 
-- [ ] **Step 4: Model them**
+- [x] **Step 4: Model them**
 
 In `build_softgoods`:
 
@@ -1896,7 +1896,7 @@ In `build_softgoods`:
     box('systems_panel', (1.115, 2.79, 1.63),  (.03, .26, .18),  'graphic.screen', bevel=.004)
 ```
 
-- [ ] **Step 5: Add the decal planes**
+- [x] **Step 5: Add the decal planes**
 
 Thin boxes carrying `graphic.print`, positioned from the photographs: the galley photo wall, the
 alcove framed pictures, the washroom photo wall:
@@ -1908,7 +1908,7 @@ alcove framed pictures, the washroom photo wall:
         box(name, (x, y, z), (.006, w, h), 'graphic.print', bevel=0)
 ```
 
-- [ ] **Step 6: Author the two decal maps**
+- [x] **Step 6: Author the two decal maps**
 
 Add `photo-wall` and `systems-panel` entries to `model/textures.json`, sourced from
 `docs/research/reference/galley-detail.jpg`. These are flat and non-tiling, so set
@@ -1916,12 +1916,12 @@ Add `photo-wall` and `systems-panel` entries to `model/textures.json`, sourced f
 
 Run: `pnpm exec npm run textures photo-wall systems-panel`
 
-- [ ] **Step 7: Regenerate, export and check**
+- [x] **Step 7: Regenerate, export and check**
 
 Run the phase cycle with `<collection>` = `softgoods`. `check_blend.py:2` asserts
 `len([m for m in bpy.data.materials if m.name.startswith('role.')]) == 17`; raise it to 19.
 
-- [ ] **Step 8: Count the draw calls**
+- [x] **Step 8: Count the draw calls**
 
 Run `pnpm dev`, open `?verify`, and read `canvas.dataset.drawCalls` at every interior hotspot.
 Expected: ≤ 40. If any zone exceeds it, merge the decal planes for that zone into a single mesh

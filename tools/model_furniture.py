@@ -136,6 +136,13 @@ def build_galley(a):
         a.bowl('stainless sink', (x,sink_y,.886), (.21,.21), .14, 'metal.chrome', corner=.3)])
     for j in range(3):
         cy = y-d/2+(j+.5)*d/3
+        if j == 2:
+            # The 5 kg washer-dryer takes the rear bay. Given a wooden door in front of it, it
+            # would be a box nobody can see, so the appliance is the door.
+            parts.append(a.box('washer',(x-w/2+.036,cy,.43),(.028,d/3-.02,.77),'metal.brushed',.012))
+            parts.append(a.box('washer_door',(x-w/2+.018,cy,.40),(.026,.34,.34),'metal.dark',.15))
+            parts.append(a.box('washer_fascia',(x-w/2+.018,cy,.70),(.026,.30,.09),'graphic.screen',.008))
+            continue
         parts.append(a.box('galley cabinet door',(x-w/2+.036,cy,.43),(.028,d/3-.02,.77),'wood.cabinet',.012))
         parts.append(a.box('long cabinet pull',(x-w/2+.011,cy,.74),(.022,.34,.023),'metal.chrome',.007))
     a.group('galley_run',parts)
@@ -154,6 +161,10 @@ def build_galley(a):
         parts.append(a.box('overhead handle',(x-w/2+.008,cy,z-.12),(.016,.12,.023),'metal.chrome',.006))
     a.box('extractor_hood',(x-.02,y-.4,z-h/2-.045),(w-.04,.48,.09),'metal.dark',.02)
     a.group('galley_overhead',parts)
+    # Microwave/steam oven, set into the overhead run at its aisle end.
+    a.box('oven',(x-.06,y-.52,z),(w-.12,.42,h-.06),'metal.dark',.015)
+    # Proud of the oven's own front face at x-w/2, or it renders inside the box it labels.
+    a.box('oven_fascia',(x-w/2-.004,y-.52,z),(.016,.34,h-.16),'graphic.screen',.006)
     for name,direction in [('fridge',1),('wardrobe',-1)]:
         (x,y,z),(w,d,h)=a.placement(name)
         parts=[a.box(name+' carcass',(x-direction*.03,y,z),(w-.06,d,h),'wood.cabinet',.018)]
@@ -212,6 +223,18 @@ def build_softgoods(a):
     for y in (-1.05,-.39):
         parts.append(a.box('alcove pillow',(-.76,y,1.42),(.44,.53,.13),'textile.curtain',.06))
     a.group('softgoods_fabric',parts)
+    # Equipment the photographs show and the model lacked. All detail meshes: none of them is a
+    # volume of its own, they are faces applied to walls and cabinetry. Every position here is
+    # chosen for visibility -- the kerb wall the reference hangs these on is covered end to end
+    # by the galley run and the wardrobe, so a panel on it renders inside a cupboard.
+    a.box('systems_panel',(.630,2.225,1.55),(.020,.20,.26),'graphic.screen',.004)
+    for name, x, y, z, wide, high in (
+            # Wardrobe and fridge faces, both of which front the aisle.
+            ('decal_galley_wall', -.548, 2.30, 1.30, .22, .26),
+            # Alcove flanks, forward of the window openings cut into them.
+            ('decal_alcove_off', -1.094, -1.27, 1.60, .22, .28),
+            ('decal_alcove_kerb', 1.094, -1.27, 1.60, .22, .28)):
+        a.box(name, (x, y, z), (.006, wide, high), 'graphic.print', 0)
 
 
 def build_washroom(a):

@@ -3,7 +3,8 @@ export type Role =
   | 'upholstery.seat' | 'upholstery.bolster' | 'upholstery.sofa'
   | 'worktop' | 'floor' | 'washroom.shell' | 'washroom.duckboard'
   | 'metal.brushed' | 'metal.chrome' | 'metal.dark' | 'textile.curtain'
-  | 'led.cove' | 'glass';
+  | 'led.cove' | 'glass'
+  | 'graphic.print' | 'graphic.screen';
 
 /**
  * A texture described, not loaded. This file imports nothing, so it cannot hold a
@@ -103,6 +104,17 @@ export const DEFAULT_REGISTRY: Registry = {
       { id: 'neutral', label: 'Neutral white', params: { color: 0x000000, roughness: 1, metalness: 0, emissive: 0xfff3e0, emissiveIntensity: 14 } },
     ],
   },
+  // Flat graphics: framed art and the photo wall carry their image, the systems panel and TV
+  // glow. Both keep color white so the photographic map is not tinted a second time.
+  'graphic.print':  one('photo-wall', 'Photo wall', {
+    color: 0xffffff, roughness: 0.9, metalness: 0, transparent: true,
+    map: { url: '/textures/photo-wall.webp' },
+  }),
+  'graphic.screen': one('systems', 'Systems panel', {
+    color: 0xffffff, roughness: 0.2, metalness: 0,
+    emissive: 0x3a6ea8, emissiveIntensity: 2.2,
+    map: { url: '/textures/systems-panel.webp' },
+  }),
   // Emissive rather than transparent: the world outside is not modelled, so the panes are lit
   // to read as blown-out daylight openings the way the reference shots do.
   'glass':             one('clear', 'Clear', { color: 0xdfe6ea, roughness: 0.05, metalness: 0, emissive: 0xeef4ff, emissiveIntensity: 1.4 }),

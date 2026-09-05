@@ -206,6 +206,62 @@
       "quality": 88,
       "note": "Shower curtain. The pattern itself is high contrast, so the mirror tile keeps a visible motif; that is the material, not an artefact.",
       "contrast": 0.5
+    },
+    {
+      "out": "photo-wall",
+      "role": "graphic.print",
+      "note": "Family photo wall beside the galley. colour and flatField 0: a decal reproduces the photograph, it does not modulate a registry tint, and its own lighting is the point.",
+      "source": "docs/research/reference/galley-wardrobe-dinette.jpg",
+      "corners": [
+        [
+          665,
+          335
+        ],
+        [
+          845,
+          335
+        ],
+        [
+          845,
+          505
+        ],
+        [
+          665,
+          505
+        ]
+      ],
+      "size": 512,
+      "quality": 86,
+      "colour": true,
+      "flatField": 0
+    },
+    {
+      "out": "systems-panel",
+      "role": "graphic.screen",
+      "note": "Systems touch panel over the galley.",
+      "source": "docs/research/reference/galley-wardrobe-dinette.jpg",
+      "corners": [
+        [
+          135,
+          208
+        ],
+        [
+          250,
+          208
+        ],
+        [
+          250,
+          268
+        ],
+        [
+          135,
+          268
+        ]
+      ],
+      "size": 256,
+      "quality": 86,
+      "colour": true,
+      "flatField": 0
     }
   ]
 }

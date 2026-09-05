@@ -57,6 +57,8 @@ ROLE_VIEWPORT = {
     "role.textile.curtain": (0.85, 0.81, 0.75, 1.0),
     "role.led.cove": (1.0, 0.85, 0.63, 1.0),
     "role.glass": (0.87, 0.90, 0.92, 1.0),
+    "role.graphic.print": (0.85, 0.84, 0.82, 1.0),
+    "role.graphic.screen": (0.10, 0.14, 0.20, 1.0),
 }
 
 

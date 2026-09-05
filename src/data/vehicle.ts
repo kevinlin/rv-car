@@ -109,7 +109,9 @@ export const PLACEMENTS: readonly Placement[] = [
 
   // --- storage band between lounge and wet zone ---
   { id: 'fridge',   zone: 'storage', origin: [e(-1150), e(0), e(2100)], size: [e(600), e(1800), e(400)], movable: false },
-  { id: 'wardrobe', zone: 'storage', origin: [e(600), e(0), e(2100)],   size: [e(550), e(1900), e(400)], movable: false },
+  // 250 mm deep, which is the storage band the design spec states (Z 2050-2300); at 400 it
+  // also filled the floor in front of the entry door.
+  { id: 'wardrobe', zone: 'storage', origin: [e(600), e(0), e(2100)],   size: [e(550), e(1900), e(250)], movable: false },
 
   // --- rear wet zone. Which side is which is open question 5 in the spec. ---
   { id: 'galley_run',      zone: 'galley', origin: [e(550), e(0), e(2550)],    size: [e(600), e(900), e(1500)], movable: false },

@@ -182,6 +182,20 @@ def window(name, x, y, z, width, height):
     return group(name, parts)
 
 
+def entry_door(x, y, z, width, height):
+    """Leaf, frame and pleated flyscreen filling an opening in the kerb wall."""
+    parts = [box('entry_door_leaf', (x, y, z), (.035, width-.06, height-.06), 'panel.wall', .012),
+             box('entry_door_glass', (x-.004, y, z+height/4), (.006, width-.24, height/3), 'glass', 0),
+             box('entry_door_handle', (x-.032, y-width/2+.14, z), (.03, .04, .17), 'metal.brushed', .012)]
+    for side in (-1, 1):
+        parts.append(box('entry_door_jamb', (x, y+side*width/2, z), (.055, .04, height), 'panel.wall', .006))
+    parts.append(box('entry_door_head', (x, y, z+height/2), (.055, width, .04), 'panel.wall', .006))
+    # Pleated flyscreen, gathered against the forward jamb.
+    parts.append(box('entry_door_flyscreen', (x-.05, y-width/2+.07, z), (.012, .12, height-.10),
+                     'textile.curtain', .004))
+    return group('entry_door', parts)
+
+
 def build_shell():
     c, s = placement('floor')
     box('floor',c,s,'floor',0)
@@ -192,7 +206,12 @@ def build_shell():
               box('roof_back',(0,2.9,2.015),(.5,2.3,.03),'panel.wall',0)]
     group('ceiling',panels)
     wall('wall_off',*placement('wall_off'),[(.15,0,2.05,1.98)])
-    wall('wall_kerb',*placement('wall_kerb'),[(.32,.9,1.76,1.36),(2.75,.93,3.45,1.35)])
+    # The entry door is an opening in the wall, so it belongs to the shell alongside the
+    # windows rather than to a zone. As a furniture placement it overlapped the wardrobe,
+    # the galley run and the galley overhead at once, and there is no free kerb wall to
+    # move it to: the galley run fills that side from the storage band to the rear.
+    wall('wall_kerb',*placement('wall_kerb'),
+         [(.32,.9,1.76,1.36),(2.75,.93,3.45,1.35),(2.35,0,3.00,1.85)])
     # Full-width passage under the overcab mattress and a sleeping opening above it.
     wall('bulkhead',*placement('bulkhead'),[(-1.1,0,1.1,1.98)],axis='y')
     box('wall_rear',*placement('wall_rear'),'panel.wall',.002)
@@ -206,6 +225,7 @@ def build_shell():
     window('slideout_window',-1.745,1.1,1.115,1.56,.51)
     # Taller than before: the reference puts a window over the counter, not a slot.
     window('galley_window',1.165,3.1,1.14,.7,.42)
+    entry_door(1.165,2.675,.925,.65,1.85)
     for x in [-1.125,1.125]:
         wall('alcove_flank', (x,-.7,1.675),(.05,1.4,.65),[(-1.15,1.43,-.4,1.82)])
         window('alcove_window',x,-.775,1.625,.75,.39)

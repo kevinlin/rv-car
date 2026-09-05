@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-09-05T18:39:28.645Z",
+  "checkedAt": "2026-09-05T18:49:48.566Z",
   "toleranceMetres": 0.001,
   "modules": [
     {
@@ -155,8 +155,8 @@
           "errors": []
         }
       ],
-      "primitives": 14,
-      "aoPrimitives": 12,
+      "primitives": 16,
+      "aoPrimitives": 14,
       "errors": []
     },
     {
@@ -312,8 +312,8 @@
           "errors": []
         }
       ],
-      "primitives": 14,
-      "aoPrimitives": 12,
+      "primitives": 16,
+      "aoPrimitives": 14,
       "errors": []
     },
     {
@@ -889,18 +889,18 @@
           "origin": [
             0.875,
             0.949999988079071,
-            2.299999952316284
+            2.2249999046325684
           ],
           "bounds": {
             "min": [
               0.6050000190734863,
               0,
-              2.099999949336052
+              2.0999999046325684
             ],
             "max": [
               1.149999976158142,
               1.899999976158142,
-              2.4999999552965164
+              2.3499999046325684
             ]
           },
           "errors": []
@@ -948,8 +948,8 @@
           "errors": []
         }
       ],
-      "primitives": 12,
-      "aoPrimitives": 12,
+      "primitives": 16,
+      "aoPrimitives": 16,
       "errors": []
     },
     {
@@ -983,18 +983,18 @@
           "origin": [
             0.875,
             0.949999988079071,
-            2.299999952316284
+            2.2249999046325684
           ],
           "bounds": {
             "min": [
               0.6050000190734863,
               0,
-              2.099999949336052
+              2.0999999046325684
             ],
             "max": [
               1.149999976158142,
               1.899999976158142,
-              2.4999999552965164
+              2.3499999046325684
             ]
           },
           "errors": []
@@ -1042,8 +1042,8 @@
           "errors": []
         }
       ],
-      "primitives": 12,
-      "aoPrimitives": 12,
+      "primitives": 16,
+      "aoPrimitives": 16,
       "errors": []
     },
     {
@@ -1217,8 +1217,8 @@
       "stage": "raw",
       "path": "dist/raw/softgoods.glb",
       "placements": [],
-      "primitives": 1,
-      "aoPrimitives": 1,
+      "primitives": 3,
+      "aoPrimitives": 3,
       "errors": []
     },
     {
@@ -1226,16 +1226,16 @@
       "stage": "optimized",
       "path": "public/models/softgoods.glb",
       "placements": [],
-      "primitives": 1,
-      "aoPrimitives": 1,
+      "primitives": 3,
+      "aoPrimitives": 3,
       "errors": []
     }
   ],
   "violations": [],
-  "triangles": 67036,
-  "bytes": 9940960,
-  "optimizedPrimitiveInstances": 78,
-  "potentialRoleBatchedDrawCalls": 36,
+  "triangles": 70280,
+  "bytes": 9967940,
+  "optimizedPrimitiveInstances": 86,
+  "potentialRoleBatchedDrawCalls": 38,
   "drawCallNote": "Primitive instances are exported geometry draws. Role batching is a feasibility estimate; browser renderer.info.render.calls must be measured separately.",
   "aoNote": "Checks texture/UV wiring only. Nonconstant baked AO and visible shading require bake evidence and visual verification.",
   "passed": true
