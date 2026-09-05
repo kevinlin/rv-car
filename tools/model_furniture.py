@@ -33,10 +33,13 @@ def build_dinette(a):
         for side in ('in', 'out'):
             _chair(a, f'dinette_chair_{end}_{side}', direction)
     (x, y, z), (w, d, h) = a.placement('dinette_table')
-    parts = [a.box('rounded table edge', (x,y,h-.038), (w,d,.076), 'worktop', .065),
-             a.box('rounded tabletop', (x,y,h-.013), (w-.012,d-.012,.026), 'worktop', .06),
-             a.cylinder('table pedestal', (x,y,.34), .044, .62, 'metal.brushed'),
-             a.box('pedestal foot', (x,y,.022), (.36,.32,.04), 'metal.brushed', .055)]
+    # Reference: a walnut edge band around a pale top, on a chrome column rather than brushed.
+    # The pale top sits proud of the walnut band. Flush would put the two top faces on the same
+    # plane, and they z-fight — the band wins and the whole table reads as solid walnut.
+    parts = [a.box('dinette_table_edge', (x,y,h-.042), (w,d,.076), 'wood.trim', .065),
+             a.box('rounded tabletop', (x,y,h-.015), (w-.06,d-.06,.030), 'worktop', .012),
+             a.cylinder('dinette_table_pedestal', (x,y,.36), .038, .72, 'metal.chrome'),
+             a.box('pedestal foot', (x,y,.022), (.36,.32,.04), 'metal.chrome', .055)]
     a.group('dinette_table', parts)
 
 
@@ -56,6 +59,11 @@ def build_sofa_slideout(a):
             parts.append(a.box('stitched sofa cushion', (x-w/2+(col+.5)*w/2,y-d/2+(row+.5)*d/3,z+.025),
                                (w/2-.012,d/3-.012,.15), 'upholstery.sofa', .04))
     a.group('slideout_bed', parts)
+    # The deployed slide-out is a bed, but the reference keeps a back cushion against the
+    # outboard wall rather than laying every cushion flat. Deliberately NOT joined into
+    # slideout_bed: the cushion rises above that placement box, which carries the published
+    # 1280 x 1900 footprint and is checked to the millimetre.
+    a.box('slideout_back', (-1.66, 1.10, .74), (.12, 1.86, .28), 'upholstery.sofa', .03)
 
 
 def build_alcove_bed(a):
@@ -76,11 +84,20 @@ def build_lockers(a):
     for name, direction in [('lockers_kerb', -1), ('lockers_off', 1)]:
         (x,y,z), (w,d,h) = a.placement(name)
         parts = [a.box('locker walnut case', (x-direction*.024,y,z), (w-.048,d,h), 'wood.cabinet', .025)]
+        face = x + direction*(w/2-.034)
         for i in range(3):
             cy = y-d/2+(i+.5)*d/3
-            parts.append(a.box('rounded cream locker door', (x+direction*(w/2-.034),cy,z), (.035,d/3-.018,h-.048), 'panel.locker', .028))
+            # Cream doors inset into a walnut frame, per the reference. The carcass is already
+            # walnut, so the frame is a wider reveal rather than a second box: at the old
+            # 18/48 mm insets it read as a hairline, and a separate surround would have to be
+            # positioned per run — the two runs are 2.5 m apart, the off pair riding the
+            # slide-out at x -1.73 to -1.28.
+            parts.append(a.box('rounded cream locker door', (face,cy,z), (.035,d/3-.05,h-.10), 'panel.locker', .028))
             parts.append(a.box('locker pull', (x+direction*(w/2-.009),cy,z-.13), (.018,.12,.02), 'metal.brushed', .006))
         a.group(name, parts)
+        # Under-locker LED strip. Outside the group deliberately: it hangs below the placement
+        # box, which the bounds check holds every named node to.
+        a.box('locker_strip', (face, y, z-h/2-.006), (.09, d-.04, .010), 'led.cove', 0)
 
 
 def build_cab(a):

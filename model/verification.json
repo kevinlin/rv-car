@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-09-05T18:22:06.472Z",
+  "checkedAt": "2026-09-05T18:29:16.307Z",
   "toleranceMetres": 0.001,
   "modules": [
     {
@@ -623,7 +623,7 @@
           "bounds": {
             "min": [
               0.12000000476837158,
-              0.0020000338554382324,
+              0,
               0.6400000154972076
             ],
             "max": [
@@ -635,8 +635,8 @@
           "errors": []
         }
       ],
-      "primitives": 18,
-      "aoPrimitives": 18,
+      "primitives": 19,
+      "aoPrimitives": 19,
       "errors": []
     },
     {
@@ -738,7 +738,7 @@
           "bounds": {
             "min": [
               0.12000000476837158,
-              0.0020000338554382324,
+              0,
               0.6400000154972076
             ],
             "max": [
@@ -750,8 +750,8 @@
           "errors": []
         }
       ],
-      "primitives": 18,
-      "aoPrimitives": 18,
+      "primitives": 19,
+      "aoPrimitives": 19,
       "errors": []
     },
     {
@@ -802,8 +802,8 @@
           "errors": []
         }
       ],
-      "primitives": 3,
-      "aoPrimitives": 3,
+      "primitives": 4,
+      "aoPrimitives": 4,
       "errors": []
     },
     {
@@ -854,8 +854,8 @@
           "errors": []
         }
       ],
-      "primitives": 3,
-      "aoPrimitives": 3,
+      "primitives": 4,
+      "aoPrimitives": 4,
       "errors": []
     },
     {
@@ -1156,7 +1156,7 @@
           "errors": []
         }
       ],
-      "primitives": 6,
+      "primitives": 7,
       "aoPrimitives": 6,
       "errors": []
     },
@@ -1208,7 +1208,7 @@
           "errors": []
         }
       ],
-      "primitives": 6,
+      "primitives": 7,
       "aoPrimitives": 6,
       "errors": []
     },
@@ -1232,10 +1232,10 @@
     }
   ],
   "violations": [],
-  "triangles": 65384,
-  "bytes": 9739700,
-  "optimizedPrimitiveInstances": 73,
-  "potentialRoleBatchedDrawCalls": 35,
+  "triangles": 65596,
+  "bytes": 9933052,
+  "optimizedPrimitiveInstances": 76,
+  "potentialRoleBatchedDrawCalls": 36,
   "drawCallNote": "Primitive instances are exported geometry draws. Role batching is a feasibility estimate; browser renderer.info.render.calls must be measured separately.",
   "aoNote": "Checks texture/UV wiring only. Nonconstant baked AO and visible shading require bake evidence and visual verification.",
   "passed": true

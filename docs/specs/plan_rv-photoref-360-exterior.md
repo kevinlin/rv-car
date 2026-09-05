@@ -1577,7 +1577,7 @@ Run `pnpm dev`, go to Lounge, look up. The band should read as a walnut spine wi
 shoulders and a glowing edge, matching `interior-lounge-and-overcab.jpg`. Save a screenshot to
 `docs/research/corrected/ceiling.png`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tools/model_interior.py model/rv.blend public/models/shell.glb dist/raw/shell.glb \
@@ -1598,7 +1598,7 @@ each a small change.
 - Produces: no new placements. New child meshes: `locker_frame_off`, `locker_frame_kerb`,
   `dinette_table_edge`, `dinette_table_pedestal`, `slideout_back`.
 
-- [ ] **Step 1: Frame the locker doors**
+- [x] **Step 1: Frame the locker doors**
 
 The photographs show cream gloss doors set into a walnut frame with an LED strip below, not the
 plain cream boxes currently modelled. In `build_lockers`, wrap each locker run:
@@ -1610,7 +1610,7 @@ plain cream boxes currently modelled. In `build_lockers`, wrap each locker run:
         box(f'locker_strip_{side}', (x - .01, 1.10, 1.395), (.10, 1.86, .010), 'led.cove', bevel=0)
 ```
 
-- [ ] **Step 2: Give the table its edge band and pedestal**
+- [x] **Step 2: Give the table its edge band and pedestal**
 
 In `build_dinette`, replace the plain slab with a banded top on a chrome column:
 
@@ -1619,7 +1619,7 @@ In `build_dinette`, replace the plain slab with a banded top on a chrome column:
     cylinder('dinette_table_pedestal', (.61, .99, .36), .038, .72, 'metal.chrome')
 ```
 
-- [ ] **Step 3: Give the sofa its back cushion**
+- [x] **Step 3: Give the sofa its back cushion**
 
 The deployed slide-out is a bed, but the reference shows it keeping a back cushion against the
 outboard wall. In `build_sofa_slideout`:
@@ -1628,7 +1628,7 @@ outboard wall. In `build_sofa_slideout`:
     box('slideout_back', (-1.66, 1.10, .74), (.12, 1.86, .28), 'upholstery.sofa', bevel=.03)
 ```
 
-- [ ] **Step 4: Regenerate all three**
+- [x] **Step 4: Regenerate all three**
 
 ```bash
 for c in lockers dinette sofa_slideout; do pnpm exec npm run model -- $c; done
@@ -1637,7 +1637,7 @@ pnpm exec npm run export && pnpm exec npm run optimize
 pnpm exec npm run check:models && pnpm exec npm run budget
 ```
 
-- [ ] **Step 5: Confirm the dimensional checks still hold**
+- [x] **Step 5: Confirm the dimensional checks still hold**
 
 Run: `pnpm check`
 Expected: PASS. `slideout_back` sits inside the `slideout` volume and must not push
