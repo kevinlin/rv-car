@@ -2013,6 +2013,12 @@ git commit -m "feat: add hotspot camera tweening with per-hotspot orbit limits"
 
 ---
 
+> **Tasks 12 and 13 have a standalone guide:**
+> [2026-09-05-rv-blender-modelling-guide.md](2026-09-05-rv-blender-modelling-guide.md).
+> `model/rv.blend` is now generated from the placement data by `npm run starter`, so both tasks
+> start from a correctly scaled block-out rather than an empty file. Follow the guide; the two
+> tasks below record the original intent.
+
 ## Task 12: Model the shell in Blender
 
 **Files:**
