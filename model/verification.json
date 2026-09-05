@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-09-05T13:07:31.130Z",
+  "checkedAt": "2026-09-05T16:19:23.368Z",
   "toleranceMetres": 0.001,
   "modules": [
     {
@@ -1233,7 +1233,7 @@
   ],
   "violations": [],
   "triangles": 64232,
-  "bytes": 10134056,
+  "bytes": 11089388,
   "optimizedPrimitiveInstances": 72,
   "potentialRoleBatchedDrawCalls": 35,
   "drawCallNote": "Primitive instances are exported geometry draws. Role batching is a feasibility estimate; browser renderer.info.render.calls must be measured separately.",

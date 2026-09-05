@@ -98,6 +98,38 @@ def bowl(name, center, radii, depth, role):
     return finish(obj, name, role)
 
 
+TEXEL_DENSITY = 1.0  # UV units per metre on UVMap, held equal across every object
+
+
+def normalise_uv_density(obj, target=TEXEL_DENSITY):
+    """Rescale an unwrap to a fixed UV-units-per-metre.
+
+    smart_project normalises each object into 0..1, so density depends on how big the object
+    is: the joined `*_details` catch-all measured 0.056 UV/m against 0.200 for the standalone
+    floor, and a tiling map would then run at three different scales on surfaces sharing a
+    role. Scaling by the median ratio equalises objects while leaving each unwrap's own
+    layout alone. UV2 is untouched, so the baked AO atlas stays valid.
+    """
+    layer = obj.data.uv_layers['UVMap'].data
+    scale = obj.matrix_world.to_scale()
+    ratios = []
+    for poly in obj.data.polygons:
+        world = poly.area * scale.x * scale.y
+        if world < 1e-9:
+            continue
+        loops = [layer[i].uv for i in poly.loop_indices]
+        cross = sum(p.x * q.y - q.x * p.y for p, q in zip(loops, loops[1:] + loops[:1]))
+        uv_area = abs(cross) / 2
+        if uv_area > 1e-12:
+            ratios.append((uv_area / world) ** .5)
+    if not ratios:
+        return
+    ratios.sort()
+    factor = target / ratios[len(ratios) // 2]
+    for loop in layer:
+        loop.uv = (loop.uv.x * factor, loop.uv.y * factor)
+
+
 def group(name, parts):
     bpy.ops.object.select_all(action='DESELECT')
     for p in parts:
@@ -239,6 +271,7 @@ def main():
         bpy.ops.mesh.select_all(action='SELECT')
         bpy.ops.uv.smart_project(angle_limit=1.15, island_margin=.025)
         bpy.ops.object.mode_set(mode='OBJECT')
+        normalise_uv_density(obj)
     bpy.context.scene['modelled_'+module] = True
     bpy.ops.wm.save_as_mainfile(filepath=str(HERE/'model/rv.blend'))
     print('MODELLED:', module)

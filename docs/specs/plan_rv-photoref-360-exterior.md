@@ -408,7 +408,7 @@ office fluorescent. If neutrality and warmth genuinely conflict, keep the coves 
 Save a fresh set of renders to `docs/research/calibrated/` at the same six hotspots as
 `docs/research/tuned/`, so the before and after can be compared side by side.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/calibrate.ts src/calibrate.test.ts src/main.ts src/lighting.ts src/scene.ts \
@@ -435,7 +435,7 @@ script rather than after authoring nine maps.
 - Produces: `texel_density(obj)` returning a list of √(UV area / world area) per polygon, and a
   printed `TEXEL_DENSITY` line per role
 
-- [ ] **Step 1: Add the measurement, printing only**
+- [x] **Step 1: Add the measurement, printing only**
 
 Insert into `tools/check_blend.py`, before the final `print('SAVED_MODEL_CHECK_PASS')`:
 
@@ -479,13 +479,13 @@ for role, values in sorted(by_role.items()):
           'p5=%.2f p95=%.2f spread=%.2f' % (lo, hi, hi / lo))
 ```
 
-- [ ] **Step 2: Run it and record the numbers**
+- [x] **Step 2: Run it and record the numbers**
 
 Run: `pnpm exec npm run check:blend 2>&1 | grep TEXEL_DENSITY`
 Expected: one line per role. Write the output into
 `docs/research/texel-density.md` verbatim, with the date.
 
-- [ ] **Step 3: Decide, from the measurement, whether a re-unwrap is needed**
+- [x] **Step 3: Decide, from the measurement, whether a re-unwrap is needed**
 
 Read the `spread` column for the nine roles that will receive maps: `wood.cabinet`, `wood.trim`,
 `floor`, `worktop`, `upholstery.seat`, `upholstery.bolster`, `upholstery.sofa`,
@@ -496,7 +496,7 @@ Read the `spread` column for the nine roles that will receive maps: `wood.cabine
   task ahead of Task 4, and it invalidates the packed AO atlas in UV2, so
   `pnpm exec npm run bake` must be re-run after it. Do not start authoring maps first.
 
-- [ ] **Step 4: Assert the measured tolerance**
+- [x] **Step 4: Assert the measured tolerance**
 
 Add, after the printing loop, using the number step 2 actually produced (replace `4.0` with the
 measured worst case rounded up to one decimal place):
@@ -512,7 +512,7 @@ for role in TEXTURED_ROLES:
     assert spread <= 4.0, (role, 'texel density spread %.2f; tiling maps will scale unevenly' % spread)
 ```
 
-- [ ] **Step 5: Run it and make sure it passes**
+- [x] **Step 5: Run it and make sure it passes**
 
 Run: `pnpm exec npm run check:blend`
 Expected: `SAVED_MODEL_CHECK_PASS`.
