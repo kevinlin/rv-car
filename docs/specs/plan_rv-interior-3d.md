@@ -11,6 +11,23 @@
 **Spec:** [design_rv-interior-3d.md](design_rv-interior-3d.md)
 **Evidence:** [../research/2026-09-04-dachi-wujijing-500-reference.md](../research/2026-09-04-dachi-wujijing-500-reference.md)
 
+## Status — 2026-09-05
+
+**67 of 76 steps complete** on branch `feat/interior-3d`. 77 tests passing, `tsc --noEmit` clean,
+pipeline verified end to end.
+
+| Tasks | State |
+|---|---|
+| 1–11 | Complete. Data model, dimensional checks, grey-box gate, export script, budget checker, node binding, finish registry, camera hotspots. |
+| 12–13 | **Blocked on modelling.** `model/rv.blend` exists as a generated block-out and the whole pipeline runs against it, but no geometry has been sculpted. See [the Blender guide](guide_rv-blender-modelling.md). |
+| 14–15 | Code complete; the two tuning steps need real geometry to tune against. |
+
+The nine open steps: Task 12 steps 1–2, Task 13 steps 1–5, Task 14 step 5 (lighting tuning) and
+Task 15 step 5 (success-criteria sweep). Task 13's five steps repeat once per collection, so the
+count understates the work: eight collections still need sculpting.
+
+---
+
 ## Global Constraints
 
 - **Units.** Data is authored in millimetres. 1 Three.js unit = 1 metre. Conversion happens once, in `toM()`. No other file divides by 1000.
@@ -70,7 +87,7 @@ Found while turning the design into concrete numbers. All three are improvements
 - Consumes: nothing
 - Produces: a working `pnpm test` and `pnpm dev`. Every later task depends on both.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/smoke.test.ts`:
 
@@ -86,12 +103,12 @@ describe('toolchain', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm exec vitest run`
 Expected: FAIL — no `package.json`, vitest not installed.
 
-- [ ] **Step 3: Create the toolchain**
+- [x] **Step 3: Create the toolchain**
 
 ```bash
 pnpm init
@@ -185,12 +202,12 @@ public/models/
 model/*.blend1
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm test`
 Expected: PASS, 1 test.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A
@@ -214,7 +231,7 @@ git commit -m "chore: scaffold vite + typescript + vitest + three"
   - `toM(d: Mm): number`
   - `toMTriple(t: readonly [Mm, Mm, Mm]): [number, number, number]`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/data/units.test.ts`:
 
@@ -243,12 +260,12 @@ describe('units', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm exec vitest run src/data/units.test.ts`
 Expected: FAIL — cannot resolve `./units`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `src/data/units.ts`:
 
@@ -275,12 +292,12 @@ export const toMTriple = (t: readonly [Mm, Mm, Mm]): [number, number, number] =>
 ];
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm exec vitest run src/data/units.test.ts`
 Expected: PASS, 3 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/data/units.ts src/data/units.test.ts
@@ -305,7 +322,7 @@ git commit -m "feat: add millimetre units with confidence tags"
   - `const VOLUMES: Record<VolumeId, Box>`
   - `const ZONE_VOLUME: Record<Exclude<ZoneId, 'shell'>, VolumeId>`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/data/vehicle.test.ts`:
 
@@ -377,12 +394,12 @@ describe('volumes', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm exec vitest run src/data/vehicle.test.ts`
 Expected: FAIL — cannot resolve `./vehicle`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `src/data/vehicle.ts`:
 
@@ -449,12 +466,12 @@ export const ZONE_VOLUME: Record<Exclude<ZoneId, 'shell'>, VolumeId> = {
 };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm exec vitest run src/data/vehicle.test.ts`
 Expected: PASS, 9 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/data/vehicle.ts src/data/vehicle.test.ts
@@ -478,7 +495,7 @@ git commit -m "feat: add vehicle envelope, volumes and zone mapping"
 
 Origin is the **minimum corner**. Sizes are positive extents along `+X`, `+Y`, `+Z`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/data/placements.test.ts`:
 
@@ -543,12 +560,12 @@ describe('placements', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm exec vitest run src/data/placements.test.ts`
 Expected: FAIL — `PLACEMENTS` and `aabb` are not exported.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Append to `src/data/vehicle.ts`:
 
@@ -620,12 +637,12 @@ export const aabb = (p: Placement) => ({
 });
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm exec vitest run src/data/placements.test.ts`
 Expected: PASS, 7 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/data/vehicle.ts src/data/placements.test.ts
@@ -652,7 +669,7 @@ git commit -m "feat: add interior placement data for all zones"
 
 Touching faces are **not** an overlap — the test is strict (`<`, not `<=`).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/check.test.ts`:
 
@@ -743,12 +760,12 @@ describe('checkAll', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm exec vitest run src/check.test.ts`
 Expected: FAIL — cannot resolve `./check`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `src/check.ts`:
 
@@ -839,12 +856,12 @@ export const checkAll = (ps: readonly Placement[] = PLACEMENTS): Violation[] => 
 };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm exec vitest run src/check.test.ts`
 Expected: PASS, 11 tests. If `minAisleWidth` does not return exactly 520, the placement data in Task 4 has drifted — fix the data, not the test.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/check.ts src/check.test.ts
@@ -866,7 +883,7 @@ git commit -m "feat: add dimensional checks for overlap, containment and aisle w
   - `buildGreybox(ps?: readonly Placement[]): THREE.Group` — one `THREE.Mesh` per placement, named with the placement id, positioned at the box centre
   - `createScene(canvas: HTMLCanvasElement): { scene, camera, renderer, controls, render }` from `scene.ts`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/greybox.test.ts`:
 
@@ -909,12 +926,12 @@ describe('buildGreybox', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm exec vitest run src/greybox.test.ts`
 Expected: FAIL — cannot resolve `./greybox`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `src/greybox.ts`:
 
@@ -1040,12 +1057,12 @@ scene.add(buildGreybox());
 renderer.setAnimationLoop(render);
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm exec vitest run src/greybox.test.ts && pnpm check`
 Expected: PASS, 4 tests, and `tsc --noEmit` clean.
 
-- [ ] **Step 5: Look at it — this is the gate**
+- [x] **Step 5: Look at it — this is the gate**
 
 Run: `pnpm dev`, open `http://localhost:5173`.
 
@@ -1060,7 +1077,7 @@ Record what you found in a new `## Phase 1 gate findings` section at the end of 
 
 **No Blender work starts until this gate is recorded as passed.**
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
@@ -1081,7 +1098,7 @@ git commit -m "feat: add grey-box scene and record phase 1 dimensional gate find
 
 Blender is at `/Applications/Blender.app/Contents/MacOS/Blender` (5.2.1 LTS).
 
-- [ ] **Step 1: Write the export script**
+- [x] **Step 1: Write the export script**
 
 Create `tools/export_modules.py`:
 
@@ -1212,14 +1229,14 @@ Add to `package.json` `"scripts"`:
 }
 ```
 
-- [ ] **Step 2: Verify the script rejects a bad file**
+- [x] **Step 2: Verify the script rejects a bad file**
 
 Create a throwaway `.blend` with a material named `wood` (not `role.wood.cabinet`) and run the export against it.
 
 Run: `/Applications/Blender.app/Contents/MacOS/Blender -b /tmp/bad.blend -P tools/export_modules.py`
 Expected: exit code 1, stderr contains `materials must be named role.<role-id>`.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add tools/export_modules.py model/README.md package.json
@@ -1240,7 +1257,7 @@ git commit -m "feat: add Blender headless module export with convention checks"
 
 Triangle counts are read from the **raw** exports because Draco compression does not change triangle count and reading compressed meshes would need the Draco decoder. Byte counts are read from the **optimised** output. This avoids a decoder dependency entirely.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/budget.test.ts`:
 
@@ -1273,12 +1290,12 @@ describe('summarise', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm exec vitest run src/budget.test.ts`
 Expected: FAIL — cannot resolve `../tools/check_budget.mjs`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```bash
 pnpm add -D @gltf-transform/core
@@ -1352,12 +1369,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm exec vitest run src/budget.test.ts`
 Expected: PASS, 4 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add tools/check_budget.mjs src/budget.test.ts package.json pnpm-lock.yaml
@@ -1380,7 +1397,7 @@ git commit -m "feat: add triangle and byte budget checker"
 
 Binding is tested against a hand-built `Object3D` tree, not a real `.glb`. The loading and the binding are separate concerns, and only the binding has logic worth testing.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/binding.test.ts`:
 
@@ -1439,12 +1456,12 @@ describe('bindPlacements', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm exec vitest run src/binding.test.ts`
 Expected: FAIL — cannot resolve `./binding`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `src/binding.ts`:
 
@@ -1485,12 +1502,12 @@ export const bindPlacements = (
 };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm exec vitest run src/binding.test.ts`
 Expected: PASS, 4 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/binding.ts src/binding.test.ts
@@ -1516,7 +1533,7 @@ git commit -m "feat: bind glTF nodes to placement data, failing loudly on rename
   - `roleOf(materialName: string): Role | null`
   - `applyFinishes(root: THREE.Object3D, registry?: Registry): number` — returns the number of meshes restyled
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/finishes.test.ts`:
 
@@ -1619,12 +1636,12 @@ describe('applyFinishes', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm exec vitest run src/finishes.test.ts`
 Expected: FAIL — cannot resolve `./data/finishes`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `src/data/finishes.ts`:
 
@@ -1755,12 +1772,12 @@ export const applyFinishes = (
 };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm exec vitest run src/finishes.test.ts`
 Expected: PASS, 11 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/data/finishes.ts src/finishes.ts src/finishes.test.ts
@@ -1786,7 +1803,7 @@ git commit -m "feat: add role-keyed finish registry and runtime application"
   - `applyHotspotLimits(controls: OrbitControls, h: Hotspot): void`
   - `tweenTo(bundle: SceneBundle, h: Hotspot, ms?: number): Promise<void>`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/camera.test.ts`:
 
@@ -1864,12 +1881,12 @@ describe('HOTSPOTS', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm exec vitest run src/camera.test.ts`
 Expected: FAIL — `HOTSPOTS` is not exported and `./camera` does not exist.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Append to `src/data/vehicle.ts`:
 
@@ -1999,12 +2016,12 @@ export const tweenTo = (bundle: SceneBundle, h: Hotspot, ms = 900): Promise<void
 };
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm exec vitest run src/camera.test.ts`
 Expected: PASS, 9 tests.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/data/vehicle.ts src/camera.ts src/camera.test.ts
@@ -2020,6 +2037,11 @@ git commit -m "feat: add hotspot camera tweening with per-hotspot orbit limits"
 > tasks below record the original intent.
 
 ## Task 12: Model the shell in Blender
+
+> **Partially complete.** Steps 3–5 are done: `src/loader.ts` exists, loads, and was verified in
+> the browser. Step 1 (modelling) is outstanding — `model/rv.blend` holds a generated block-out,
+> not a modelled shell. Step 2 is left open because, although it runs cleanly against the
+> block-out, it has to be re-run against the real geometry to mean anything.
 
 **Files:**
 - Create: `model/rv.blend` (binary), `dist/raw/shell.glb` (generated), `public/models/shell.glb` (generated)
@@ -2056,7 +2078,7 @@ pnpm budget
 
 Expected: `shell.glb` in both directories, `Budget OK.`
 
-- [ ] **Step 3: Write the loader**
+- [x] **Step 3: Write the loader**
 
 Create `src/loader.ts`:
 
@@ -2120,12 +2142,12 @@ bundle.scene.add(vehicle);
 bundle.renderer.setAnimationLoop(bundle.render);
 ```
 
-- [ ] **Step 4: Verify in the browser**
+- [x] **Step 4: Verify in the browser**
 
 Run: `pnpm dev`
 Expected: the shell loads, walls and floor take their registry colours, no console errors. `pnpm check` still clean.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add model/rv.blend src/loader.ts src/main.ts
@@ -2135,6 +2157,10 @@ git commit -m "feat: model and load the habitation shell"
 ---
 
 ## Task 13: Model the furniture modules
+
+> **Outstanding.** The block-out generator has created every object at the correct size, place,
+> name and material, and steps 2–5 have been exercised once against it, so the pipeline is known
+> to work. None of the eight collections has been sculpted. Steps 1–5 repeat per collection.
 
 **Files:**
 - Modify: `model/rv.blend`, `src/main.ts`
@@ -2210,7 +2236,7 @@ git commit -m "feat: model the <collection> module"
   - `coveLightSpecs(): CoveSpec[]` — pure, testable
   - `installLighting(scene, renderer, vehicle): { refreshProbe: () => void }`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/lighting.test.ts`:
 
@@ -2244,12 +2270,12 @@ describe('coveLightSpecs', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `pnpm exec vitest run src/lighting.test.ts`
 Expected: FAIL — cannot resolve `./lighting`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `src/lighting.ts`:
 
@@ -2336,12 +2362,12 @@ Modify `src/scene.ts`: delete the `HemisphereLight` and `DirectionalLight` place
 
 Modify `src/main.ts` to call `installLighting(bundle.scene, bundle.renderer, vehicle)` after `applyFinishes(vehicle)`, keeping the returned `refreshProbe` for Task 15.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm exec vitest run src/lighting.test.ts && pnpm check`
 Expected: PASS, 4 tests, `tsc` clean.
 
-- [ ] **Step 5: Tune against the references**
+- [ ] **Step 5: Tune against the references** — blocked: needs real geometry to tune against
 
 Run `pnpm dev`. Compare to `docs/research/reference/interior-lounge-and-overcab.jpg`. Adjust, in this order, one at a time:
 
@@ -2350,7 +2376,7 @@ Run `pnpm dev`. Compare to `docs/research/reference/interior-lounge-and-overcab.
 3. `intensity` in `coveLightSpecs` — how strongly the coves read
 4. `emissiveIntensity` on `led.cove` in `src/data/finishes.ts` — how bright the strips look in frame
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/lighting.ts src/scene.ts src/main.ts src/lighting.test.ts src/data/finishes.ts
@@ -2370,7 +2396,7 @@ git commit -m "feat: add real-time interior lighting with an environment probe"
 - Consumes: `HOTSPOTS`, `tweenTo`, `DEFAULT_REGISTRY`, `applyFinishes`
 - Produces: `buildUi(opts): HTMLElement`, `WOOD_ROLES: Role[]`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/ui.test.ts`:
 
@@ -2415,7 +2441,7 @@ describe('buildUi', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 ```bash
 pnpm add -D jsdom
@@ -2424,7 +2450,7 @@ pnpm exec vitest run src/ui.test.ts
 
 Expected: FAIL — cannot resolve `./ui`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `src/ui.ts`:
 
@@ -2534,12 +2560,12 @@ Add to the `<style>` block in `index.html`:
                       border: 2px solid rgba(255,255,255,.7); }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `pnpm exec vitest run && pnpm check`
 Expected: all tests pass across every file, `tsc` clean.
 
-- [ ] **Step 5: Verify all success criteria**
+- [ ] **Step 5: Verify all success criteria** — blocked: needs real geometry
 
 - Click each zone button — camera flies there and orbit stays inside the vehicle.
 - Click each wood swatch — every wood surface changes, nothing else does.
@@ -2549,7 +2575,7 @@ Expected: all tests pass across every file, `tsc` clean.
 
 Record the results in a `## Verification` section at the end of the spec.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
