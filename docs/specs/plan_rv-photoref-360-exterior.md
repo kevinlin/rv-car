@@ -791,7 +791,7 @@ Open `public/textures/walnut.webp`. Check three things: the grain runs straight 
 converging, there is no bright blob left from the original lighting, and the four quadrants meet
 without a visible seam. Adjust `corners` and re-run until they do.
 
-- [ ] **Step 8: Commit, including the source slice**
+- [x] **Step 8: Commit, including the source slice**
 
 ```bash
 git add tools/rectify_textures.mjs tools/rectify_textures.test.mjs model/textures.json \
@@ -816,7 +816,7 @@ Task 6 replaces them.
 - Produces: `type Resolve = (spec: TextureSpec) => THREE.Texture | null`,
   `createTextureResolver(): Resolve`, and `applyFinishes(root, registry, resolve?)`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `src/finishes.test.ts`:
 
@@ -854,13 +854,13 @@ describe('texture resolution', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `pnpm exec vitest run src/finishes.test.ts`
 Expected: FAIL — `map` is not a valid `MaterialParams` field, and `applyFinishes` takes two
 arguments.
 
-- [ ] **Step 3: Extend the data shape**
+- [x] **Step 3: Extend the data shape**
 
 In `src/data/finishes.ts`, above `MaterialParams`:
 
@@ -887,7 +887,7 @@ and add to `MaterialParams`:
   readonly transparent?: boolean;
 ```
 
-- [ ] **Step 4: Write `src/textures.ts`**
+- [x] **Step 4: Write `src/textures.ts`**
 
 ```ts
 import * as THREE from 'three';
@@ -921,7 +921,7 @@ export const createTextureResolver = (): Resolve => {
 };
 ```
 
-- [ ] **Step 5: Teach `applyFinishes` to use it**
+- [x] **Step 5: Teach `applyFinishes` to use it**
 
 In `src/finishes.ts`, add the import and change the signature:
 
@@ -952,12 +952,12 @@ and inside the material loop, after `material.emissiveIntensity = ...`:
       material.transparent = p.transparent ?? false;
 ```
 
-- [ ] **Step 6: Run the tests and make sure they pass**
+- [x] **Step 6: Run the tests and make sure they pass**
 
 Run: `pnpm check`
 Expected: PASS, TypeScript clean.
 
-- [ ] **Step 7: Wire the real resolver into `main.ts`**
+- [x] **Step 7: Wire the real resolver into `main.ts`**
 
 Add the import:
 

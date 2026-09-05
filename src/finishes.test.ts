@@ -94,3 +94,39 @@ describe('applyFinishes', () => {
     expect((stray.material as THREE.MeshStandardMaterial).color.getHex()).toBe(0x000000);
   });
 });
+
+describe('texture resolution', () => {
+  it('assigns a resolved texture to the material map', () => {
+    const mesh = meshWithMaterial('role.floor');
+    const registry = structuredClone(DEFAULT_REGISTRY);
+    // Variant.params is readonly, so the variant is replaced rather than mutated.
+    registry['floor'].variants[0] = {
+      ...registry['floor'].variants[0]!,
+      params: {
+        ...registry['floor'].variants[0]!.params,
+        map: { url: '/textures/herringbone.webp', repeat: [4, 8] },
+      },
+    };
+
+    const texture = new THREE.Texture();
+    applyFinishes(mesh, registry, () => texture);
+
+    expect((mesh.material as THREE.MeshStandardMaterial).map).toBe(texture);
+  });
+
+  it('leaves an existing map alone when the registry supplies none', () => {
+    // The .glb-authored maps must survive until the registry replaces them role by role.
+    const mesh = meshWithMaterial('role.floor');
+    const existing = new THREE.Texture();
+    (mesh.material as THREE.MeshStandardMaterial).map = existing;
+
+    applyFinishes(mesh, DEFAULT_REGISTRY, () => new THREE.Texture());
+
+    expect((mesh.material as THREE.MeshStandardMaterial).map).toBe(existing);
+  });
+
+  it('defaults to no resolver, so node tests need no WebGL context', () => {
+    const mesh = meshWithMaterial('role.floor');
+    expect(() => applyFinishes(mesh, DEFAULT_REGISTRY)).not.toThrow();
+  });
+});

@@ -5,12 +5,31 @@ export type Role =
   | 'metal.brushed' | 'metal.chrome' | 'metal.dark' | 'textile.curtain'
   | 'led.cove' | 'glass';
 
+/**
+ * A texture described, not loaded. This file imports nothing, so it cannot hold a
+ * THREE.Texture — src/textures.ts turns one of these into one at runtime.
+ */
+export interface TextureSpec {
+  readonly url: string;
+  /**
+   * UV tiling. Defaults to [1, 1]. UVMap is normalised to 1.0 UV units per metre by
+   * `normalise_uv_density()` in the Blender pipeline, so a repeat reads as tiles per metre.
+   */
+  readonly repeat?: readonly [number, number];
+  /** Base colour is sRGB; normal and data maps are not. Defaults to true. */
+  readonly srgb?: boolean;
+}
+
 export interface MaterialParams {
   readonly color: number;
   readonly roughness: number;
   readonly metalness: number;
   readonly emissive?: number;
   readonly emissiveIntensity?: number;
+  readonly map?: TextureSpec;
+  readonly normalMap?: TextureSpec;
+  readonly normalScale?: number;
+  readonly transparent?: boolean;
 }
 
 export interface Variant {

@@ -3,6 +3,7 @@ import { createScene } from './scene';
 import { loadModules } from './loader';
 import { buildGreybox } from './greybox';
 import { applyFinishes } from './finishes';
+import { createTextureResolver } from './textures';
 import { installLighting } from './lighting';
 import * as THREE from 'three';
 import { bindPlacements } from './binding';
@@ -36,7 +37,8 @@ if (loaded.length === 0) {
 }
 
 const registry = structuredClone(DEFAULT_REGISTRY);
-applyFinishes(vehicle, registry);
+const resolveTexture = createTextureResolver();
+applyFinishes(vehicle, registry, resolveTexture);
 bundle.scene.add(vehicle);
 
 /**
@@ -64,7 +66,7 @@ document.body.appendChild(
     },
     onWood: (variantId) => {
       for (const role of WOOD_ROLES) registry[role].active = variantId;
-      applyFinishes(vehicle, registry);
+      applyFinishes(vehicle, registry, resolveTexture);
       refreshProbe(); // the room's albedo changed, so the bounce light must too
     },
   }),

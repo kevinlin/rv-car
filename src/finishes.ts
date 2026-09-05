@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { ALL_ROLES, DEFAULT_REGISTRY, type Registry, type Role } from './data/finishes';
+import type { Resolve } from './textures';
 
 const ROLE_SET = new Set<string>(ALL_ROLES);
 
@@ -18,6 +19,8 @@ export const roleOf = (materialName: string): Role | null => {
 export const applyFinishes = (
   root: THREE.Object3D,
   registry: Registry = DEFAULT_REGISTRY,
+  /** Defaults to a no-op so vitest's node environment needs no WebGL context. */
+  resolve: Resolve = () => null,
 ): number => {
   let restyled = 0;
 
@@ -40,6 +43,15 @@ export const applyFinishes = (
       material.metalness = p.metalness;
       material.emissive.setHex(p.emissive ?? 0x000000);
       material.emissiveIntensity = p.emissiveIntensity ?? 1;
+      // Only override when the registry supplies one: the .glb-authored maps must survive
+      // until every role has been migrated.
+      if (p.map) material.map = resolve(p.map);
+      if (p.normalMap) {
+        material.normalMap = resolve(p.normalMap);
+        const s = p.normalScale ?? 1;
+        material.normalScale.set(s, s);
+      }
+      material.transparent = p.transparent ?? false;
       // The baked AO shares one 2048 atlas across 29 objects, so the large shell surfaces get
       // few texels and read as blotches at full strength. Held back to contact shading only.
       material.aoMapIntensity = 0.4;
