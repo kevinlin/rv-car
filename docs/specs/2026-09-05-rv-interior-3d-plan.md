@@ -68,7 +68,7 @@ Found while turning the design into concrete numbers. All three are improvements
 
 **Interfaces:**
 - Consumes: nothing
-- Produces: a working `npm test` and `npm run dev`. Every later task depends on both.
+- Produces: a working `pnpm test` and `pnpm dev`. Every later task depends on both.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -88,15 +88,15 @@ describe('toolchain', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run`
+Run: `pnpm exec vitest run`
 Expected: FAIL — no `package.json`, vitest not installed.
 
 - [ ] **Step 3: Create the toolchain**
 
 ```bash
-npm init -y
-npm install three
-npm install -D vite vitest typescript @types/three @types/node
+pnpm init
+pnpm add three
+pnpm add -D vite vitest typescript @types/three @types/node
 ```
 
 Create `tsconfig.json`:
@@ -187,7 +187,7 @@ model/*.blend1
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npm test`
+Run: `pnpm test`
 Expected: PASS, 1 test.
 
 - [ ] **Step 5: Commit**
@@ -245,7 +245,7 @@ describe('units', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/data/units.test.ts`
+Run: `pnpm exec vitest run src/data/units.test.ts`
 Expected: FAIL — cannot resolve `./units`.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -277,7 +277,7 @@ export const toMTriple = (t: readonly [Mm, Mm, Mm]): [number, number, number] =>
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/data/units.test.ts`
+Run: `pnpm exec vitest run src/data/units.test.ts`
 Expected: PASS, 3 tests.
 
 - [ ] **Step 5: Commit**
@@ -379,7 +379,7 @@ describe('volumes', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/data/vehicle.test.ts`
+Run: `pnpm exec vitest run src/data/vehicle.test.ts`
 Expected: FAIL — cannot resolve `./vehicle`.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -451,7 +451,7 @@ export const ZONE_VOLUME: Record<Exclude<ZoneId, 'shell'>, VolumeId> = {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/data/vehicle.test.ts`
+Run: `pnpm exec vitest run src/data/vehicle.test.ts`
 Expected: PASS, 9 tests.
 
 - [ ] **Step 5: Commit**
@@ -545,7 +545,7 @@ describe('placements', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/data/placements.test.ts`
+Run: `pnpm exec vitest run src/data/placements.test.ts`
 Expected: FAIL — `PLACEMENTS` and `aabb` are not exported.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -622,7 +622,7 @@ export const aabb = (p: Placement) => ({
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/data/placements.test.ts`
+Run: `pnpm exec vitest run src/data/placements.test.ts`
 Expected: PASS, 7 tests.
 
 - [ ] **Step 5: Commit**
@@ -745,7 +745,7 @@ describe('checkAll', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/check.test.ts`
+Run: `pnpm exec vitest run src/check.test.ts`
 Expected: FAIL — cannot resolve `./check`.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -841,7 +841,7 @@ export const checkAll = (ps: readonly Placement[] = PLACEMENTS): Violation[] => 
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/check.test.ts`
+Run: `pnpm exec vitest run src/check.test.ts`
 Expected: PASS, 11 tests. If `minAisleWidth` does not return exactly 520, the placement data in Task 4 has drifted — fix the data, not the test.
 
 - [ ] **Step 5: Commit**
@@ -911,7 +911,7 @@ describe('buildGreybox', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/greybox.test.ts`
+Run: `pnpm exec vitest run src/greybox.test.ts`
 Expected: FAIL — cannot resolve `./greybox`.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -1042,12 +1042,12 @@ renderer.setAnimationLoop(render);
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/greybox.test.ts && npm run check`
+Run: `pnpm exec vitest run src/greybox.test.ts && pnpm check`
 Expected: PASS, 4 tests, and `tsc --noEmit` clean.
 
 - [ ] **Step 5: Look at it — this is the gate**
 
-Run: `npm run dev`, open `http://localhost:5173`.
+Run: `pnpm dev`, open `http://localhost:5173`.
 
 Compare against `docs/research/reference/interior-lounge-and-overcab.jpg` and `dinette-and-slideout-bed.jpg`. Check specifically:
 
@@ -1056,7 +1056,7 @@ Compare against `docs/research/reference/interior-lounge-and-overcab.jpg` and `d
 3. Does the alcove bed mass sit at a believable height above the cab seats?
 4. Do the rear galley and washroom masses divide the rear third the way the photos show?
 
-Record what you found in a new `## Phase 1 gate findings` section at the end of the spec, adjust the `estimated` values in `PLACEMENTS` and `ENVELOPE` until the grey-box matches, and re-run `npm test` after every adjustment.
+Record what you found in a new `## Phase 1 gate findings` section at the end of the spec, adjust the `estimated` values in `PLACEMENTS` and `ENVELOPE` until the grey-box matches, and re-run `pnpm test` after every adjustment.
 
 **No Blender work starts until this gate is recorded as passed.**
 
@@ -1199,7 +1199,7 @@ Create `model/README.md`:
 
 ## Export
 
-    npm run export
+    pnpm export
 ```
 
 Add to `package.json` `"scripts"`:
@@ -1207,7 +1207,7 @@ Add to `package.json` `"scripts"`:
 ```json
 {
   "export": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend -P tools/export_modules.py",
-  "optimize": "npx --yes @gltf-transform/cli optimize dist/raw --output public/models --texture-compress ktx2 --compress draco",
+  "optimize": "pnpm dlx @gltf-transform/cli optimize dist/raw --output public/models --texture-compress ktx2 --compress draco",
   "budget": "node tools/check_budget.mjs"
 }
 ```
@@ -1275,13 +1275,13 @@ describe('summarise', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/budget.test.ts`
+Run: `pnpm exec vitest run src/budget.test.ts`
 Expected: FAIL — cannot resolve `../tools/check_budget.mjs`.
 
 - [ ] **Step 3: Write minimal implementation**
 
 ```bash
-npm install -D @gltf-transform/core
+pnpm add -D @gltf-transform/core
 ```
 
 Create `tools/check_budget.mjs`:
@@ -1354,13 +1354,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/budget.test.ts`
+Run: `pnpm exec vitest run src/budget.test.ts`
 Expected: PASS, 4 tests.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add tools/check_budget.mjs src/budget.test.ts package.json package-lock.json
+git add tools/check_budget.mjs src/budget.test.ts package.json pnpm-lock.yaml
 git commit -m "feat: add triangle and byte budget checker"
 ```
 
@@ -1441,7 +1441,7 @@ describe('bindPlacements', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/binding.test.ts`
+Run: `pnpm exec vitest run src/binding.test.ts`
 Expected: FAIL — cannot resolve `./binding`.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -1487,7 +1487,7 @@ export const bindPlacements = (
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/binding.test.ts`
+Run: `pnpm exec vitest run src/binding.test.ts`
 Expected: PASS, 4 tests.
 
 - [ ] **Step 5: Commit**
@@ -1621,7 +1621,7 @@ describe('applyFinishes', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/finishes.test.ts`
+Run: `pnpm exec vitest run src/finishes.test.ts`
 Expected: FAIL — cannot resolve `./data/finishes`.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -1757,7 +1757,7 @@ export const applyFinishes = (
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/finishes.test.ts`
+Run: `pnpm exec vitest run src/finishes.test.ts`
 Expected: PASS, 11 tests.
 
 - [ ] **Step 5: Commit**
@@ -1866,7 +1866,7 @@ describe('HOTSPOTS', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/camera.test.ts`
+Run: `pnpm exec vitest run src/camera.test.ts`
 Expected: FAIL — `HOTSPOTS` is not exported and `./camera` does not exist.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -2001,7 +2001,7 @@ export const tweenTo = (bundle: SceneBundle, h: Hotspot, ms = 900): Promise<void
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/camera.test.ts`
+Run: `pnpm exec vitest run src/camera.test.ts`
 Expected: PASS, 9 tests.
 
 - [ ] **Step 5: Commit**
@@ -2019,7 +2019,7 @@ git commit -m "feat: add hotspot camera tweening with per-hotspot orbit limits"
 - Create: `model/rv.blend` (binary), `dist/raw/shell.glb` (generated), `public/models/shell.glb` (generated)
 - Create: `src/loader.ts`
 - Modify: `src/main.ts`
-- Test: manual visual plus `npm run budget`
+- Test: manual visual plus `pnpm budget`
 
 **Interfaces:**
 - Consumes: `bindPlacements`, `applyFinishes`, `PLACEMENTS`
@@ -2043,9 +2043,9 @@ Bake AO per object into UV map 2.
 
 ```bash
 mkdir -p dist/raw public/models
-npm run export
-npm run optimize
-npm run budget
+pnpm export
+pnpm optimize
+pnpm budget
 ```
 
 Expected: `shell.glb` in both directories, `Budget OK.`
@@ -2116,8 +2116,8 @@ bundle.renderer.setAnimationLoop(bundle.render);
 
 - [ ] **Step 4: Verify in the browser**
 
-Run: `npm run dev`
-Expected: the shell loads, walls and floor take their registry colours, no console errors. `npm run check` still clean.
+Run: `pnpm dev`
+Expected: the shell loads, walls and floor take their registry colours, no console errors. `pnpm check` still clean.
 
 - [ ] **Step 5: Commit**
 
@@ -2132,7 +2132,7 @@ git commit -m "feat: model and load the habitation shell"
 
 **Files:**
 - Modify: `model/rv.blend`, `src/main.ts`
-- Test: `npm test`, `npm run budget`, visual comparison
+- Test: `pnpm test`, `pnpm budget`, visual comparison
 
 Do these **one collection at a time**, in this order. Each is its own commit. Washroom is last because it is the hardest and least visible.
 
@@ -2160,7 +2160,7 @@ Bake AO per object into UV map 2.
 - [ ] **Step 2: Export and check**
 
 ```bash
-npm run export && npm run optimize && npm run budget && npm test
+pnpm export && pnpm optimize && pnpm budget && pnpm test
 ```
 
 Expected: `Budget OK.`, all tests pass. If the budget fails, decimate the collection you just added rather than trimming an earlier one.
@@ -2179,7 +2179,7 @@ Add only the collections that exist so far. Binding is not yet wired into `main.
 
 - [ ] **Step 4: Verify in the browser**
 
-Run: `npm run dev`
+Run: `pnpm dev`
 Expected: the new module appears in the right place at the right size, with registry colours applied.
 
 - [ ] **Step 5: Commit, one per collection**
@@ -2240,7 +2240,7 @@ describe('coveLightSpecs', () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `npx vitest run src/lighting.test.ts`
+Run: `pnpm exec vitest run src/lighting.test.ts`
 Expected: FAIL — cannot resolve `./lighting`.
 
 - [ ] **Step 3: Write minimal implementation**
@@ -2332,12 +2332,12 @@ Modify `src/main.ts` to call `installLighting(bundle.scene, bundle.renderer, veh
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run src/lighting.test.ts && npm run check`
+Run: `pnpm exec vitest run src/lighting.test.ts && pnpm check`
 Expected: PASS, 4 tests, `tsc` clean.
 
 - [ ] **Step 5: Tune against the references**
 
-Run `npm run dev`. Compare to `docs/research/reference/interior-lounge-and-overcab.jpg`. Adjust, in this order, one at a time:
+Run `pnpm dev`. Compare to `docs/research/reference/interior-lounge-and-overcab.jpg`. Adjust, in this order, one at a time:
 
 1. `renderer.toneMappingExposure` in `scene.ts` — overall brightness
 2. `scene.environmentIntensity` in `lighting.ts` — how much bounce fill
@@ -2412,8 +2412,8 @@ describe('buildUi', () => {
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-npm install -D jsdom
-npx vitest run src/ui.test.ts
+pnpm add -D jsdom
+pnpm exec vitest run src/ui.test.ts
 ```
 
 Expected: FAIL — cannot resolve `./ui`.
@@ -2530,7 +2530,7 @@ Add to the `<style>` block in `index.html`:
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `npx vitest run && npm run check`
+Run: `pnpm exec vitest run && pnpm check`
 Expected: all tests pass across every file, `tsc` clean.
 
 - [ ] **Step 5: Verify all success criteria**
@@ -2539,7 +2539,7 @@ Expected: all tests pass across every file, `tsc` clean.
 - Click each wood swatch — every wood surface changes, nothing else does.
 - Compare three viewpoints against the reference images.
 - Check frame rate at 1080p desktop and on a phone.
-- Run `npm run budget`.
+- Run `pnpm budget`.
 
 Record the results in a `## Verification` section at the end of the spec.
 
@@ -2589,8 +2589,8 @@ Tasks 1–11, 14 and 15 complete. Tasks 12–13 need Blender modelling and are t
 
 ### State
 
-- 77 tests passing, `tsc --noEmit` clean, `npm run check` green.
-- `npm run dev` serves the grey-box with working hotspot navigation and wood swatches.
-- `npm run budget` passes trivially — no models yet.
+- 77 tests passing, `tsc --noEmit` clean, `pnpm check` green.
+- `pnpm dev` serves the grey-box with working hotspot navigation and wood swatches.
+- `pnpm budget` passes trivially — no models yet.
 - Blender 5.2.1 LTS, Node 24.15, Python 3.13 all present; export script verified to reject a
   file that breaks the material naming contract.

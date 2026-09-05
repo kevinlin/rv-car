@@ -12,13 +12,14 @@
     "test": "vitest run",
     "check": "vitest run && tsc --noEmit",
     "export": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend -P tools/export_modules.py",
-    "optimize": "npx --yes @gltf-transform/cli optimize dist/raw --output public/models --texture-compress ktx2 --compress draco",
+    "optimize": "pnpm dlx @gltf-transform/cli optimize dist/raw --output public/models --texture-compress ktx2 --compress draco",
     "budget": "node tools/check_budget.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
+  "packageManager": "pnpm@11.21.0",
   "dependencies": {
     "three": "^0.185.1"
   },

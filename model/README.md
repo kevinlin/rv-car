@@ -16,4 +16,4 @@
 
 ## Export
 
-    npm run export && npm run optimize && npm run budget
+    pnpm export && pnpm optimize && pnpm budget
