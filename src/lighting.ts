@@ -38,6 +38,8 @@ export const installLighting = (
   scene: THREE.Scene,
   renderer: THREE.WebGLRenderer,
   vehicle: THREE.Object3D,
+  /** Held out of the probe capture: an opaque body around the cabin would black it out. */
+  exterior: readonly THREE.Object3D[] = [],
 ) => {
   RectAreaLightUniformsLib.init();
 
@@ -73,8 +75,13 @@ export const installLighting = (
     // camera frame; future furniture moves can call this same refresh function.
     renderer.shadowMap.autoUpdate = false;
     renderer.shadowMap.needsUpdate = true;
+    // Toggling visibility rather than juggling render layers is deliberate: CubeCamera holds
+    // six child cameras, and setting layers on the parent does not propagate to all of them.
+    const wasVisible = exterior.map((o) => o.visible);
+    for (const o of exterior) o.visible = false;
     scene.environment = null;
     probeCamera.update(renderer, scene);
+    exterior.forEach((o, i) => { o.visible = wasVisible[i]!; });
     scene.environment = cubeTarget.texture;
     scene.environmentIntensity = 2.5;
   };

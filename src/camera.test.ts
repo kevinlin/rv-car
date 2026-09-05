@@ -80,8 +80,9 @@ describe('HOTSPOTS', () => {
     expect(interior.every((h) => h.view.kind === 'look')).toBe(true);
   });
 
-  it('places every camera inside the vehicle, roughly at eye height', () => {
+  it('places every interior camera inside the vehicle, roughly at eye height', () => {
     for (const h of HOTSPOTS) {
+      if (h.id === 'exterior') continue; // stands outside the body by design
       const [x, y, z] = h.camera.position;
       expect(Math.abs(x!)).toBeLessThan(2.0);
       expect(y!).toBeGreaterThan(0.3);
@@ -151,5 +152,31 @@ describe('tweenTo', () => {
     void tweenTo(b, h, 0);
     expect(b.camera.position.toArray()).toEqual([...h.camera.position]);
     expect(b.controls.target.toArray()).toEqual([...h.camera.target]);
+  });
+});
+
+describe('the exterior stop', () => {
+  const exterior = HOTSPOTS.find((h) => h.id === 'exterior');
+
+  it('exists and orbits', () => {
+    expect(exterior?.view.kind).toBe('orbit');
+  });
+
+  it('stands outside the body at every point of its orbit', () => {
+    // Nearest body face is 1.225 m from the centreline; the ring must clear it.
+    if (exterior?.view.kind !== 'orbit') throw new Error('exterior must orbit');
+    expect(exterior.view.distance[0]).toBeGreaterThan(1.225);
+  });
+
+  it('never looks up from below the ground plane', () => {
+    if (exterior?.view.kind !== 'orbit') throw new Error('exterior must orbit');
+    expect(exterior.view.polar[1]).toBeLessThanOrEqual(Math.PI / 2);
+  });
+
+  it('starts outside the body and above the ground', () => {
+    // The interior test above skips this stop, so its own bound lives here.
+    const [x, y, z] = exterior!.camera.position;
+    expect(Math.hypot(x!, z!)).toBeGreaterThan(3.5);
+    expect(y!).toBeGreaterThan(-1.05); // floorAboveGround: the ground plane
   });
 });

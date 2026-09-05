@@ -268,29 +268,29 @@
     {
       "out": "side-graphic",
       "role": "body.graphic",
-      "note": "The two-tone flank livery from the hero shot, below the side window. Reproduced by eye as spec open question 2 allows, so tagged estimated. tile false and colour true: it is artwork, not a material.",
+      "note": "The flank livery's stripe band, aft of the lettering. Deliberately logo-free: the exterior body is smart-projected, so its UV islands neither start at zero nor span a whole number of tiles, and any repeat setting cuts a word in half. Stripes tile without a reader noticing. Reproduced by eye, so estimated.",
       "source": "docs/research/reference/exterior-hero.jpg",
       "corners": [
         [
-          400,
-          1180
+          700,
+          1176
         ],
         [
           950,
-          1186
+          1182
         ],
         [
           950,
           1288
         ],
         [
-          400,
+          700,
           1282
         ]
       ],
       "size": [
-        1024,
-        210
+        512,
+        216
       ],
       "quality": 88,
       "colour": true,

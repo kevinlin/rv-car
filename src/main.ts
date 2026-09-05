@@ -2,7 +2,7 @@
 import { createScene } from './scene';
 import { loadModules } from './loader';
 import { buildGreybox } from './greybox';
-import { applyFinishes } from './finishes';
+import { applyFinishes, roleOf } from './finishes';
 import { createTextureResolver } from './textures';
 import { installLighting } from './lighting';
 import * as THREE from 'three';
@@ -11,7 +11,7 @@ import { tweenTo } from './camera';
 import { buildUi, WOOD_ROLES } from './ui';
 import { checkAll } from './check';
 import { HOTSPOTS } from './data/vehicle';
-import { DEFAULT_REGISTRY } from './data/finishes';
+import { DEFAULT_REGISTRY, EXTERIOR_ROLES, type Role } from './data/finishes';
 import { batchByRole } from './batching';
 
 const violations = checkAll();
@@ -55,7 +55,20 @@ if (usingGreybox) {
   key.position.set(3, 5, 2);
   bundle.scene.add(key);
 } else {
-  ({ refreshProbe } = installLighting(bundle.scene, bundle.renderer, vehicle));
+  // Selected by role, not by node name. Every module's .glb root exports as "Scene", and
+  // batchByRole has already merged the exterior into shared meshes by this point, so there is
+  // no "exterior" node left to look up. The roles are the stable handle.
+  const exteriorRoles = new Set<Role>(EXTERIOR_ROLES);
+  const exterior: THREE.Object3D[] = [];
+  vehicle.traverse((o) => {
+    if (!(o instanceof THREE.Mesh)) return;
+    const materials = Array.isArray(o.material) ? o.material : [o.material];
+    if (materials.some((mat) => {
+      const role = roleOf(mat.name);
+      return role !== null && exteriorRoles.has(role);
+    })) exterior.push(o);
+  });
+  ({ refreshProbe } = installLighting(bundle.scene, bundle.renderer, vehicle, exterior));
 }
 
 document.body.appendChild(

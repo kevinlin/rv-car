@@ -214,4 +214,18 @@ export const HOTSPOTS: readonly Hotspot[] = [
     camera: { position: [0.0, 1.05, -0.05], target: [0.0, 0.8, -1.75] },
     view: { kind: 'look', pitch: [-30 * D, 30 * D] },
   },
+  {
+    // Three-quarter front, kerb side, matching the brochure hero shot. Target sits at the
+    // body's mid-height so the vehicle fills the frame without tipping. The one stop where
+    // orbiting is the right verb: outside, there is room to swing around the subject.
+    id: 'exterior',
+    label: 'Exterior',
+    camera: { position: [6.4, 1.6, -5.2], target: [0.0, 0.5, 1.0] },
+    view: {
+      kind: 'orbit',
+      azimuth: [-Math.PI, Math.PI],
+      polar: [55 * D, 88 * D],
+      distance: [6.0, 14.0],
+    },
+  },
 ];

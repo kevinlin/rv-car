@@ -26,6 +26,19 @@ export const createScene = (canvas: HTMLCanvasElement): SceneBundle => {
   // background the windows read as grey holes instead of the blown-out openings in the reference.
   scene.background = new THREE.Color(0xeef3fb);
 
+  // The world outside, so the exterior stop has something to stand on and the glazing has
+  // something to reflect. The parent spec records both as known gaps.
+  const sky = new THREE.HemisphereLight(0xdcecff, 0x6a6257, 0.6);
+  scene.add(sky);
+
+  const ground = new THREE.Mesh(
+    new THREE.CircleGeometry(60, 48).rotateX(-Math.PI / 2),
+    new THREE.MeshStandardMaterial({ color: 0x6f7276, roughness: 0.95 }),
+  );
+  ground.position.y = -1.05; // floorAboveGround, in metres
+  ground.receiveShadow = true;
+  scene.add(ground);
+
   const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 100);
   camera.position.set(2.6, 1.9, 4.2);
 

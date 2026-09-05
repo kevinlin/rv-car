@@ -2188,7 +2188,7 @@ Expected: all pass. `bindPlacements` now binds 38 nodes rather than 25, and it o
 contract once every module is present — so the exterior `.glb` and the exterior placements from
 Task 15 must both be in place, which they are.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add tools/model_exterior.py tools/model_interior.py tools/export_modules.py \
@@ -2208,7 +2208,7 @@ git commit -m "feat: model the exterior from the published envelope"
 - Produces: `installLighting(scene, renderer, vehicle, exterior?)`; a seventh hotspot
   `{ id: 'exterior', view: { kind: 'orbit', ... } }`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `src/camera.test.ts`:
 
@@ -2233,12 +2233,12 @@ describe('the exterior stop', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `pnpm exec vitest run src/camera.test.ts`
 Expected: FAIL — no hotspot has id `exterior`.
 
-- [ ] **Step 3: Add the hotspot**
+- [x] **Step 3: Add the hotspot**
 
 `ZoneId` already gained `'exterior'` in Task 15. Append to `HOTSPOTS`:
 
@@ -2258,7 +2258,7 @@ Expected: FAIL — no hotspot has id `exterior`.
   },
 ```
 
-- [ ] **Step 4: Hold the exterior out of the probe capture**
+- [x] **Step 4: Hold the exterior out of the probe capture**
 
 `installLighting` renders a cubemap from inside the cabin. Wrap that cabin in an opaque body and
 the daylight background stops reaching the windows, so the interior darkens for no visible
@@ -2291,7 +2291,7 @@ export const installLighting = (
 Toggling visibility rather than juggling render layers is deliberate: `CubeCamera` holds six
 child cameras, and setting layers on the parent does not propagate to all of them.
 
-- [ ] **Step 5: Find the exterior group in `main.ts` and pass it**
+- [x] **Step 5: Find the exterior group in `main.ts` and pass it**
 
 The exterior arrives as one of the loaded modules, so it is a child of `vehicle`:
 
@@ -2306,7 +2306,7 @@ const exterior = vehicle.getObjectByName('exterior') ?? undefined;
 If the exported group is not named `exterior`, read the actual name from
 `console.log(vehicle.children.map((c) => c.name))` and use that; do not rename the collection.
 
-- [ ] **Step 6: Add the ground and sky**
+- [x] **Step 6: Add the ground and sky**
 
 In `src/scene.ts`, after `scene.background`:
 
@@ -2325,7 +2325,7 @@ In `src/scene.ts`, after `scene.background`:
   scene.add(ground);
 ```
 
-- [ ] **Step 7: Run everything and check the interior did not darken**
+- [x] **Step 7: Run everything and check the interior did not darken**
 
 ```bash
 pnpm check
@@ -2334,7 +2334,7 @@ pnpm dev
 Open `?calibrate` and confirm every patch still passes at the Task 2 threshold. If the interior
 darkened, the probe is still seeing the exterior — check that step 5 found the right group.
 
-- [ ] **Step 8: Check the exterior stop by eye and by count**
+- [x] **Step 8: Check the exterior stop by eye and by count**
 
 Click Exterior. Drag a full circle. Compare against
 `docs/research/reference/exterior-hero.jpg`. Read `?verify`'s `drawCalls` at the exterior stop.
