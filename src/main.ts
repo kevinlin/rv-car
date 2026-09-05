@@ -48,6 +48,11 @@ bundle.scene.add(vehicle);
  */
 const usingGreybox = loaded.length === 0;
 let refreshProbe = () => {};
+/**
+ * Show the body only at the stop that looks at it. From inside you never see your own
+ * bodywork, and drawing it anyway cost the lounge 6 draw calls — 41 against a ceiling of 40.
+ */
+let showExterior = (_visible: boolean) => {};
 
 if (usingGreybox) {
   bundle.scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 2.0));
@@ -69,13 +74,20 @@ if (usingGreybox) {
     })) exterior.push(o);
   });
   ({ refreshProbe } = installLighting(bundle.scene, bundle.renderer, vehicle, exterior));
+  showExterior = (visible) => { for (const o of exterior) o.visible = visible; };
 }
+
+/** Fly to a hotspot, showing the body only when the hotspot is the one that orbits it. */
+const goTo = (h: (typeof HOTSPOTS)[number], ms?: number) => {
+  showExterior(h.view.kind === 'orbit');
+  return tweenTo(bundle, h, ms);
+};
 
 document.body.appendChild(
   buildUi({
     onHotspot: (id) => {
       const h = HOTSPOTS.find((x) => x.id === id);
-      if (h) void tweenTo(bundle, h);
+      if (h) void goTo(h);
     },
     onWood: (variantId) => {
       for (const role of WOOD_ROLES) registry[role].active = variantId;
@@ -85,7 +97,7 @@ document.body.appendChild(
   }),
 );
 
-void tweenTo(bundle, HOTSPOTS[0]!, 0);
+void goTo(HOTSPOTS[0]!, 0);
 bundle.renderer.setAnimationLoop(bundle.render);
 
 // Local verification only; production builds remove this branch.

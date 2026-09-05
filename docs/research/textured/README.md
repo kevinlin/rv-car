@@ -13,7 +13,7 @@ Every material in the live scene, read before and after clicking a swatch:
 | `wood.cabinet` | `5a3a24` repeat 2,2 | `a97f4f` repeat 2,2 | `d8c3a0` repeat 2.6,2.6 |
 | `wood.trim` | `5a3a24` repeat 2,2 | `a97f4f` repeat 2,2 | `d8c3a0` repeat 2.6,2.6 |
 
-Two roles change and nothing else does, and the change now covers grain scale as well as tint —
+Two roles change and nothing else does, and the change now covers grain scale as well as tint,
 which is what moving maps into the registry was for. All three variants share `walnut.webp`,
 because the reference shows one veneer throughout; ash reads coarser through its repeat.
 

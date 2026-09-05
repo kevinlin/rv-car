@@ -347,3 +347,93 @@ remodelled twice.
 
 The cab (row 9) and the washroom rebuild (row 8), in that order. Both are the least-seen zones,
 and the parent spec already records the washroom as the weakest zone by design.
+
+---
+
+## Results (2026-09-06)
+
+Implemented per [plan_rv-photoref-360-exterior.md](plan_rv-photoref-360-exterior.md). Renders in
+[../research/final/](../research/final/); the calibration evidence is in
+[../research/calibrated/](../research/calibrated/) and the texel-density measurement in
+[../research/texel-density.md](../research/texel-density.md).
+
+### Section 9 in full
+
+| Check | Kind | Result |
+|---|---|---|
+| Neutral roles | vitest | **Pass.** `floor` 0.034, `upholstery.seat` 0.005, `washroom.shell` 0.008, against a threshold of 0.05 |
+| Rendered neutrals | browser, `?calibrate` | **Pass.** Floor 0.039, chair panel 0.037, washroom wall 0.051, against 0.08 |
+| Texel density | `check_blend.py` | **Pass, after a fix.** See below |
+| Exterior envelope | `check_models.mjs` | **Pass.** 2.450 x 5.998 x 3.200 m, to the millimetre |
+| Exterior bounds | `check_models.mjs` | **Pass.** All nine exterior nodes land on their placement world bounds |
+| Look mode | vitest | **Pass.** Rotation never changes `camera.position`, verified in the browser at all six stops |
+| Hotspot safety | vitest | **Pass.** Every `look` eye sits outside every placement box; the `orbit` ring clears the body at 6.0 m against a 1.225 m half-width |
+| Budget | `check_budget.mjs` | **Pass.** 71,980 triangles of 350,000; 9.69 MB of `.glb` plus 0.15 MB of textures, against 25 MB |
+| Draw calls | browser | **Pass.** 36 worst interior against 40; 45 exterior against 60 |
+| Finish seam | browser | **Pass.** Of 23 roles, the wood swap changes exactly `wood.cabinet` and `wood.trim`, and ash changes grain scale (2.6) as well as tint |
+
+Frame rate at all seven stops: 83 to 97 fps interior, 120 (vsync-capped) exterior, measured over
+120 frames into a 3840 x 1882 buffer — four times the pixel count of 1080p.
+
+### Risk 1 fired, and the fallback was needed
+
+`role.floor` measured a texel-density spread of 4.30 against the plan's threshold of 4, so the
+gate ahead of map authoring failed as designed. The cause was between objects, not within them:
+`smart_project` normalises each object into the 0..1 square, so the joined `shell_details`
+catch-all sat at 0.056 UV/m beside a standalone floor at 0.200.
+
+`normalise_uv_density()` rescales each unwrap to a fixed 1.0 UV/m. It rescales rather than
+re-unwraps, so UV2 and the packed AO atlas stayed valid and no re-bake was required — cheaper
+than the fallback §11 anticipated. Worst spread across the model fell from 8.57 to 1.40.
+
+### Three corrections to this spec's own design
+
+1. **Maps carry luminance only; the registry keeps hue.** §4 has the registry own colour *and*
+   the map.
+   THREE multiplies the two, so a map carrying its own hue tints twice: the camel bolster crop
+   has a mean of (125, 82, 46), and multiplied by the registry's `0xb08052` it rendered brick
+   red. The rectifier now flattens each map to luminance around a fixed mean and the registry
+   keeps hue, which is what the palette tables describe and what the greyscale maps in
+   `tools/surface_textures.py` already did. `"colour": true` opts a decal out.
+2. **Eight maps, not nine.** `wood.trim` shares `walnut.webp`: the reference shows one veneer on
+   both the cabinets and the ceiling band, so a second crop of the same material adds only a
+   second way to be wrong.
+3. **The cove tint is the white-balance lever.** §3 names `environmentIntensity` first instead.
+   Lowering it from 2.5 to 1.2 made the floor patch *worse*, 0.155 to 0.245, because the probe
+   carries the cool
+   daylight arriving through the glazing and the roof hatch, so weakening it concentrates the
+   coves' orange. Cooling the `RectAreaLight` tint from `0xffd9a0` to `0xffeed8` was the whole
+   fix; exposure stayed at 1.05.
+
+### Row 10 could not be placements
+
+§6 row 10 and the plan add `entry_door`, `washer`, `oven` and `systems_panel` as placements. All
+four overlap existing furniture, and not by a coordinate error: a built-in appliance shares the
+volume of the cabinetry it is built into, which is what the overlap check exists to forbid, and
+the kerb wall the reference hangs the door on is covered end to end by the wardrobe and the
+galley run. The door became shell architecture, cut into `wall_kerb` beside the windows and
+excluded from the checks the same way; the appliances and graphics became detail meshes.
+
+The wall TV is dropped: no unobstructed wall remains for it. The wardrobe went from 400 mm deep
+to the 250 mm the parent spec states, which also clears floor in front of the door.
+
+### One defect found in the pipeline itself
+
+`vite build` and `pnpm budget` were mutually destructive. The Blender export writes its
+uncompressed `.glb` files to `dist/raw`, Vite builds into `dist`, and Vite empties its output
+directory by default — so a build deleted the exports, and the next budget check reported
+0 triangles against a 350,000 ceiling. A check that passes because its input vanished is worse
+than no check. `emptyOutDir: false` in `vite.config.ts` fixes it.
+
+### Still unmet
+
+- **The mid-range phone frame rate has never been measured on hardware**, and this work does not
+  change that. The parent spec recorded it open and it stays open. Desktop headroom is now
+  larger, but §11's risk 5 concerns a phone's fill rate, which no desktop measurement predicts.
+- **No bloom and no GTAO.** The parent spec's §6 asks for both. Neither pass has added a post
+  chain, so the cove strips still read as bright geometry rather than light sources.
+- **The exterior is massed rather than sculpted.** Boxes, wheels, a skirt and a decal, which is
+  the scope Task 16 defines. The hero shot's shaped cab, curved over-cab moulding, window apertures and storage
+  hatches are not modelled.
+- **The side livery is a stripe band, not the full artwork**, for the UV reason recorded in
+  [../research/final/README.md](../research/final/README.md).

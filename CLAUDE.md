@@ -4,9 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A Three.js walkthrough of the interior of a 大驰 无极境500 C-type motorhome. Portfolio piece,
-not a product. Design spec: [docs/specs/design_rv-interior-3d.md](docs/specs/design_rv-interior-3d.md).
-Implementation plan and execution log: [docs/specs/plan_rv-interior-3d.md](docs/specs/plan_rv-interior-3d.md).
+A Three.js walkthrough of a 大驰 无极境500 C-type motorhome — six interior stops with free look,
+plus an exterior stop that orbits the body. Portfolio piece, not a product.
+
+Specs, in order: [docs/specs/design_rv-interior-3d.md](docs/specs/design_rv-interior-3d.md) and its
+[plan](docs/specs/plan_rv-interior-3d.md) build the interior;
+[docs/specs/design_rv-photoref-360-exterior.md](docs/specs/design_rv-photoref-360-exterior.md) and
+its [plan](docs/specs/plan_rv-photoref-360-exterior.md) correct it against the manufacturer's
+photography, add photo-derived textures, replace orbit with free look, and add the exterior.
 
 Read the design spec before making architectural changes: it records decisions (no lightmaps,
 slide-out deployed only, AO-only bakes) that the code depends on and that should not be
@@ -29,9 +34,22 @@ yet in the repo):
 
 ```
 pnpm export      # Blender headless -> dist/raw/<module>.glb
-pnpm optimize    # gltf-transform: Draco + KTX2 -> public/models/
+pnpm optimize    # gltf-transform: Draco -> public/models/
 pnpm budget      # fails over 350k triangles or 25 MB
+pnpm exec npm run model -- <collection>   # rebuild one Blender collection
+pnpm exec npm run bake                    # AO into the packed UV2 atlas, ~10 s
+pnpm exec npm run check:blend             # geometry checks against the saved .blend
+pnpm exec npm run check:models            # placement bounds, roles, exterior envelope
+pnpm exec npm run textures                # rectify photographs into public/textures/*.webp
 ```
+
+`public/models/` and `dist/` are gitignored: the `.glb`s regenerate from `model/rv.blend`, which
+is committed. `public/textures/` is committed, because it regenerates from committed reference
+images with no Blender needed.
+
+Dev-only query flags: `?verify` exposes `window.__rv` and writes draw calls, triangles and fps to
+`canvas.dataset`; `?calibrate` samples fixed screen patches over neutral surfaces and reports
+their saturation.
 
 ## Architecture
 
@@ -55,7 +73,16 @@ node environment (vitest runs with `environment: 'node'`).
 - `finishes.ts`: maps `role.<role-id>` material names to registry variants. Strips Blender's
   `.001` suffix.
 - `lighting.ts`: cove `RectAreaLight`s + a cubemap environment probe standing in for a lightmap.
-  A finish swap changes room albedo, so `refreshProbe()` must be called after one.
+  A finish swap changes room albedo, so `refreshProbe()` must be called after one. The probe is
+  captured from inside the cabin, so the exterior body is hidden for the capture — otherwise it
+  replaces the daylight arriving through the glazing with bounce off warm bodywork.
+- `textures.ts`: resolves a `TextureSpec` from the registry to a `THREE.Texture`, cached by URL.
+  Appearance lives in the registry now, not in Blender: the `.glb`s carry geometry and the baked
+  AO only.
+- `look.ts`: yaw and pitch about a fixed eye. `OrbitControls` cannot do this — it swings the
+  camera at a radius, and a full turn inside a 2.36 m cabin goes through a wall. Every interior
+  hotspot is a `look` stop; the exterior one is the only `orbit` stop.
+- `calibrate.ts`: the `?calibrate` white-balance measurement.
 
 ### Coordinate frame
 
@@ -74,9 +101,23 @@ Enforced by [tools/export_modules.py](tools/export_modules.py) on the way out an
 
 ## Current state
 
-Phase 1–5 of the plan are done as a grey-box: `public/models/` is empty, so the app falls back to
-box geometry and flat lighting. `model/rv.blend` does not exist yet. When modules start landing,
-`binding.ts` only enforces the naming contract once *every* module is present.
+Both specs are implemented. Ten Blender collections export to ten `.glb`s; the grey-box in
+`greybox.ts` is now only the fallback for a checkout with no `public/models/`, and it skips the
+`exterior` zone because that body would hide everything it encloses.
+
+Measured: 71,980 triangles of 350,000, 9.8 MB transferred of 25 MB, 36 draw calls at the worst
+interior stop against a ceiling of 40, and 45 at the exterior against 60. Results table in the
+photo-reference spec.
+
+Two conventions worth knowing before editing geometry:
+
+- **UVMap runs at exactly 1.0 UV unit per metre**, held there by `normalise_uv_density()` in
+  `tools/model_interior.py` and asserted by `check_blend.py`. Every `repeat` in the finish
+  registry is authored against that, so a change to it silently rescales every texture.
+- **`shell` and `exterior` are enclosures**, excluded from the overlap, containment, grey-box and
+  camera checks via `ENCLOSURES` in `check.ts`. Anything that wraps the cabin belongs in one of
+  them; a built-in appliance cannot be a placement, because it shares the volume of the
+  cabinetry it sits in.
 
 ## Conventions
 

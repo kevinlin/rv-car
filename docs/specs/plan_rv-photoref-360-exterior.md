@@ -2340,7 +2340,7 @@ Click Exterior. Drag a full circle. Compare against
 `docs/research/reference/exterior-hero.jpg`. Read `?verify`'s `drawCalls` at the exterior stop.
 Expected: ≤ 60. Save the render to `docs/research/corrected/exterior.png`.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add src/scene.ts src/lighting.ts src/data/vehicle.ts src/camera.test.ts src/main.ts \
@@ -2363,7 +2363,7 @@ git commit -m "feat: add the exterior stop, ground, sky and probe exclusion"
 - Consumes: everything above
 - Produces: the recorded results table
 
-- [ ] **Step 1: Run every automated check**
+- [x] **Step 1: Run every automated check**
 
 ```bash
 pnpm check
@@ -2375,34 +2375,34 @@ node --test tools/rectify_textures.test.mjs
 ```
 Expected: all pass. Record the triangle count, the byte total, and the test count.
 
-- [ ] **Step 2: Record the browser-measured numbers**
+- [x] **Step 2: Record the browser-measured numbers**
 
 With `pnpm dev` and `?verify`, at all seven hotspots, record `drawCalls`, `triangles` and `fps`.
 Expected: ≤ 40 draws at the six interior stops, ≤ 60 at the exterior, 60 fps at 1080p.
 
-- [ ] **Step 3: Re-run the calibration**
+- [x] **Step 3: Re-run the calibration**
 
 Open `?calibrate`. Every patch under 0.08 saturation. Paste the table into the spec.
 
-- [ ] **Step 4: Confirm the finish seam still holds, and now changes grain**
+- [x] **Step 4: Confirm the finish seam still holds, and now changes grain**
 
 Click walnut, oak, ash. Confirm only `wood.cabinet` and `wood.trim` materials change, and that
 the grain map changes with the tint. This is the parent spec's shipped proof of the customisation
 seam and it must not have regressed.
 
-- [ ] **Step 5: Capture the final comparison set**
+- [x] **Step 5: Capture the final comparison set**
 
 Save renders for all seven hotspots to `docs/research/final/`, and place each beside the
 reference slice it matches in a short markdown page, `docs/research/final/README.md`.
 
-- [ ] **Step 6: Write the results into the spec**
+- [x] **Step 6: Write the results into the spec**
 
 Add a "Results" section to `docs/specs/design_rv-photoref-360-exterior.md` in the shape the
 parent spec uses: one row per §9 verification item, with the measured value and a plain pass or
 fail. State explicitly which criteria are still unmet — the mid-range-phone frame rate has never
 been measured on hardware and this work does not change that.
 
-- [ ] **Step 7: Update `CLAUDE.md`**
+- [x] **Step 7: Update `CLAUDE.md`**
 
 Its "Current state" section says `public/models/` is empty and the app falls back to grey-box
 geometry, which stopped being true before this work started. Correct it, add `src/look.ts`,
