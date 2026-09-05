@@ -2409,7 +2409,7 @@ geometry, which stopped being true before this work started. Correct it, add `sr
 `src/textures.ts` and `src/calibrate.ts` to the architecture list, add the `textures` script to
 the commands block, and note that appearance now lives in the registry rather than in Blender.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add docs/specs docs/research/final CLAUDE.md
