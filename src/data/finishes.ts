@@ -60,11 +60,13 @@ export const DEFAULT_REGISTRY: Registry = {
   'led.cove': {
     active: 'warm',
     variants: [
-      { id: 'warm',    label: 'Warm white',    params: { color: 0x000000, roughness: 1, metalness: 0, emissive: 0xffd9a0, emissiveIntensity: 6 } },
-      { id: 'neutral', label: 'Neutral white', params: { color: 0x000000, roughness: 1, metalness: 0, emissive: 0xfff3e0, emissiveIntensity: 6 } },
+      { id: 'warm',    label: 'Warm white',    params: { color: 0x000000, roughness: 1, metalness: 0, emissive: 0xffd9a0, emissiveIntensity: 14 } },
+      { id: 'neutral', label: 'Neutral white', params: { color: 0x000000, roughness: 1, metalness: 0, emissive: 0xfff3e0, emissiveIntensity: 14 } },
     ],
   },
-  'glass':             one('clear', 'Clear', { color: 0xdfe6ea, roughness: 0.05, metalness: 0 }),
+  // Emissive rather than transparent: the world outside is not modelled, so the panes are lit
+  // to read as blown-out daylight openings the way the reference shots do.
+  'glass':             one('clear', 'Clear', { color: 0xdfe6ea, roughness: 0.05, metalness: 0, emissive: 0xeef4ff, emissiveIntensity: 1.4 }),
 };
 
 export const ALL_ROLES = Object.keys(DEFAULT_REGISTRY) as Role[];

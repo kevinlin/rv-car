@@ -13,18 +13,18 @@
 
 ## Status — 2026-09-05
 
-**74 of 76 steps complete** on branch `feat/interior-3d`. Tasks 12 and 13 are complete.
-81 unit tests pass, TypeScript and production build pass, and the generated assets pass
-saved-Blender and raw/optimised glTF checks.
+**76 of 76 steps complete** on branch `feat/interior-3d`. 84 unit tests pass, TypeScript and
+production build pass, and the generated assets pass saved-Blender and raw/optimised glTF checks.
+One success criterion is unmet: the mid-range-phone frame rate was never measured on hardware.
 
 | Tasks | State |
 |---|---|
 | 1–11 | Complete. Existing data model, grey-box gate, pipeline and runtime infrastructure. |
 | 12–13 | **Complete.** Modelled shell and all eight furniture collections, packed UV2 AO, Draco/KTX2 exports, browser loading and per-collection commits. |
-| 14–15 | Code complete; final reference-matched lighting and camera/acceptance tuning remain open. Real geometry is now available. |
+| 14–15 | **Complete.** Lighting tuned against the references, six hotspot cameras re-placed against real furniture, success criteria recorded. |
 
-The two open steps are Task 14 step 5 and Task 15 step 5. The asset work does not claim
-photoreal reference parity or a measured mid-range-phone frame rate.
+Results are in the spec's [Verification section](design_rv-interior-3d.md#verification-2026-09-05).
+Still not claimed: photoreal reference parity, or any frame rate measured on a phone.
 
 ---
 
@@ -2365,7 +2365,7 @@ Modify `src/main.ts` to call `installLighting(bundle.scene, bundle.renderer, veh
 Run: `pnpm exec vitest run src/lighting.test.ts && pnpm check`
 Expected: PASS, 4 tests, `tsc` clean.
 
-- [ ] **Step 5: Tune against the references** — ready: modelled geometry is available
+- [x] **Step 5: Tune against the references**
 
 Run `pnpm dev`. Compare to `docs/research/reference/interior-lounge-and-overcab.jpg`. Adjust, in this order, one at a time:
 
@@ -2563,7 +2563,7 @@ Add to the `<style>` block in `index.html`:
 Run: `pnpm exec vitest run && pnpm check`
 Expected: all tests pass across every file, `tsc` clean.
 
-- [ ] **Step 5: Verify all success criteria** — ready: final camera/reference and phone checks remain
+- [x] **Step 5: Verify all success criteria** — every criterion but the mid-range-phone frame rate, which needs hardware nobody had
 
 - Click each zone button — camera flies there and orbit stays inside the vehicle.
 - Click each wood swatch — every wood surface changes, nothing else does.
@@ -2698,3 +2698,29 @@ rather than fully recessed niches, and a dedicated shower curtain is not modelle
 recorded fidelity limits, not a claim of a reference-perfect interior.
 
 [Source review and binary follow-up](../research/blender-modelling-review.md).
+
+## Acceptance pass (2026-09-05)
+
+Task 14 step 5 and Task 15 step 5, the two steps the modelling handover left open. Full results
+and the numbers are in the spec's Verification section; what follows is what changed in code.
+
+| File | Change |
+|---|---|
+| `src/scene.ts` | Exposure 1.0 → 1.05; background near-black → daylight, so the 24 %-opaque glazing reads as an opening |
+| `src/lighting.ts` | `environmentIntensity` 1.1 → 2.5; cove intensity 12 → 26 |
+| `src/data/finishes.ts` | `led.cove` emissive 6 → 14; `glass` given a faint emissive |
+| `src/finishes.ts` | `aoMapIntensity` pinned to 0.4 — the shared 2048 px bake atlas blotches at full strength |
+| `src/data/vehicle.ts` | All six hotspot cameras re-placed against the modelled furniture |
+| `src/camera.ts` | `tweenTo` now releases the polar limits too, not just azimuth and distance |
+| `src/main.ts` | `?verify` exposes the scene bundle on `window.__rv`, so a pose can be tried without an edit-reload cycle |
+
+### Deviations
+
+1. **Two knobs beyond the four the plan lists.** The background colour and `aoMapIntensity`.
+   Both were fixing something the four knobs could not reach: windows compositing over a dark
+   world, and AO blotching from a bake atlas that is too small for the shell surfaces.
+2. **A real bug fell out of the camera work.** `tweenTo` released azimuth and distance limits for
+   the flight but not polar, so a hotspot's polar floor followed the camera into the next zone
+   and pulled the arrival off its pose. Found by comparing the requested pose to the landed one.
+3. **The mid-range-phone criterion is not met, only bounded.** No device. Mobile viewport plus
+   20× CPU throttling still held 120 fps, which rules out a CPU bottleneck and nothing else.

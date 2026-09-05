@@ -145,40 +145,43 @@ export interface Hotspot {
 const D = Math.PI / 180;
 
 export const HOTSPOTS: readonly Hotspot[] = [
+  // Positions retuned against the modelled geometry: the grey-box values sat too close, and two
+  // of them sat inside furniture that did not exist when they were chosen.
   {
     id: 'dinette',
     label: 'Lounge',
-    camera: { position: [-0.2, 1.35, 2.9], target: [0.55, 0.85, 0.9] },
-    orbit: { azimuth: [-70 * D, 70 * D], polar: [60 * D, 105 * D], distance: [1.2, 3.4] },
+    camera: { position: [-0.2, 1.55, 2.6], target: [0.1, 0.95, 0.3] },
+    orbit: { azimuth: [-60 * D, 60 * D], polar: [55 * D, 100 * D], distance: [1.2, 3.0] },
   },
   {
     id: 'alcove',
     label: 'Alcove bed',
-    camera: { position: [0.0, 1.5, 1.5], target: [0.0, 1.35, -0.7] },
-    orbit: { azimuth: [-45 * D, 45 * D], polar: [65 * D, 100 * D], distance: [1.0, 2.6] },
+    camera: { position: [0.0, 1.55, 1.9], target: [0.0, 1.3, -0.9] },
+    orbit: { azimuth: [-35 * D, 35 * D], polar: [70 * D, 100 * D], distance: [1.5, 3.2] },
   },
   {
     id: 'sofa',
     label: 'Slide-out bed',
-    camera: { position: [0.35, 1.3, 2.4], target: [-1.05, 0.6, 1.1] },
-    orbit: { azimuth: [-120 * D, 20 * D], polar: [60 * D, 105 * D], distance: [1.0, 2.8] },
+    camera: { position: [0.35, 1.55, 2.02], target: [-1.0, 0.55, 0.9] },
+    orbit: { azimuth: [-45 * D, 45 * D], polar: [50 * D, 100 * D], distance: [1.2, 2.6] },
   },
   {
     id: 'galley',
     label: 'Galley',
-    camera: { position: [0.1, 1.45, 2.2], target: [0.85, 1.0, 3.3] },
-    orbit: { azimuth: [-30 * D, 90 * D], polar: [60 * D, 100 * D], distance: [0.9, 2.4] },
+    camera: { position: [-0.35, 1.6, 2.35], target: [0.85, 0.95, 3.4] },
+    orbit: { azimuth: [-40 * D, 40 * D], polar: [55 * D, 100 * D], distance: [1.1, 2.2] },
   },
   {
     id: 'washroom',
     label: 'Washroom',
-    camera: { position: [-0.3, 1.45, 2.2], target: [-0.85, 1.0, 3.1] },
-    orbit: { azimuth: [-90 * D, 30 * D], polar: [60 * D, 100 * D], distance: [0.8, 2.0] },
+    camera: { position: [0.4, 1.6, 2.5], target: [-0.85, 0.95, 3.5] },
+    orbit: { azimuth: [-40 * D, 40 * D], polar: [55 * D, 100 * D], distance: [1.1, 2.2] },
   },
   {
+    // Below the alcove bed, which starts at 1150 mm: any higher and the camera is in the mattress.
     id: 'cab',
     label: 'Cab',
-    camera: { position: [0.0, 1.4, 0.9], target: [0.0, 1.0, -1.3] },
-    orbit: { azimuth: [-50 * D, 50 * D], polar: [65 * D, 100 * D], distance: [1.0, 2.6] },
+    camera: { position: [0.0, 1.05, -0.05], target: [0.0, 0.8, -1.75] },
+    orbit: { azimuth: [-35 * D, 35 * D], polar: [70 * D, 100 * D], distance: [1.0, 2.4] },
   },
 ];

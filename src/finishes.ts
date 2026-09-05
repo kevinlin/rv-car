@@ -40,6 +40,9 @@ export const applyFinishes = (
       material.metalness = p.metalness;
       material.emissive.setHex(p.emissive ?? 0x000000);
       material.emissiveIntensity = p.emissiveIntensity ?? 1;
+      // The baked AO shares one 2048 atlas across 29 objects, so the large shell surfaces get
+      // few texels and read as blotches at full strength. Held back to contact shading only.
+      material.aoMapIntensity = 0.4;
       material.needsUpdate = true;
       restyled++;
     }

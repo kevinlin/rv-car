@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { HOTSPOTS } from './data/vehicle';
-import { clamp, easeInOutCubic } from './camera';
+import { HOTSPOTS, PLACEMENTS, aabb } from './data/vehicle';
+import * as THREE from 'three';
+import { clamp, easeInOutCubic, tweenTo } from './camera';
+import type { SceneBundle } from './scene';
 
 describe('clamp', () => {
   it('passes values inside the range through', () => {
@@ -74,5 +76,54 @@ describe('clamp with a degenerate duration', () => {
   it('never yields NaN, which would put the camera at an unrenderable position', () => {
     // tweenTo(bundle, h, 0) computes elapsed/ms; on the first frame that is 0/0.
     expect(Number.isNaN(clamp(0 / 0, 0, 1))).toBe(false);
+  });
+});
+
+describe('hotspot cameras stand in free space', () => {
+  // Two of the grey-box positions ended up inside geometry that was modelled later — the cab
+  // camera in the alcove mattress, the washroom camera in the storage band's header.
+  it('puts no camera inside a placement', () => {
+    const inside = HOTSPOTS.filter((h) =>
+      PLACEMENTS.filter((p) => p.zone !== 'shell').some((p) => {
+        const b = aabb(p);
+        return h.camera.position.every(
+          (v, i) => v * 1000 >= b.min[i]! - 60 && v * 1000 <= b.max[i]! + 60,
+        );
+      }),
+    );
+    expect(inside.map((h) => h.id)).toEqual([]);
+  });
+});
+
+describe('tweenTo', () => {
+  /** Minimal stand-ins: tweenTo only touches the camera and the controls' limits and target. */
+  const bundle = () => {
+    const camera = new THREE.PerspectiveCamera();
+    const controls = {
+      target: new THREE.Vector3(),
+      enabled: true,
+      minAzimuthAngle: 0, maxAzimuthAngle: 0,
+      minPolarAngle: 1.2, maxPolarAngle: 1.4,
+      minDistance: 2, maxDistance: 2,
+      update: () => {},
+    };
+    return { camera, controls } as unknown as SceneBundle;
+  };
+
+  it('releases the previous hotspot polar limits before flying', () => {
+    // Without this the previous zone's polar floor drags the arriving camera off its pose.
+    globalThis.requestAnimationFrame = () => 0; // vitest runs in node; the flight never ticks
+    const b = bundle();
+    void tweenTo(b, HOTSPOTS[2]!, 500);
+    expect(b.controls.minPolarAngle).toBe(0);
+    expect(b.controls.maxPolarAngle).toBe(Math.PI);
+  });
+
+  it('snaps to the hotspot pose at zero duration', () => {
+    const b = bundle();
+    const h = HOTSPOTS[0]!;
+    void tweenTo(b, h, 0);
+    expect(b.camera.position.toArray()).toEqual([...h.camera.position]);
+    expect(b.controls.target.toArray()).toEqual([...h.camera.target]);
   });
 });

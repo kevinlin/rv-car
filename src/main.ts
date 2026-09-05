@@ -76,6 +76,8 @@ bundle.renderer.setAnimationLoop(bundle.render);
 // Local verification only; production builds remove this branch.
 if (import.meta.env.DEV && new URLSearchParams(location.search).has('verify')) {
   let frames = 0, started = performance.now();
+  // Live handle for camera and lighting tuning from the devtools console.
+  Object.assign(window, { __rv: bundle });
   canvas.dataset.loadedModules = loaded.join(',');
   canvas.dataset.boundPlacements = String(bindPlacements(vehicle).size);
   bundle.renderer.setAnimationLoop(() => {

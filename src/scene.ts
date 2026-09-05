@@ -14,13 +14,15 @@ export const createScene = (canvas: HTMLCanvasElement): SceneBundle => {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  renderer.toneMappingExposure = 1.05;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x111111);
+  // Daylight standing in for the world outside: the glazing is 24 % opaque, so without a bright
+  // background the windows read as grey holes instead of the blown-out openings in the reference.
+  scene.background = new THREE.Color(0xeef3fb);
 
   const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 100);
   camera.position.set(2.6, 1.9, 4.2);

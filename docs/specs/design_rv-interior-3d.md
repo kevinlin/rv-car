@@ -363,3 +363,71 @@ lockers at Z -300 to 0 mm blocked the sleeping-area entrance. Their estimated fo
 is now -1400 mm, placing them at the head end visible in the reference. The 2200 × 1400 mm bed,
 locker size, confidence tags and 520 mm habitation aisle are unchanged. The updated placement
 and exported geometry pass their dimensional checks.
+
+## Verification (2026-09-05)
+
+Closes the two acceptance steps the modelling handover left open: Task 14 step 5 (lighting tuned
+against the references) and Task 15 step 5 (hotspot cameras and success criteria). Renders in
+[../research/tuned/](../research/tuned/), captured at 1920 × 941 CSS pixels, device pixel ratio 2.
+
+### Lighting values settled
+
+| Knob | Was | Now | Why |
+|---|---|---|---|
+| `toneMappingExposure` | 1.0 | 1.05 | The room was under-exposed; past ~1.2 the cream panels clip |
+| `scene.environmentIntensity` | 1.1 | 2.5 | The probe was too weak to lift the floor and the lower walls |
+| Cove `intensity` | 12 | 26 | The coves barely registered against the probe fill |
+| `led.cove` `emissiveIntensity` | 6 | 14 | So the strips read as light sources, not white stripes |
+
+Two changes beyond the four knobs the plan lists:
+
+- **`scene.background` is now daylight, not near-black.** The glazing is 24 % opaque, so the
+  panes were compositing over a dark world and reading as grey holes. §6 asks for a
+  low-resolution HDRI here; a flat daylight colour buys the same "bright opening" read for one
+  line, and `led.cove`-style emissive on the `glass` role makes the panes glow the way the
+  reference shots do. An HDRI would additionally give the glass something to reflect.
+- **`aoMapIntensity` is held at 0.4.** The bake shares one 2048 px atlas across 29 objects, so
+  the ceiling and the long walls get few texels each and read as blotches at full strength.
+  At 0.4 the contact shading survives and the blotching does not. The real fix is a second
+  atlas page for the shell, not a runtime constant.
+
+### Cameras
+
+All six hotspots were re-placed against the modelled furniture; the grey-box values sat too
+close, and two sat inside geometry that did not exist when they were chosen — the cab camera in
+the alcove mattress, the washroom camera in the storage band. `camera.test.ts` now fails if any
+hotspot position lands inside a placement box.
+
+`tweenTo` released the azimuth and distance limits for the flight but not the polar ones, so the
+previous zone's polar floor dragged the arrival off its pose — the slide-out shot landed 0.3 m
+low after a visit to the alcove. Fixed, and covered by a test.
+
+### Results against §1
+
+| Axis | Criterion | Result |
+|---|---|---|
+| Visual | Three viewpoints read as the same room as the references | Lounge, alcove and galley hold up side by side; see the caveats below |
+| Dimensional | Automated check passes | 84 tests, `tsc` clean |
+| Performance | 60 fps at 1080p desktop | 120 fps (vsync-capped), 32 draws, 60 k triangles |
+| Performance | ≥ 30 fps mid-range phone | **Not measured** — see below |
+| Budget | ≤ 350 k triangles, ≤ 25 MB, ≤ 40 draw calls | 64,232 triangles, 10.1 MB, 13–32 draws per zone |
+| Seam | Wood swap restyles every wood surface and nothing else | Confirmed by material diff: only `role.wood.cabinet` and `role.wood.trim` change |
+
+The seam check reads every material in the live scene before and after clicking a swatch. Walnut
+`#5a3a24` → oak `#a97f4f` on both wood roles, every other role byte-identical.
+
+### The phone number is still missing
+
+No physical device was available. As a partial substitute the scene was run at a 412 × 915
+mobile viewport with 4× and 20× CPU throttling and held 120 fps at both, which says the frame
+loop is not CPU-bound — it says nothing about a phone GPU's fill rate, which is what risk 5
+predicts would break first. Treat the mobile criterion as open until someone runs it on hardware.
+
+### Known fidelity gaps
+
+- No bloom or GTAO. §6 asks for both; Task 14 shipped without a post chain and this pass did not
+  add one. Bloom is what would make the cove strips read as light rather than bright geometry.
+- The world outside is a flat colour, so the glazing reflects nothing and the windows carry no
+  scene beyond brightness.
+- The washroom stays the weakest zone, as §9 accepted: projecting shelves rather than recessed
+  niches, and no shower curtain.

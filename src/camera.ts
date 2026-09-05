@@ -29,9 +29,12 @@ export const applyHotspotLimits = (controls: OrbitControls, h: Hotspot): void =>
 export const tweenTo = (bundle: SceneBundle, h: Hotspot, ms = 900): Promise<void> => {
   const { camera, controls } = bundle;
 
-  // Limits must be released for the flight, or the tween fights the clamp.
+  // Limits must be released for the flight, or the tween fights the clamp. Polar included:
+  // the previous hotspot's polar floor otherwise drags the arrival pose off its target.
   controls.minAzimuthAngle = -Infinity;
   controls.maxAzimuthAngle = Infinity;
+  controls.minPolarAngle = 0;
+  controls.maxPolarAngle = Math.PI;
   controls.minDistance = 0;
   controls.maxDistance = Infinity;
   controls.enabled = false;

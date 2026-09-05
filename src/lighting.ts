@@ -17,10 +17,10 @@ const WARM = 0xffd9a0;
  * RectAreaLights are the expensive part of this scene.
  */
 export const coveLightSpecs = (): CoveSpec[] => [
-  { position: [-1.05, 1.92, 0.9], lookAt: [-0.2, 0.9, 0.9], width: 1.8, height: 0.06, intensity: 12 },
-  { position: [-1.05, 1.92, 2.9], lookAt: [-0.2, 0.9, 2.9], width: 1.8, height: 0.06, intensity: 12 },
-  { position: [1.05, 1.92, 0.9],  lookAt: [0.2, 0.9, 0.9],  width: 1.8, height: 0.06, intensity: 12 },
-  { position: [1.05, 1.92, 2.9],  lookAt: [0.2, 0.9, 2.9],  width: 1.8, height: 0.06, intensity: 12 },
+  { position: [-1.05, 1.92, 0.9], lookAt: [-0.2, 0.9, 0.9], width: 1.8, height: 0.06, intensity: 26 },
+  { position: [-1.05, 1.92, 2.9], lookAt: [-0.2, 0.9, 2.9], width: 1.8, height: 0.06, intensity: 26 },
+  { position: [1.05, 1.92, 0.9],  lookAt: [0.2, 0.9, 0.9],  width: 1.8, height: 0.06, intensity: 26 },
+  { position: [1.05, 1.92, 2.9],  lookAt: [0.2, 0.9, 2.9],  width: 1.8, height: 0.06, intensity: 26 },
 ];
 
 export const installLighting = (
@@ -65,7 +65,7 @@ export const installLighting = (
     scene.environment = null;
     probeCamera.update(renderer, scene);
     scene.environment = cubeTarget.texture;
-    scene.environmentIntensity = 1.1;
+    scene.environmentIntensity = 2.5;
   };
 
   vehicle.traverse((o) => {

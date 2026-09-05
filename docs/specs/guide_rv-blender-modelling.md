@@ -163,15 +163,16 @@ to compress.
 | `npm run check` | Tests plus `tsc --noEmit` |
 | `npm run dev` | Serve at `localhost:5173` |
 
-## What comes back to the implementer
+## What came back to the implementer
 
-Once the modules exist, two plan steps remain and neither needs Blender:
+Both remaining plan steps are done and neither needed Blender: the lighting was tuned against the
+reference photography, and the six hotspot cameras were re-placed against the real furniture.
+See the spec's Verification section for the settled values and what is still open.
 
-- **Task 14 step 5** — tune `toneMappingExposure`, `environmentIntensity`, cove intensity and
-  `led.cove` emissive strength against the reference photography.
-- **Task 15 step 5** — retune the six hotspot camera positions. They currently sit too close,
-  having been placed against grey-box masses rather than real furniture. Then verify frame rate
-  and run the visual comparison.
+One thing worth knowing before the next Blender session: **the AO bake atlas is too small.** All
+29 objects share one 2048 px page, so the ceiling and the long walls get few texels each and
+blotch. The runtime holds `aoMapIntensity` at 0.4 to hide it. Giving the shell its own page would
+let that go back up.
 
 ## Current state
 
@@ -183,8 +184,8 @@ bed footprints survive Draco/KTX2 optimisation.
 AO is baked separately for 29 mesh objects into disjoint regions of one packed 2048px atlas.
 `npm run check:blend` checks the saved Blender geometry; `npm run check:models` checks raw and
 optimised exports. Runtime role batching retains movable roots and reduces steady frames to
-35 draws with cached static shadows. See [the plan](plan_rv-interior-3d.md) for measured results,
-visual evidence and the two remaining lighting/camera acceptance steps.
+35 draws with cached static shadows. See [the plan](plan_rv-interior-3d.md) for measured results
+and visual evidence.
 
 One estimated placement was corrected during visual inspection: alcove lockers now sit at the
 head end (runtime Z -1400 to -1100 mm), leaving the bed entrance open. Published sizes are unchanged.
