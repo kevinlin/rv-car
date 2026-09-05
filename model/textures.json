@@ -1,0 +1,30 @@
+{
+  "note": "Rectifier manifest. Corners are source pixels, ordered top-left, top-right, bottom-right, bottom-left. Run: pnpm exec npm run textures [out-name ...]",
+  "textures": [
+    {
+      "out": "walnut",
+      "role": "wood.cabinet",
+      "source": "docs/research/reference/galley-wardrobe-dinette.jpg",
+      "corners": [
+        [
+          372,
+          660
+        ],
+        [
+          470,
+          663
+        ],
+        [
+          470,
+          758
+        ],
+        [
+          372,
+          755
+        ]
+      ],
+      "size": 512,
+      "quality": 88
+    }
+  ]
+}

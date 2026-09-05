@@ -19,7 +19,8 @@
     "check:models": "node --test tools/check_models.test.mjs && node tools/check_models.mjs",
     "model": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/model_interior.py --",
     "bake": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/bake_ao.py",
-    "check:blend": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/check_blend.py"
+    "check:blend": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/check_blend.py",
+    "textures": "node tools/rectify_textures.mjs"
   },
   "keywords": [],
   "author": "",
@@ -34,6 +35,7 @@
     "@types/node": "^26.4.1",
     "@types/three": "^0.185.4",
     "jsdom": "^30.0.1",
+    "sharp": "^0.35.4",
     "typescript": "^7.0.2",
     "vite": "^8.2.2",
     "vitest": "^5.0.0"

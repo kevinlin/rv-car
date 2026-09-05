@@ -517,7 +517,7 @@ for role in TEXTURED_ROLES:
 Run: `pnpm exec npm run check:blend`
 Expected: `SAVED_MODEL_CHECK_PASS`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add tools/check_blend.py docs/research/texel-density.md
@@ -538,13 +538,13 @@ Turns a perspective view of a flat surface in a photograph into a tileable, even
 - Produces: `solveHomography(src, dst): number[9]`, `applyHomography(h, x, y): [number, number]`,
   and a CLI `pnpm exec npm run textures`
 
-- [ ] **Step 1: Add the dependency**
+- [x] **Step 1: Add the dependency**
 
 ```bash
 pnpm add -D sharp
 ```
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 Create `tools/rectify_textures.test.mjs`, following the `node:test` pattern already used by
 `tools/check_models.test.mjs`:
@@ -586,12 +586,12 @@ test('is invertible: the inverse maps destination corners back to source', () =>
 });
 ```
 
-- [ ] **Step 3: Run it and watch it fail**
+- [x] **Step 3: Run it and watch it fail**
 
 Run: `node --test tools/rectify_textures.test.mjs`
 Expected: FAIL, cannot find module `./rectify_textures.mjs`.
 
-- [ ] **Step 4: Write `tools/rectify_textures.mjs`**
+- [x] **Step 4: Write `tools/rectify_textures.mjs`**
 
 ```js
 #!/usr/bin/env node
@@ -753,12 +753,12 @@ const main = async () => {
 if (process.argv[1] === fileURLToPath(import.meta.url)) await main();
 ```
 
-- [ ] **Step 5: Run the tests and make sure they pass**
+- [x] **Step 5: Run the tests and make sure they pass**
 
 Run: `node --test tools/rectify_textures.test.mjs`
 Expected: 3 tests pass.
 
-- [ ] **Step 6: Add the manifest and the script entry**
+- [x] **Step 6: Add the manifest and the script entry**
 
 Create `model/textures.json` with one entry, to prove the pipeline end to end. Corner order is
 top-left, top-right, bottom-right, bottom-left, in source pixels:
@@ -784,7 +784,7 @@ Add to `package.json` scripts:
     "textures": "node tools/rectify_textures.mjs",
 ```
 
-- [ ] **Step 7: Run it and inspect the output**
+- [x] **Step 7: Run it and inspect the output**
 
 Run: `pnpm exec npm run textures`
 Open `public/textures/walnut.webp`. Check three things: the grain runs straight rather than
