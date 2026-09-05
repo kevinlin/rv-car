@@ -206,7 +206,7 @@ description from "Cream leather main panels" to "Grey leather main panels" and i
 `#C9CAC9`. Add one line under that table: "Corrected 2026-09-05 from pixel samples; the original
 values were estimated by eye."
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add src/data/finishes.ts src/data/finishes.test.ts \
@@ -231,7 +231,7 @@ is 2.5 against a probe of a walnut-lined room lit by warm LEDs, and ACES saturat
 - Produces: `saturation(r, g, b): number`, `samplePatch(renderer, u, v, size): [number, number, number]`,
   `PATCHES: readonly Patch[]`, `runCalibration(bundle): Promise<CalibrationRow[]>`
 
-- [ ] **Step 1: Write the failing test for the pure part**
+- [x] **Step 1: Write the failing test for the pure part**
 
 Create `src/calibrate.test.ts`:
 
@@ -268,12 +268,12 @@ describe('PATCHES', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `pnpm exec vitest run src/calibrate.test.ts`
 Expected: FAIL with "Failed to resolve import ./calibrate".
 
-- [ ] **Step 3: Write `src/calibrate.ts`**
+- [x] **Step 3: Write `src/calibrate.ts`**
 
 ```ts
 import * as THREE from 'three';
@@ -365,12 +365,12 @@ export const runCalibration = async (bundle: SceneBundle): Promise<CalibrationRo
 };
 ```
 
-- [ ] **Step 4: Run the tests and make sure they pass**
+- [x] **Step 4: Run the tests and make sure they pass**
 
 Run: `pnpm exec vitest run src/calibrate.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Wire `?calibrate` into `main.ts`**
+- [x] **Step 5: Wire `?calibrate` into `main.ts`**
 
 Append to `src/main.ts`, after the `?verify` block:
 
@@ -389,7 +389,7 @@ Run `pnpm dev`, open `http://localhost:5173/?calibrate`, and read the table. Bef
 should show the floor patch failing. If a patch reports an obviously wrong surface, adjust its
 `u`/`v` in `PATCHES` and reload — that is what the coordinates are for.
 
-- [ ] **Step 6: Tune until every patch passes**
+- [x] **Step 6: Tune until every patch passes**
 
 Three knobs, in this order. Change one, reload `?calibrate`, read the table.
 
@@ -403,7 +403,7 @@ Target: every row under 0.08 saturation, and the room still reads as warm LED li
 office fluorescent. If neutrality and warmth genuinely conflict, keep the coves warm and cool the
 `environmentIntensity` instead — the strips are meant to look warm, the floor is not.
 
-- [ ] **Step 7: Capture evidence**
+- [x] **Step 7: Capture evidence**
 
 Save a fresh set of renders to `docs/research/calibrated/` at the same six hotspots as
 `docs/research/tuned/`, so the before and after can be compared side by side.

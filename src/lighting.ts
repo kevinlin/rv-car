@@ -9,7 +9,18 @@ export interface CoveSpec {
   readonly intensity: number;
 }
 
-const WARM = 0xffd9a0;
+/**
+ * Cove tint, and the single knob that fixes the render's warm cast.
+ *
+ * At the old 0xffd9a0 every neutral in the room measured 0.11 to 0.19 saturation against
+ * photographs that measure 0.015 to 0.034. Cooling it to a warm white lands all three
+ * calibration patches near 0.045. `environmentIntensity` is deliberately NOT the lever: the
+ * probe cubemap carries the cool daylight arriving through the glazing and the roof hatch, so
+ * lowering it concentrates the coves' orange instead of diluting it — dropping it to 1.2 took
+ * the floor patch from 0.155 to 0.245. The `led.cove` emissive stays at 0xffd9a0, because the
+ * strips are meant to look warm in frame and they are too small to move the measurement.
+ */
+const WARM = 0xffeed8;
 
 /**
  * Four RectAreaLights: one per ceiling cove, split fore and aft so the long cabin does not

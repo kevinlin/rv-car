@@ -76,8 +76,9 @@ bundle.renderer.setAnimationLoop(bundle.render);
 // Local verification only; production builds remove this branch.
 if (import.meta.env.DEV && new URLSearchParams(location.search).has('verify')) {
   let frames = 0, started = performance.now();
-  // Live handle for camera and lighting tuning from the devtools console.
-  Object.assign(window, { __rv: bundle });
+  // Live handle for camera and lighting tuning from the devtools console. refreshProbe is
+  // included because cooling the cove tint only reaches the bounce light after a re-capture.
+  Object.assign(window, { __rv: bundle, __refreshProbe: refreshProbe });
   canvas.dataset.loadedModules = loaded.join(',');
   canvas.dataset.boundPlacements = String(bindPlacements(vehicle).size);
   bundle.renderer.setAnimationLoop(() => {
@@ -90,4 +91,13 @@ if (import.meta.env.DEV && new URLSearchParams(location.search).has('verify')) {
       started = performance.now();
     }
   });
+}
+
+if (import.meta.env.DEV && new URLSearchParams(location.search).has('calibrate')) {
+  const { runCalibration } = await import('./calibrate');
+  bundle.renderer.setAnimationLoop(null);
+  const rows = await runCalibration(bundle);
+  console.table(rows);
+  canvas.dataset.calibration = JSON.stringify(rows);
+  bundle.renderer.setAnimationLoop(bundle.render);
 }
