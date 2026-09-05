@@ -1,7 +1,17 @@
-.firecrawl/
+# Node / pnpm
 node_modules/
+
+# Python (tools/)
+__pycache__/
+
+# Build output
 dist/
-node_modules/
-dist/
+
+# Generated assets (pnpm export / optimize)
 public/models/
+
+# Blender
 model/*.blend1
+
+# Tooling caches
+.firecrawl/
