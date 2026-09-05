@@ -91,7 +91,8 @@ export const PLACEMENTS: readonly Placement[] = [
 
   // --- alcove: transverse bed, 2200 across x 1400 fore-aft (published) ---
   { id: 'alcove_bed',     zone: 'alcove', origin: [d(-1100), e(1150), e(-1400)], size: [pub(2200), e(200), pub(1400)], movable: false },
-  { id: 'alcove_lockers', zone: 'alcove', origin: [e(-1100), e(1500), e(-300)],  size: [e(2200), e(400), e(300)],      movable: false },
+  // Head-end lockers: the former -300 mm position blocked the sleeping-area entrance.
+  { id: 'alcove_lockers', zone: 'alcove', origin: [e(-1100), e(1500), e(-1400)], size: [e(2200), e(400), e(300)],      movable: false },
 
   // --- dinette: four captain chairs face to face around a pedestal table ---
   { id: 'dinette_chair_fwd_in',  zone: 'dinette', origin: [e(70), e(0), e(100)],  size: [e(520), e(1150), e(520)], movable: true },

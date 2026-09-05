@@ -354,3 +354,12 @@ height looking forward, kerb wall cut away).
 **Resolved 2026-09-05: (a), bed infills inboard.** The data already modelled this, so nothing
 changed. The consequence to keep in mind while modelling: the slide-out buys sleeping width, not
 floor space, and the aisle stays 520 mm deployed.
+
+
+## Modelling correction (2026-09-05)
+
+The detailed alcove view exposed an error that was hard to read in the grey-box: full-width
+lockers at Z -300 to 0 mm blocked the sleeping-area entrance. Their estimated fore-aft origin
+is now -1400 mm, placing them at the head end visible in the reference. The 2200 × 1400 mm bed,
+locker size, confidence tags and 520 mm habitation aisle are unchanged. The updated placement
+and exported geometry pass their dimensional checks.

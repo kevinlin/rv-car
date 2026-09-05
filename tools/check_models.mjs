@@ -1,0 +1,131 @@
+import { readFile, writeFile, stat } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
+import { NodeIO } from '@gltf-transform/core';
+import { Box3, Matrix4, Quaternion, Vector3 } from 'three';
+import { ALL_ROLES } from '../src/data/finishes.ts';
+import { MAX_BYTES, MAX_TRIANGLES } from './check_budget.mjs';
+
+const MODULES = ['shell', 'cab', 'alcove_bed', 'dinette', 'sofa_slideout', 'galley', 'washroom', 'lockers', 'softgoods'];
+const TOLERANCE = 0.001; // One millimetre, including float and compression error.
+const ROLES = new Set(ALL_ROLES.map((role) => `role.${role}`));
+
+// Accessor bounds also survive Draco compression. Traverse descendants so an empty
+// placement root does not hide an incorrectly positioned chair back or cabinet door.
+export function sceneNodes(json) {
+  const entries = [];
+  function visit(index, parent, ancestors) {
+    const node = json.nodes[index];
+    const local = node.matrix ? new Matrix4().fromArray(node.matrix) : new Matrix4().compose(
+      new Vector3().fromArray(node.translation ?? [0, 0, 0]),
+      new Quaternion().fromArray(node.rotation ?? [0, 0, 0, 1]),
+      new Vector3().fromArray(node.scale ?? [1, 1, 1]),
+    );
+    const world = parent.clone().multiply(local);
+    const bounds = new Box3();
+    const primitives = json.meshes?.[node.mesh]?.primitives ?? [];
+    for (const primitive of primitives) {
+      const accessor = json.accessors?.[primitive.attributes.POSITION];
+      if (!accessor?.min || !accessor?.max) throw new Error(`${node.name}: missing POSITION bounds`);
+      bounds.union(new Box3(new Vector3().fromArray(accessor.min), new Vector3().fromArray(accessor.max)).applyMatrix4(world));
+    }
+    const entry = { node, world, bounds, primitives, ancestors };
+    entries.push(entry);
+    for (const child of node.children ?? []) bounds.union(visit(child, world, [...ancestors, node.name]));
+    return bounds;
+  }
+  for (const root of json.scenes?.[json.scene ?? 0]?.nodes ?? []) visit(root, new Matrix4(), []);
+  return entries;
+}
+
+export function checkPlacement(placement, entry, requireGeometry = true) {
+  const errors = [];
+  const origin = new Vector3().setFromMatrixPosition(entry.world).toArray();
+  if (origin.some((v, i) => Math.abs(v - placement.location[i]) > TOLERANCE)) errors.push('world origin differs from placement');
+  if (entry.bounds.isEmpty()) {
+    if (requireGeometry) errors.push('placement has no descendant geometry');
+  } else {
+    const min = entry.bounds.min.toArray(), max = entry.bounds.max.toArray();
+    if (min.some((v, i) => v < placement.location[i] - placement.dimensions[i] / 2 - TOLERANCE)
+      || max.some((v, i) => v > placement.location[i] + placement.dimensions[i] / 2 + TOLERANCE)) errors.push('geometry exceeds placement box');
+    if (['alcove_bed', 'slideout_bed'].includes(placement.id)) {
+      const size = entry.bounds.getSize(new Vector3()).toArray();
+      if ([0, 2].some((i) => Math.abs(size[i] - placement.dimensions[i]) > TOLERANCE)) errors.push('published bed footprint differs by more than 1 mm');
+    }
+  }
+  return { id: placement.id, origin, bounds: entry.bounds.isEmpty() ? null : { min: entry.bounds.min.toArray(), max: entry.bounds.max.toArray() }, errors };
+}
+
+export async function checkModels() {
+  const placements = JSON.parse(await readFile('model/placements.json', 'utf8')).objects;
+  const report = { checkedAt: new Date().toISOString(), toleranceMetres: TOLERANCE, modules: [], violations: [], triangles: 0, bytes: 0, optimizedPrimitiveInstances: 0 };
+  const batchedRoles = new Set();
+  for (const module of MODULES) {
+    for (const stage of ['raw', 'optimized']) {
+      const path = `${stage === 'raw' ? 'dist/raw' : 'public/models'}/${module}.glb`;
+      const result = { module, stage, path, placements: [], primitives: 0, aoPrimitives: 0, errors: [] };
+      report.modules.push(result);
+      try {
+        const { json } = await new NodeIO().readAsJSON(path);
+        const entries = sceneNodes(json);
+        if (!entries.some((entry) => entry.primitives.length)) result.errors.push('module contains no geometry');
+        for (const placement of placements.filter((p) => p.collection === module)) {
+          const matches = entries.filter((entry) => entry.node.name === placement.id);
+          if (matches.length !== 1) result.errors.push(`${placement.id}: expected one named node, found ${matches.length}`);
+          else {
+            const checked = checkPlacement(placement, matches[0], stage === 'raw' || placement.movable);
+            result.placements.push(checked);
+            result.errors.push(...checked.errors.map((error) => `${placement.id}: ${error}`));
+          }
+        }
+        for (const entry of entries) {
+          if (entry.node.extensions?.EXT_mesh_gpu_instancing) result.errors.push('GPU instancing is not supported by the placement bounds check');
+          for (const primitive of entry.primitives) {
+            result.primitives++;
+            const material = json.materials?.[primitive.material];
+            const role = material?.name?.replace(/\.\d{3}$/, '');
+            if (!ROLES.has(role)) result.errors.push(`unknown material role: ${material?.name}`);
+            if (stage === 'raw') {
+              const count = json.accessors[primitive.indices ?? primitive.attributes.POSITION].count;
+              if ((primitive.mode ?? 4) !== 4) result.errors.push('non-triangle primitive cannot be budgeted');
+              report.triangles += count / 3;
+            } else {
+              const movable = placements.find((p) => p.movable && (p.id === entry.node.name || entry.ancestors.includes(p.id)));
+              batchedRoles.add(`${movable?.id ?? 'static'}:${role}`);
+            }
+            // Glass and emissive strips do not receive ambient occlusion.
+            if (role === 'role.glass' || role === 'role.led.cove') continue;
+            const ao = material?.occlusionTexture;
+            const texture = json.textures?.[ao?.index];
+            const image = json.images?.[texture?.extensions?.KHR_texture_basisu?.source ?? texture?.source];
+            if (primitive.attributes.TEXCOORD_1 === undefined || (ao?.texCoord ?? 0) !== 1 || !image) {
+              result.errors.push(`${entry.node.name ?? role}: missing UV2 or AO image using TEXCOORD_1`);
+            } else result.aoPrimitives++;
+          }
+        }
+        if (stage === 'optimized') {
+          report.bytes += (await stat(path)).size;
+          report.optimizedPrimitiveInstances += result.primitives;
+        }
+      } catch (error) { result.errors.push(error.message); }
+      result.errors = [...new Set(result.errors)];
+      report.violations.push(...result.errors.map((error) => `${stage}/${module}: ${error}`));
+    }
+  }
+  report.potentialRoleBatchedDrawCalls = batchedRoles.size;
+  report.drawCallNote = 'Primitive instances are exported geometry draws. Role batching is a feasibility estimate; browser renderer.info.render.calls must be measured separately.';
+  report.aoNote = 'Checks texture/UV wiring only. Nonconstant baked AO and visible shading require bake evidence and visual verification.';
+  if (report.triangles > MAX_TRIANGLES) report.violations.push(`triangle budget exceeded: ${report.triangles} > ${MAX_TRIANGLES}`);
+  if (report.bytes > MAX_BYTES) report.violations.push(`byte budget exceeded: ${report.bytes} > ${MAX_BYTES}`);
+  if (batchedRoles.size > 40) report.violations.push(`even role batching exceeds draw budget: ${batchedRoles.size} > 40`);
+  report.passed = report.violations.length === 0;
+  return report;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const report = await checkModels();
+  await writeFile('model/verification.json', `${JSON.stringify(report, null, 2)}\n`);
+  console.log(`${report.passed ? 'PASS' : 'FAIL'}: ${report.triangles} triangles, ${report.bytes} bytes, ${report.optimizedPrimitiveInstances} exported draws; role-batched estimate ${report.potentialRoleBatchedDrawCalls}.`);
+  for (const violation of report.violations) console.error(violation);
+  console.log('Report: model/verification.json');
+  process.exitCode = report.passed ? 0 : 1;
+}

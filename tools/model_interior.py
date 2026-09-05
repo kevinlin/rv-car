@@ -90,7 +90,7 @@ def bowl(name, center, radii, depth, role):
               (j + 1) * 32 + (i + 1) % 32, (j + 1) * 32 + i)
              for j in range(len(section) - 1) for i in range(32)]
     mesh = bpy.data.meshes.new(name)
-    mesh.from_pydata(vertices, [], faces)
+    mesh.from_pydata(vertices, [], [tuple(reversed(face)) for face in faces])
     obj = bpy.data.objects.new(name, mesh)
     COLLECTION.objects.link(obj)
     for p in mesh.polygons:

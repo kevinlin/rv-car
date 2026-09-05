@@ -11,11 +11,15 @@
     "build": "vite build",
     "test": "vitest run",
     "check": "vitest run && tsc --noEmit",
-    "export": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend -P tools/export_modules.py",
+    "export": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/export_modules.py",
     "optimize": "bash tools/optimize.sh",
     "budget": "node tools/check_budget.mjs",
     "dump": "npx --yes tsx tools/dump_placements.ts",
-    "starter": "npm run dump && /Applications/Blender.app/Contents/MacOS/Blender -b -P tools/make_starter_blend.py"
+    "starter": "npm run dump && /Applications/Blender.app/Contents/MacOS/Blender -b -P tools/make_starter_blend.py",
+    "check:models": "node --test tools/check_models.test.mjs && node tools/check_models.mjs",
+    "model": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/model_interior.py --",
+    "bake": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/bake_ao.py",
+    "check:blend": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/check_blend.py"
   },
   "keywords": [],
   "author": "",

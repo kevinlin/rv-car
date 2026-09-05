@@ -58,6 +58,10 @@ export const installLighting = (
   scene.add(probeCamera);
 
   const refreshProbe = () => {
+    // Geometry and the hatch light are static. Rebuild shadows with the probe, not every
+    // camera frame; future furniture moves can call this same refresh function.
+    renderer.shadowMap.autoUpdate = false;
+    renderer.shadowMap.needsUpdate = true;
     scene.environment = null;
     probeCamera.update(renderer, scene);
     scene.environment = cubeTarget.texture;

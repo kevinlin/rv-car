@@ -1,0 +1,11 @@
+{
+  "type": "AMBIENT_OCCLUSION",
+  "isolatedObjects": true,
+  "uv": "UV2",
+  "resolution": 2048,
+  "objects": 29,
+  "minimum": 0.0,
+  "maximum": 1.0,
+  "nonwhitePixels": 954369,
+  "atlas": "ao.png"
+}

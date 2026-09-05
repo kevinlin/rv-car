@@ -13,18 +13,18 @@
 
 ## Status — 2026-09-05
 
-**67 of 76 steps complete** on branch `feat/interior-3d`. 77 tests passing, `tsc --noEmit` clean,
-pipeline verified end to end.
+**74 of 76 steps complete** on branch `feat/interior-3d`. Tasks 12 and 13 are complete.
+81 unit tests pass, TypeScript and production build pass, and the generated assets pass
+saved-Blender and raw/optimised glTF checks.
 
 | Tasks | State |
 |---|---|
-| 1–11 | Complete. Data model, dimensional checks, grey-box gate, export script, budget checker, node binding, finish registry, camera hotspots. |
-| 12–13 | **Blocked on modelling.** `model/rv.blend` exists as a generated block-out and the whole pipeline runs against it, but no geometry has been sculpted. See [the Blender guide](guide_rv-blender-modelling.md). |
-| 14–15 | Code complete; the two tuning steps need real geometry to tune against. |
+| 1–11 | Complete. Existing data model, grey-box gate, pipeline and runtime infrastructure. |
+| 12–13 | **Complete.** Modelled shell and all eight furniture collections, packed UV2 AO, Draco/KTX2 exports, browser loading and per-collection commits. |
+| 14–15 | Code complete; final reference-matched lighting and camera/acceptance tuning remain open. Real geometry is now available. |
 
-The nine open steps: Task 12 steps 1–2, Task 13 steps 1–5, Task 14 step 5 (lighting tuning) and
-Task 15 step 5 (success-criteria sweep). Task 13's five steps repeat once per collection, so the
-count understates the work: eight collections still need sculpting.
+The two open steps are Task 14 step 5 and Task 15 step 5. The asset work does not claim
+photoreal reference parity or a measured mid-range-phone frame rate.
 
 ---
 
@@ -2038,10 +2038,8 @@ git commit -m "feat: add hotspot camera tweening with per-hotspot orbit limits"
 
 ## Task 12: Model the shell in Blender
 
-> **Partially complete.** Steps 3–5 are done: `src/loader.ts` exists, loads, and was verified in
-> the browser. Step 1 (modelling) is outstanding — `model/rv.blend` holds a generated block-out,
-> not a modelled shell. Step 2 is left open because, although it runs cleanly against the
-> block-out, it has to be re-run against the real geometry to mean anything.
+> **Complete.** The shell is modelled with actual apertures, cove recesses and emissive
+> strips. Saved geometry, packed AO, export transforms and browser loading are verified.
 
 **Files:**
 - Create: `model/rv.blend` (binary), `dist/raw/shell.glb` (generated), `public/models/shell.glb` (generated)
@@ -2053,7 +2051,7 @@ git commit -m "feat: add hotspot camera tweening with per-hotspot orbit limits"
 - Consumes: `bindPlacements`, `applyFinishes`, `PLACEMENTS`
 - Produces: `loadModules(names: string[]): Promise<THREE.Group>`
 
-- [ ] **Step 1: Build the shell in Blender**
+- [x] **Step 1: Build the shell in Blender**
 
 Open Blender, set scene units to metres. Create a collection named `shell` containing objects named exactly: `floor`, `ceiling`, `wall_off`, `wall_kerb`, `bulkhead`, `wall_rear`, `slideout_shell`.
 
@@ -2067,7 +2065,7 @@ Assign materials `role.panel.wall` to walls and ceiling, `role.floor` to the flo
 
 Bake AO per object into UV map 2.
 
-- [ ] **Step 2: Export, optimise, and check the budget**
+- [x] **Step 2: Export, optimise, and check the budget**
 
 ```bash
 mkdir -p dist/raw public/models
@@ -2158,9 +2156,9 @@ git commit -m "feat: model and load the habitation shell"
 
 ## Task 13: Model the furniture modules
 
-> **Outstanding.** The block-out generator has created every object at the correct size, place,
-> name and material, and steps 2–5 have been exercised once against it, so the pipeline is known
-> to work. None of the eight collections has been sculpted. Steps 1–5 repeat per collection.
+> **Complete.** All eight furniture collections were generated, exported, checked and
+> committed in the requested order. The final AO bake and texture optimisation cover every
+> collection; the browser loads all nine modules and binds all 25 placement nodes.
 
 **Files:**
 - Modify: `model/rv.blend`, `src/main.ts`
@@ -2170,7 +2168,7 @@ Do these **one collection at a time**, in this order. Each is its own commit. Wa
 
 Order: `dinette` → `sofa_slideout` → `alcove_bed` → `lockers` → `cab` → `galley` → `softgoods` → `washroom`
 
-- [ ] **Step 1: Model one collection**
+- [x] **Step 1: Model one collection**
 
 Create the collection in `model/rv.blend`. Object names must exactly match the `PLACEMENTS` ids in that zone. Reference the photographs in `docs/research/reference/` throughout:
 
@@ -2189,7 +2187,7 @@ Material roles per collection: seats use `role.upholstery.seat` and `role.uphols
 
 Bake AO per object into UV map 2.
 
-- [ ] **Step 2: Export and check**
+- [x] **Step 2: Export and check**
 
 ```bash
 pnpm export && pnpm optimize && pnpm budget && pnpm test
@@ -2197,7 +2195,7 @@ pnpm export && pnpm optimize && pnpm budget && pnpm test
 
 Expected: `Budget OK.`, all tests pass. If the budget fails, decimate the collection you just added rather than trimming an earlier one.
 
-- [ ] **Step 3: Load it**
+- [x] **Step 3: Load it**
 
 Add the module name to the array in `src/main.ts`:
 
@@ -2209,12 +2207,12 @@ const vehicle = await loadModules(bundle.renderer, [
 
 Add only the collections that exist so far. Binding is not yet wired into `main.ts` — Task 15 does that, once every module exists.
 
-- [ ] **Step 4: Verify in the browser**
+- [x] **Step 4: Verify in the browser**
 
 Run: `pnpm dev`
 Expected: the new module appears in the right place at the right size, with registry colours applied.
 
-- [ ] **Step 5: Commit, one per collection**
+- [x] **Step 5: Commit, one per collection**
 
 ```bash
 git add model/rv.blend src/main.ts
@@ -2367,7 +2365,7 @@ Modify `src/main.ts` to call `installLighting(bundle.scene, bundle.renderer, veh
 Run: `pnpm exec vitest run src/lighting.test.ts && pnpm check`
 Expected: PASS, 4 tests, `tsc` clean.
 
-- [ ] **Step 5: Tune against the references** — blocked: needs real geometry to tune against
+- [ ] **Step 5: Tune against the references** — ready: modelled geometry is available
 
 Run `pnpm dev`. Compare to `docs/research/reference/interior-lounge-and-overcab.jpg`. Adjust, in this order, one at a time:
 
@@ -2565,7 +2563,7 @@ Add to the `<style>` block in `index.html`:
 Run: `pnpm exec vitest run && pnpm check`
 Expected: all tests pass across every file, `tsc` clean.
 
-- [ ] **Step 5: Verify all success criteria** — blocked: needs real geometry
+- [ ] **Step 5: Verify all success criteria** — ready: final camera/reference and phone checks remain
 
 - Click each zone button — camera flies there and orbit stays inside the vehicle.
 - Click each wood swatch — every wood surface changes, nothing else does.
@@ -2626,3 +2624,77 @@ Tasks 1–11, 14 and 15 complete. Tasks 12–13 need Blender modelling and are t
 - `pnpm budget` passes trivially — no models yet.
 - Blender 5.2.1 LTS, Node 24.15, Python 3.13 all present; export script verified to reject a
   file that breaks the material naming contract.
+
+
+## Modelling execution and verification (2026-09-05)
+
+Scope: the Blender guide, Tasks 12 and 13. Used the existing approved grey-box branch and
+canonical material roles. Model generation is repeatable per collection through
+`npm run model -- <collection>`, followed by `npm run bake` and the export pipeline.
+
+| Collection | Checkpoint commit | Modelled content |
+|---|---|---|
+| shell | `2b52543` | Hatch and window openings with glazing, passage to cab, deployed slide-out walls, cove recesses/LED strips, ceiling downlights. |
+| dinette | `2b7ba5e` | Four facing upholstered swivel chairs, camel bolsters, headrests, arms, drawer bases and pedestal table. |
+| sofa_slideout | `946a0f5` | Walnut drawer plinth and seamed deployed mattress cushions at the published bed size. |
+| alcove_bed | `814261d` | Deck, rounded mattress, three cream-front lockers. Head-end placement corrected during final visual checks. |
+| lockers | `a0f37c0` | Segmented cream doors, walnut cases and metal pulls on both lounge sides. |
+| cab | `dd59a0a` | Seat shells, blocked dashboard, vents and steering-wheel outline. |
+| galley | `b35159f` | Cabinetry, long pulls, hollow sink and open countertop, black mixer, induction hob, extractor, fridge and wardrobe. |
+| softgoods | `d62a732` | Pleated curtains, scatter cushions, pillows and folded bedding. |
+| washroom | `07e4cba` | Open curved GRP pod, oval basin, toilet, mirror, shower hardware, shelves and teak duckboard. |
+
+### Verification
+
+- `npm run check:blend`: passes against the saved binary. Checks all nine modelled collections,
+  17 role materials, UV2/packed AO, upward basin-floor normals, rays through three real apertures
+  and an unobstructed alcove entrance.
+- `npm run check:models`: passes raw and optimised world-coordinate bounds for all 25 nodes,
+  1 mm tolerance, both published bed footprints, known material roles, UV2 occlusion wiring,
+  module completeness and asset budgets. [Machine-readable report](../../model/verification.json).
+- `npm run budget`: **64,232 triangles; 10,134,056 bytes** across nine Draco/KTX2 modules.
+- AO: 29 objects baked separately with other meshes hidden, into disjoint regions of a packed
+  2048 × 2048 atlas. Range 0–1 with non-white pixels; no lightmap.
+  [Bake record](../../model/ao-bake.json).
+- Runtime: **35 steady-frame draws**, measured using `renderer.info.render.calls` at a
+  1920 × 1080 viewport. The 72 exported primitive draws are batched by role, separately for
+  movable roots. Static shadows are cached after capture. Initial capture and finish-change
+  probe refreshes do extra work; this count describes steady frames.
+- Browser loaded all nine modules and bound all 25 placement nodes. Six zone buttons were
+  exercised and screenshots inspected. [Browser evidence](../research/modelled/).
+  The final 1080p lounge sample recorded 120 fps and 35 draws; these are local in-app-browser observations, not
+  measurements on a mid-range phone. Walnut, oak and ash were also exercised with no browser
+  errors; screenshots retain the surface grain and show the wood tints changing.
+- `npm run check`: **81 tests pass**, TypeScript clean. The exported-bounds regression test
+  also passes. `npm run build -- --emptyOutDir false` passes, preserving raw export evidence.
+
+### Corrections and implementation notes
+
+1. Blender +Y rearward became glTF -Z under Y-up rotation alone. A temporary reflected parent
+   corrects the export; the saved authoring frame still follows the guide.
+2. Optimiser defaults erased node identity and could combine material roles. Disabled scene
+   flattening, named-node joining, GPU instancing and palette generation; retained UV attributes.
+3. Unused canonical materials had disappeared from the starter on reopen. Restored only those
+   roles from its existing palette and retained them with fake users.
+4. Baked UV-layer references must be reacquired after leaving Edit Mode in Blender 5.2. The
+   original stale reference crashed Blender; the saved file was unaffected and the corrected bake completed.
+5. Reversed bowl winding in the shared helper was corrected, the galley/washroom regenerated,
+   and AO rebaked. Saved-binary normal checks pass.
+6. Reference inspection showed the estimated alcove lockers blocking the bed entrance. Moved
+   their fore-aft origin from -300 to -1400 mm in `vehicle.ts`, then regenerated the placement
+   JSON and asset. Published dimensions and the 520 mm habitation aisle are unchanged.
+7. Runtime batching preserves named anchors and independent chair/table roots, AO coordinates
+   and wood roles. Mixed unused tangents are removed before joining. Regression tests cover
+   reflected geometry, winding, AO UVs, retained roots and finish swapping.
+8. KTX-Software 4.4.2 arm64 was extracted from the official package into a temporary tool
+   directory. `brew install ktx` was unavailable; no system-wide installation was made.
+
+### Remaining acceptance work
+
+Tasks 14 and 15 remain open as the modelling guide specifies. The current lighting is darker
+than the references, some camera crops are too close (especially Cab), and there is no physical
+phone benchmark. The washroom is an open simplified reconstruction; its shelves are projecting
+rather than fully recessed niches, and a dedicated shower curtain is not modelled. These are
+recorded fidelity limits, not a claim of a reference-perfect interior.
+
+[Source review and binary follow-up](../research/blender-modelling-review.md).

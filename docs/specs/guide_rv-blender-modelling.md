@@ -2,12 +2,13 @@
 
 - Date: 2026-09-05
 - Audience: whoever is modelling `model/rv.blend`
-- Covers: [the plan](plan_rv-interior-3d.md) Tasks 12 and 13, the only two that cannot be done headless
+- Covers: [the plan](plan_rv-interior-3d.md) Tasks 12 and 13, implemented with repeatable Blender Python modelling
 - Design: [design_rv-interior-3d.md](design_rv-interior-3d.md)
 
-`model/rv.blend` is **generated**, not built by hand. All 25 objects already exist at the right
-size, in the right place, in the right collection, under the right name, with a role material
-assigned. The pipeline has been run end to end and works. This is a sculpting job.
+`model/rv.blend` now contains the modelled shell and all eight furniture collections, with
+packed UV2 ambient occlusion and surface maps. The original block-out has been replaced.
+See [model/README.md](../../model/README.md) for per-collection regeneration, rebaking and checks.
+The workflow below remains the authoring guide for future edits.
 
 ## Step 0 — Open what's already there
 
@@ -38,9 +39,10 @@ Everything else is taste. These are enforced by code:
    offender.
 3. **Never change scene units.** Metres, scale length 1.0. The export checks this too.
 
-**Axes:** Blender is `+Z` up, the runtime is `+Y` up, and the exporter's `export_yup` converts.
+**Axes:** Blender is `+Z` up, the runtime is `+Y` up, and the exporter's `export_yup` rotates the frame.
 Author in Blender's frame, where the runtime's `+Z` (rearward) is Blender's `+Y`. `+X` is the
-kerb side in both.
+kerb side in both. The export script also adds a temporary Y-reflection parent: Y-up rotation
+alone maps Blender +Y to runtime -Z, so it is not sufficient.
 
 **Dimensions:** `model/placements.json` carries every object's location and size in metres. It is
 generated from `src/data/vehicle.ts` by `npm run dump`, so read it rather than editing it.
@@ -141,9 +143,8 @@ customisation seam, which is the reason the architecture is shaped the way it is
 
 ## Step 5 — KTX2, only once textures exist
 
-```bash
-brew install ktx
-```
+Install the macOS tools from the [official KTX-Software releases](https://github.com/KhronosGroup/KTX-Software/releases)
+and put `ktx` on `PATH`. The original `brew install ktx` command is unavailable in the current catalogue.
 
 `npm run optimize` skips KTX2 texture compression while the `ktx` binary is absent, so the
 pipeline runs on a clean machine. It switches on by itself once the AO bakes give it something
@@ -174,9 +175,16 @@ Once the modules exist, two plan steps remain and neither needs Blender:
 
 ## Current state
 
-The pipeline is verified end to end: Blender, export, optimise, budget, load, bind, finishes,
-lighting, UI. All 8 modules with geometry load and render, and the lighting rig
-produces warm cove falloff on real geometry.
+Tasks 12 and 13 are modelled, exported and verified. The nine collections include actual
+apertures, cove recesses and strips, upholstered seating, deployed sleeping surfaces, cabinets,
+galley appliances, fabric, and an open moulded washroom. All 25 placement IDs and both published
+bed footprints survive Draco/KTX2 optimisation.
 
-What is in `rv.blend` today is still **boxes**. Nothing has been shaped to look like a motorhome.
-300 triangles against a 350,000 budget; 12 KB against 25 MB.
+AO is baked separately for 29 mesh objects into disjoint regions of one packed 2048px atlas.
+`npm run check:blend` checks the saved Blender geometry; `npm run check:models` checks raw and
+optimised exports. Runtime role batching retains movable roots and reduces steady frames to
+35 draws with cached static shadows. See [the plan](plan_rv-interior-3d.md) for measured results,
+visual evidence and the two remaining lighting/camera acceptance steps.
+
+One estimated placement was corrected during visual inspection: alcove lockers now sit at the
+head end (runtime Z -1400 to -1100 mm), leaving the bed entrance open. Published sizes are unchanged.

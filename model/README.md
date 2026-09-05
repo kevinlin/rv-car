@@ -1,35 +1,62 @@
 # Blender source
 
-`rv.blend` is the single source for all interior geometry. It is **generated** as a correctly
-scaled block-out and then sculpted by hand — do not build it from scratch.
+`rv.blend` contains the modelled shell and eight furniture collections. All 25 placement nodes
+retain their data-defined centres and bounds. The scene includes packed object AO and grayscale
+wood, floor and textile maps. Runtime finish colours tint the maps.
 
-## Generate the starter (once)
+## Reproduce or edit
 
-    npm run starter
+Edit the saved `.blend` directly, or replace a single collection from its modelling script:
 
-Reads `src/data/vehicle.ts`, writes `model/placements.json`, and builds `model/rv.blend` with
-every object at the right size, in the right place, in the right collection, under the right
-name, with a role material assigned. It refuses to overwrite an existing `rv.blend` unless you
-set `FORCE=1`, so it cannot eat work in progress.
+```sh
+npm run model -- dinette
+```
 
-## Rules
+This replaces only that collection. Supported names, in modelling order: `shell`, `dinette`,
+`sofa_slideout`, `alcove_bed`, `lockers`, `cab`, `galley`, `softgoods`, `washroom`.
+The scripts read `placements.json`, generated from `src/data/vehicle.ts` by `npm run dump`.
+Do not hand-edit the placement JSON. Regenerating a collection requires rebaking the atlas.
 
-- Scene units: **metres**, unit scale 1.0.
-- One top-level collection per module, named exactly as `MODULES` in `tools/export_modules.py`.
-- Object names must equal the `id` of the matching entry in `src/data/vehicle.ts`.
-  `src/binding.ts` throws at load time if a name in the data has no matching node.
-- Material names must be `role.<role-id>`, matching a `Role` in `src/data/finishes.ts`.
-  All 17 already exist in the starter file — assign, don't create.
-- Bake **ambient occlusion only**, per object, into UV map 2. No full lightmaps: they would
-  pin the furniture in place and kill the customisation seam.
-- Blender is +Z up, the runtime is +Y up. The exporter's `export_yup` handles it. Author in
-  Blender's frame: the runtime's `+Z` (rearward) is Blender's `+Y`.
-- `softgoods` holds curtains, cushions and bedding. It has no entries in `PLACEMENTS`, so name
-  those objects freely.
+```sh
+npm run bake
+npm run export
+npm run optimize
+npm run check:models
+npm run budget
+npm run check
+npm run dev
+```
 
-## Build
+`npm run starter` is the original block-out generator. It refuses to replace the model unless
+`FORCE=1` is provided. **A forced starter run discards the detailed model.**
 
-    npm run export && npm run optimize && npm run budget
+## Contracts
 
-`npm run optimize` skips KTX2 texture compression unless the `ktx` binary is on PATH
-(`brew install ktx`). That only matters once AO bakes exist.
+- Metres, scale length 1.0, nine module collections, 17 canonical `role.*` materials.
+- Blender authoring axes: +X kerb side, +Y rear, +Z up. `export_modules.py` adds a temporary
+  Y-reflection parent before glTF's Y-up rotation. This is necessary to produce runtime +Z rear.
+- Placement IDs are retained through export and optimisation. Their origins are centres in
+  Blender, derived from the minimum-corner placement data. Free details belong to their module.
+- AO is baked with only the current object visible, into separate regions of a shared 2048px
+  atlas on `UV2`. `UVMap` is the surface-texture set. There is no lightmap.
+- Role batching in the runtime retains all placement nodes and the five movable furniture roots.
+  Static objects share material draws; chair and table geometry remains independently movable.
+
+## KTX2
+
+Install the macOS tools from the [official KTX-Software releases](https://github.com/KhronosGroup/KTX-Software/releases).
+The guide's original `brew install ktx` command is unavailable in the current Homebrew catalogue.
+Put `ktx` on `PATH` before `npm run optimize`; otherwise the command retains PNG textures.
+This run used KTX-Software 4.4.2 arm64, extracted from the official package into a temporary
+folder, without installing system-wide files. Geometry uses Draco via glTF Transform 4.5.0.
+
+`public/models` and `dist/raw` are generated and ignored by Git. The packed `.blend` is enough
+to export them. Restart Vite after adding new module files if it still serves its HTML fallback.
+
+## Verification
+
+`npm run check:models` writes `verification.json`: raw and optimised world bounds, exact bed
+footprints, role names, UV2/occlusion texture wiring, triangle/byte counts and batching feasibility.
+`ao-bake.json` records the actual isolated AO bake. The development-only `?verify=1` viewer
+exposes module count, placement binding count, draw calls and sampled FPS as canvas data attributes.
+See the implementation plan for browser evidence and the separate lighting/performance follow-ups.
