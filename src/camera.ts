@@ -32,7 +32,23 @@ export const applyHotspotLimits = (
   controls.update();
 };
 
-/** Fly the camera to a hotspot, then re-apply that hotspot's orbit limits. */
+/** Hand the camera to whichever controller this hotspot's view calls for. */
+const arrive = (bundle: SceneBundle, h: Hotspot): void => {
+  const { camera, controls, look } = bundle;
+  if (h.view.kind === 'look') {
+    controls.enabled = false;
+    look.enabled = true;
+    look.setPitch(h.view.pitch);
+    look.aim(h.camera.position, h.camera.target);
+    look.update();
+  } else {
+    look.enabled = false;
+    controls.enabled = true;
+    applyHotspotLimits(controls, camera, h.camera.target, h.view);
+  }
+};
+
+/** Fly the camera to a hotspot, then hand it to that hotspot's controller. */
 export const tweenTo = (bundle: SceneBundle, h: Hotspot, ms = 900): Promise<void> => {
   const { camera, controls } = bundle;
 
@@ -44,14 +60,15 @@ export const tweenTo = (bundle: SceneBundle, h: Hotspot, ms = 900): Promise<void
   controls.maxPolarAngle = Math.PI;
   controls.minDistance = 0;
   controls.maxDistance = Infinity;
+  // Neither controller may fight the flight.
   controls.enabled = false;
+  bundle.look.enabled = false;
 
   // Zero duration means "place it now" — used for the opening shot.
   if (ms <= 0) {
     camera.position.set(...(h.camera.position as [number, number, number]));
     controls.target.set(...(h.camera.target as [number, number, number]));
-    controls.enabled = true;
-    if (h.view.kind === 'orbit') applyHotspotLimits(controls, camera, h.camera.target, h.view);
+    arrive(bundle, h);
     return Promise.resolve();
   }
 
@@ -72,8 +89,7 @@ export const tweenTo = (bundle: SceneBundle, h: Hotspot, ms = 900): Promise<void
       if (t < 1) {
         requestAnimationFrame(step);
       } else {
-        controls.enabled = true;
-        if (h.view.kind === 'orbit') applyHotspotLimits(controls, camera, h.camera.target, h.view);
+        arrive(bundle, h);
         resolve();
       }
     };

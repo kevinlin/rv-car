@@ -1222,7 +1222,7 @@ and in `tweenTo`, replace both `applyHotspotLimits(controls, h)` calls with:
 Run: `pnpm check`
 Expected: PASS, TypeScript clean. `ui.test.ts` is unaffected — it reads `id` and `label` only.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/data/vehicle.ts src/camera.ts src/camera.test.ts
@@ -1241,7 +1241,7 @@ git commit -m "refactor: split Hotspot into look and orbit views"
   `createLook(camera, dom): LookControls` with `{ enabled, setPitch, aim, update, dispose }`;
   `SceneBundle` gains `look: LookControls`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `src/look.test.ts`:
 
@@ -1290,12 +1290,12 @@ describe('look never translates the camera', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `pnpm exec vitest run src/look.test.ts`
 Expected: FAIL, cannot resolve `./look`.
 
-- [ ] **Step 3: Write `src/look.ts`**
+- [x] **Step 3: Write `src/look.ts`**
 
 ```ts
 import * as THREE from 'three';
@@ -1411,12 +1411,12 @@ export const createLook = (
 };
 ```
 
-- [ ] **Step 4: Run the tests and make sure they pass**
+- [x] **Step 4: Run the tests and make sure they pass**
 
 Run: `pnpm exec vitest run src/look.test.ts`
 Expected: PASS.
 
-- [ ] **Step 5: Give `SceneBundle` both controllers**
+- [x] **Step 5: Give `SceneBundle` both controllers**
 
 In `src/scene.ts`, add the import and the field:
 
@@ -1449,7 +1449,7 @@ Create it after `controls`, and update `render` so exactly one controller drives
 
 and return `{ scene, camera, renderer, controls, look, render }`.
 
-- [ ] **Step 6: Switch modes in `tweenTo`**
+- [x] **Step 6: Switch modes in `tweenTo`**
 
 In `src/camera.ts`, both the zero-duration branch and the promise's completion branch end by
 enabling one controller. Replace the zero-duration branch's tail:
@@ -1486,7 +1486,7 @@ const arrive = (bundle: SceneBundle, h: Hotspot): void => {
 Also set `look.enabled = false` alongside `controls.enabled = false` at the top of `tweenTo`, so
 neither controller fights the flight.
 
-- [ ] **Step 7: Run the whole suite**
+- [x] **Step 7: Run the whole suite**
 
 Run: `pnpm check`
 Expected: PASS. `camera.test.ts`'s `bundle()` stub needs a `look` member; add one:
@@ -1499,7 +1499,7 @@ Expected: PASS. `camera.test.ts`'s `bundle()` stub needs a `look` member; add on
     return { camera, controls, look } as unknown as SceneBundle;
 ```
 
-- [ ] **Step 8: Check it in the browser**
+- [x] **Step 8: Check it in the browser**
 
 Run `pnpm dev`. At every zone button, drag a full turn. Confirm the camera never leaves its eye
 point, the pitch stops before the viewer can look straight up or down, and moving between zones

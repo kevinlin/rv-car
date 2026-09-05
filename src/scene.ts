@@ -1,11 +1,13 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { createLook, type LookControls } from './look';
 
 export interface SceneBundle {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   renderer: THREE.WebGLRenderer;
   controls: OrbitControls;
+  look: LookControls;
   render: () => void;
 }
 
@@ -31,8 +33,12 @@ export const createScene = (canvas: HTMLCanvasElement): SceneBundle => {
   controls.target.set(0, 1.0, 1.6);
   controls.enableDamping = true;
 
+  const look = createLook(camera, renderer.domElement);
+
+  // Exactly one controller drives the camera at a time; tweenTo hands over on arrival.
   const render = () => {
-    controls.update();
+    if (look.enabled) look.update();
+    else controls.update();
     renderer.render(scene, camera);
   };
 
@@ -42,5 +48,5 @@ export const createScene = (canvas: HTMLCanvasElement): SceneBundle => {
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  return { scene, camera, renderer, controls, render };
+  return { scene, camera, renderer, controls, look, render };
 };

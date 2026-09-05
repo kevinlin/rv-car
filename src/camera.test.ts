@@ -126,7 +126,11 @@ describe('tweenTo', () => {
       minDistance: 2, maxDistance: 2,
       update: () => {},
     };
-    return { camera, controls } as unknown as SceneBundle;
+    const look = {
+      enabled: false,
+      aim: () => {}, setPitch: () => {}, update: () => {}, dispose: () => {},
+    };
+    return { camera, controls, look } as unknown as SceneBundle;
   };
 
   it('releases the previous hotspot polar limits before flying', () => {
