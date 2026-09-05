@@ -1710,7 +1710,7 @@ pnpm exec npm run export && pnpm exec npm run optimize
 pnpm exec npm run check:models && pnpm exec npm run budget && pnpm check
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add tools/model_furniture.py tools/model_interior.py tools/check_blend.py \
@@ -1733,7 +1733,7 @@ that project rather than recess.
 - Produces: no new placements. New meshes `washroom_vanity`, `washroom_mirror_cabinet`,
   `washroom_ribs`, `washroom_curtain`, `washroom_rail`, `washroom_grab`.
 
-- [ ] **Step 1: Move the basin into a corner vanity**
+- [x] **Step 1: Move the basin into a corner vanity**
 
 The pod spans X −1150 to −450, Z 2650 to 4050. Put the vanity in the forward-outboard corner:
 
@@ -1743,7 +1743,7 @@ The pod spans X −1150 to −450, Z 2650 to 4050. Put the vanity in the forward
     box('washroom_mirror_cabinet', (-.90, 2.70, 1.42), (.46, .12, .52), 'washroom.shell', bevel=.02)
 ```
 
-- [ ] **Step 2: Replace the projecting shelves with recessed niches**
+- [x] **Step 2: Replace the projecting shelves with recessed niches**
 
 Delete the existing shelf boxes and cut niches into the outboard wall instead, so they read as
 mouldings rather than brackets:
@@ -1754,7 +1754,7 @@ mouldings rather than brackets:
         box(f'washroom_niche_{i}', (-1.10, 3.30, z), (.06, .44, .16), 'washroom.shell', bevel=.012)
 ```
 
-- [ ] **Step 3: Add ribs, curtain, rail and grab handle**
+- [x] **Step 3: Add ribs, curtain, rail and grab handle**
 
 ```python
     box('washroom_ribs', (-1.13, 3.35, 1.00), (.012, .70, 1.60), 'washroom.shell', bevel=.002)
@@ -1763,13 +1763,13 @@ mouldings rather than brackets:
     tube('washroom_grab', [(-1.13, 3.30, 1.10), (-1.13, 3.62, 1.10)], .012, 'metal.chrome')
 ```
 
-- [ ] **Step 4: Regenerate and check**
+- [x] **Step 4: Regenerate and check**
 
 Run the phase cycle with `<collection>` = `washroom`. The existing bowl-normal assertions in
 `check_blend.py` reference `washroom_pod` at two points; if the basin moved out from under either
 sample point, update those coordinates rather than deleting the check.
 
-- [ ] **Step 5: Compare against the reference**
+- [x] **Step 5: Compare against the reference**
 
 Open `docs/research/reference/underseat-drawers-washroom.jpg` beside the Washroom hotspot. Save
 to `docs/research/corrected/washroom.png`.

@@ -208,10 +208,17 @@ def build_softgoods(a):
 
 
 def build_washroom(a):
-    (x,y,z),(w,d,h)=a.placement('washroom_pod')
-    parts=[a.box('wetroom tray',(x,y,.047),(w,d,.09),'washroom.shell',.04),
-           a.box('moulded outer wall',(x-w/2+.025,y,z),(.05,d,h),'washroom.shell',.022),
-           a.box('moulded rear wall',(x,y+d/2-.025,z),(w,.05,h),'washroom.shell',.024)]
+    """Corner vanity, mirror cabinet, ribbed shell, recessed niches and a drawn curtain.
+
+    The pod is a 700 x 1400 mm moulding, so almost nothing here has room to move: every piece
+    is checked against that box, and the curtain in particular has nowhere to hang fore-aft
+    without passing through the toilet. It hangs across the inboard opening instead, which is
+    where a shower curtain on a wet room this size actually goes.
+    """
+    (x,y,z), (w,d,h) = a.placement('washroom_pod')
+    parts = [a.box('wetroom tray',(x,y,.047),(w,d,.09),'washroom.shell',.04),
+             a.box('moulded outer wall',(x-w/2+.025,y,z),(.05,d,h),'washroom.shell',.022),
+             a.box('moulded rear wall',(x,y+d/2-.025,z),(w,.05,h),'washroom.shell',.024)]
     # Rounded junction of two real walls; the aisle opening remains accessible.
     radius=.14
     cx=x-w/2+radius+.022
@@ -223,11 +230,24 @@ def build_washroom(a):
         parts.append(wall)
     for j in range(13):
         parts.append(a.box('teak duckboard slat',(x,y-d/2+.095+j*.10,.107),(w-.10,.080,.028),'washroom.duckboard',.006))
-    parts.append(a.box('basin pedestal',(x-.08,y-.35,.39),(.34,.30,.55),'washroom.shell',.075))
-    parts.append(a.bowl('oval vanity basin',(x-.04,y-.34,.80),(.26,.22),.15,'washroom.shell'))
-    parts.append(a.tube('vanity chrome tap',[(x-.22,y-.34,.80),(x-.22,y-.34,.95),(x-.16,y-.34,.96),(x-.11,y-.34,.93)],.012,'metal.chrome'))
-    parts.append(a.box('mirror moulded surround',(x-w/2+.049,y-.31,1.33),(.06,.53,.69),'washroom.shell',.045))
-    parts.append(a.box('mirror',(x-w/2+.083,y-.31,1.33),(.012,.46,.61),'metal.chrome',.03))
+
+    # Corner vanity with a mirror cabinet over it, replacing the freestanding pedestal basin.
+    parts.append(a.box('washroom_vanity',(-.90,2.86,.40),(.46,.40,.80),'washroom.shell',.03))
+    parts.append(a.bowl('washroom_basin',(-.90,2.86,.82),(.19,.15),.10,'washroom.shell',corner=.6))
+    parts.append(a.tube('vanity chrome tap',[(-1.08,2.86,.80),(-1.08,2.86,.95),(-1.03,2.86,.97),(-.98,2.86,.95)],.012,'metal.chrome'))
+    parts.append(a.box('washroom_mirror_cabinet',(-.90,2.71,1.42),(.46,.12,.52),'washroom.shell',.02))
+    parts.append(a.box('mirror',(-.90,2.775,1.42),(.40,.012,.44),'metal.chrome',.01))
+
+    # Ribbed shell: horizontal mouldings on the outer wall, which is what the photograph shows
+    # and what the washroom.shell map alone is too subtle to suggest.
+    for level in (.45,.85,1.25,1.65):
+        parts.append(a.box('washroom_ribs',(x-w/2+.058,y,level),(.02,d-.10,.05),'washroom.shell',.008))
+
+    # Recessed, not projecting: the GRP pod is a single moulding, so shelves are formed into it.
+    for i, level in enumerate((1.02,1.30)):
+        parts.append(a.box(f'washroom_niche_{i}',(-1.10,3.30,level),(.06,.44,.16),'washroom.shell',.012))
+        parts.append(a.tube('niche retaining rail',[(-1.065,3.10,level+.055),(-1.065,3.50,level+.055)],.007,'metal.chrome'))
+
     parts.append(a.box('toilet pedestal',(x+.04,y+.37,.22),(.32,.43,.22),'washroom.shell',.11))
     parts.append(a.bowl('toilet pan',(x+.04,y+.35,.49),(.18,.23),.15,'washroom.shell'))
     parts.append(a.box('toilet raised lid',(x+.04,y+.55,.61),(.34,.055,.40),'washroom.shell',.10))
@@ -235,7 +255,12 @@ def build_washroom(a):
     parts.append(a.tube('shower riser',[(x-.24,y+.23,.95),(x-.24,y+.23,1.73),(x-.16,y+.23,1.78)],.011,'metal.chrome'))
     parts.append(a.cylinder('shower head',(x-.13,y+.23,1.76),.065,.022,'metal.chrome'))
     parts.append(a.tube('shower hose',[(x-.25,y+.23,1.05),(x-.17,y+.12,.76),(x-.13,y+.12,.81),(x-.21,y+.23,1.30)],.007,'metal.chrome'))
-    for level in (1.18,1.48):
-        parts.append(a.box('recessed niche shelf',(x-.21,y+.48,level),(.21,.31,.035),'washroom.shell',.016))
-        parts.append(a.tube('niche retaining rail',[(x-.105,y+.34,level+.05),(x-.105,y+.62,level+.05)],.008,'metal.chrome'))
+
+    # Damask curtain on a chrome rail, drawn across the inboard opening.
+    parts.append(a.tube('washroom_rail',[(-.47,3.18,1.86),(-.47,3.96,1.86)],.010,'metal.chrome'))
+    # Gathered forward on its rail rather than drawn across: full width, it stood between the
+    # washroom hotspot and everything the hotspot exists to show.
+    parts.append(a.box('washroom_curtain',(-.47,3.365,1.05),(.014,.37,1.55),'textile.curtain',.004))
+    # Grab handle on the rear wall, clear of the cistern below and the niches outboard.
+    parts.append(a.tube('washroom_grab',[(-1.10,3.96,1.10),(-.70,3.96,1.10)],.012,'metal.chrome'))
     a.group('washroom_pod',parts)

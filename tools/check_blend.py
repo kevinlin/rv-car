@@ -10,7 +10,7 @@ assert all(scene.get('modelled_' + name) for name in modules)
 
 # The inside bottoms of all three bowls must face up, including the regenerated binaries.
 for name, x, y, z in [('galley_run', .85, 2.91, .746),
-                      ('washroom_pod', -.84, 3.01, .65),
+                      ('washroom_pod', -.90, 2.86, .72),
                       ('washroom_pod', -.76, 3.70, .34)]:
     obj = bpy.data.objects[name]
     faces = [p for p in obj.data.polygons
