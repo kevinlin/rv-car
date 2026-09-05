@@ -129,17 +129,23 @@ export const aabb = (p: Placement) => ({
 export interface Hotspot {
   readonly id: ZoneId;
   readonly label: string;
-  /** Metres, in the runtime frame. */
+  /** Metres, in the runtime frame. In look mode `target` sets the initial heading. */
   readonly camera: {
     readonly position: readonly [number, number, number];
     readonly target: readonly [number, number, number];
   };
-  /** Radians for angles, metres for distance. */
-  readonly orbit: {
-    readonly azimuth: readonly [number, number];
-    readonly polar: readonly [number, number];
-    readonly distance: readonly [number, number];
-  };
+  /**
+   * Look rotates the camera about a fixed eye; orbit swings it around a target. Interior stops
+   * are always look: orbiting inside a 2.36 m cabin at any useful radius leaves the vehicle.
+   */
+  readonly view:
+    | { readonly kind: 'look'; readonly pitch: readonly [number, number] }
+    | {
+        readonly kind: 'orbit';
+        readonly azimuth: readonly [number, number];
+        readonly polar: readonly [number, number];
+        readonly distance: readonly [number, number];
+      };
 }
 
 const D = Math.PI / 180;
@@ -147,41 +153,45 @@ const D = Math.PI / 180;
 export const HOTSPOTS: readonly Hotspot[] = [
   // Positions retuned against the modelled geometry: the grey-box values sat too close, and two
   // of them sat inside furniture that did not exist when they were chosen.
+  //
+  // Every interior stop looks rather than orbits. The polar ranges these replaced were measured
+  // from straight up: 50-100 deg and 70-100 deg, which as signed pitch from the horizon is
+  // +40 to -10 and +20 to -10. Rounded outward to give the viewer somewhere to go.
   {
     id: 'dinette',
     label: 'Lounge',
     camera: { position: [-0.2, 1.55, 2.6], target: [0.1, 0.95, 0.3] },
-    orbit: { azimuth: [-60 * D, 60 * D], polar: [55 * D, 100 * D], distance: [1.2, 3.0] },
+    view: { kind: 'look', pitch: [-35 * D, 35 * D] },
   },
   {
     id: 'alcove',
     label: 'Alcove bed',
     camera: { position: [0.0, 1.55, 1.9], target: [0.0, 1.3, -0.9] },
-    orbit: { azimuth: [-35 * D, 35 * D], polar: [70 * D, 100 * D], distance: [1.5, 3.2] },
+    view: { kind: 'look', pitch: [-35 * D, 35 * D] },
   },
   {
     id: 'sofa',
     label: 'Slide-out bed',
     camera: { position: [0.35, 1.55, 2.02], target: [-1.0, 0.55, 0.9] },
-    orbit: { azimuth: [-45 * D, 45 * D], polar: [50 * D, 100 * D], distance: [1.2, 2.6] },
+    view: { kind: 'look', pitch: [-45 * D, 30 * D] },
   },
   {
     id: 'galley',
     label: 'Galley',
     camera: { position: [-0.35, 1.6, 2.35], target: [0.85, 0.95, 3.4] },
-    orbit: { azimuth: [-40 * D, 40 * D], polar: [55 * D, 100 * D], distance: [1.1, 2.2] },
+    view: { kind: 'look', pitch: [-40 * D, 30 * D] },
   },
   {
     id: 'washroom',
     label: 'Washroom',
     camera: { position: [0.4, 1.6, 2.5], target: [-0.85, 0.95, 3.5] },
-    orbit: { azimuth: [-40 * D, 40 * D], polar: [55 * D, 100 * D], distance: [1.1, 2.2] },
+    view: { kind: 'look', pitch: [-40 * D, 30 * D] },
   },
   {
     // Below the alcove bed, which starts at 1150 mm: any higher and the camera is in the mattress.
     id: 'cab',
     label: 'Cab',
     camera: { position: [0.0, 1.05, -0.05], target: [0.0, 0.8, -1.75] },
-    orbit: { azimuth: [-35 * D, 35 * D], polar: [70 * D, 100 * D], distance: [1.0, 2.4] },
+    view: { kind: 'look', pitch: [-30 * D, 30 * D] },
   },
 ];

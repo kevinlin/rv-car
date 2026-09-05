@@ -47,17 +47,36 @@ describe('HOTSPOTS', () => {
 
   it('orders every limit range low-to-high', () => {
     for (const h of HOTSPOTS) {
-      expect(h.orbit.azimuth[0]).toBeLessThan(h.orbit.azimuth[1]);
-      expect(h.orbit.polar[0]).toBeLessThan(h.orbit.polar[1]);
-      expect(h.orbit.distance[0]).toBeLessThan(h.orbit.distance[1]);
+      if (h.view.kind === 'look') {
+        expect(h.view.pitch[0]).toBeLessThan(h.view.pitch[1]);
+      } else {
+        expect(h.view.azimuth[0]).toBeLessThan(h.view.azimuth[1]);
+        expect(h.view.polar[0]).toBeLessThan(h.view.polar[1]);
+        expect(h.view.distance[0]).toBeLessThan(h.view.distance[1]);
+      }
     }
   });
 
-  it('keeps polar angles inside the legal 0..PI range', () => {
+  it('keeps every angle in a legal range', () => {
     for (const h of HOTSPOTS) {
-      expect(h.orbit.polar[0]).toBeGreaterThanOrEqual(0);
-      expect(h.orbit.polar[1]).toBeLessThanOrEqual(Math.PI);
+      if (h.view.kind === 'look') {
+        // Pitch is signed from the horizon; straight up and straight down are the limits.
+        expect(h.view.pitch[0]).toBeGreaterThanOrEqual(-Math.PI / 2);
+        expect(h.view.pitch[1]).toBeLessThanOrEqual(Math.PI / 2);
+      } else {
+        expect(h.view.polar[0]).toBeGreaterThanOrEqual(0);
+        expect(h.view.polar[1]).toBeLessThanOrEqual(Math.PI);
+      }
     }
+  });
+
+  it('gives every interior stop free look', () => {
+    // The whole point of this change: no interior stop may clamp azimuth, because orbiting
+    // a 2.36 m cabin at 1.2 m radius drives the camera through the walls.
+    // Cast: ZoneId does not carry 'exterior' until the exterior placements land, and this
+    // must keep excluding the exterior stop once it does.
+    const interior = HOTSPOTS.filter((h) => (h.id as string) !== 'exterior');
+    expect(interior.every((h) => h.view.kind === 'look')).toBe(true);
   });
 
   it('places every camera inside the vehicle, roughly at eye height', () => {

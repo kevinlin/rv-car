@@ -1071,7 +1071,7 @@ Run: `pnpm exec npm run budget && du -sh public/textures`
 Expected: triangles and `.glb` bytes both fall, since the images left the `.glb`s. Record the
 combined `.glb` plus texture total; the 25 MB ceiling covers both.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add model/textures.json src/data/finishes.ts tools/model_interior.py public/textures \
@@ -1096,7 +1096,7 @@ ranges meaningless at every interior stop.
 - Produces: `Hotspot` with `view: { kind: 'look'; pitch } | { kind: 'orbit'; azimuth; polar; distance }`,
   and `applyHotspotLimits(controls, view)` taking the orbit branch only
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Replace the `orders every limit range low-to-high` and `keeps polar angles inside the legal
 0..PI range` cases in `src/camera.test.ts` with:
@@ -1135,12 +1135,12 @@ Replace the `orders every limit range low-to-high` and `keeps polar angles insid
   });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `pnpm exec vitest run src/camera.test.ts`
 Expected: FAIL — `view` does not exist on `Hotspot`.
 
-- [ ] **Step 3: Change the type**
+- [x] **Step 3: Change the type**
 
 In `src/data/vehicle.ts`, replace the `Hotspot` interface:
 
@@ -1168,7 +1168,7 @@ export interface Hotspot {
 }
 ```
 
-- [ ] **Step 4: Convert the six hotspots**
+- [x] **Step 4: Convert the six hotspots**
 
 Replace each `orbit: { azimuth: [...], polar: [...], distance: [...] }` with a look view. The
 polar ranges were 50–100° and 70–100° measured from straight up; as signed pitch from the horizon
@@ -1183,7 +1183,7 @@ that is +40° to −10° and +20° to −10°. Round outward to give the viewer 
   { id: 'cab',      label: 'Cab',           camera: { position: [0.0, 1.05, -0.05], target: [0.0, 0.8, -1.75] }, view: { kind: 'look', pitch: [-30 * D, 30 * D] } },
 ```
 
-- [ ] **Step 5: Narrow `applyHotspotLimits`**
+- [x] **Step 5: Narrow `applyHotspotLimits`**
 
 In `src/camera.ts`, change it to take the orbit branch rather than the whole hotspot:
 
@@ -1217,7 +1217,7 @@ and in `tweenTo`, replace both `applyHotspotLimits(controls, h)` calls with:
     if (h.view.kind === 'orbit') applyHotspotLimits(controls, camera, h.camera.target, h.view);
 ```
 
-- [ ] **Step 6: Run the tests and make sure they pass**
+- [x] **Step 6: Run the tests and make sure they pass**
 
 Run: `pnpm check`
 Expected: PASS, TypeScript clean. `ui.test.ts` is unaffected — it reads `id` and `label` only.

@@ -10,18 +10,25 @@ export const clamp = (v: number, lo: number, hi: number): number =>
 export const easeInOutCubic = (t: number): number =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
-/** Constrain orbiting so the viewer cannot end up outside the vehicle or inside a wall. */
-export const applyHotspotLimits = (controls: OrbitControls, h: Hotspot): void => {
+type OrbitView = Extract<Hotspot['view'], { kind: 'orbit' }>;
+
+/** Constrain orbiting so the viewer cannot end up inside the vehicle or inside a wall. */
+export const applyHotspotLimits = (
+  controls: OrbitControls,
+  camera: THREE.Camera,
+  target: readonly [number, number, number],
+  view: OrbitView,
+): void => {
   const centreAzimuth = Math.atan2(
-    h.camera.position[0] - h.camera.target[0],
-    h.camera.position[2] - h.camera.target[2],
+    camera.position.x - target[0]!,
+    camera.position.z - target[2]!,
   );
-  controls.minAzimuthAngle = centreAzimuth + h.orbit.azimuth[0];
-  controls.maxAzimuthAngle = centreAzimuth + h.orbit.azimuth[1];
-  controls.minPolarAngle = h.orbit.polar[0];
-  controls.maxPolarAngle = h.orbit.polar[1];
-  controls.minDistance = h.orbit.distance[0];
-  controls.maxDistance = h.orbit.distance[1];
+  controls.minAzimuthAngle = centreAzimuth + view.azimuth[0]!;
+  controls.maxAzimuthAngle = centreAzimuth + view.azimuth[1]!;
+  controls.minPolarAngle = view.polar[0]!;
+  controls.maxPolarAngle = view.polar[1]!;
+  controls.minDistance = view.distance[0]!;
+  controls.maxDistance = view.distance[1]!;
   controls.update();
 };
 
@@ -44,7 +51,7 @@ export const tweenTo = (bundle: SceneBundle, h: Hotspot, ms = 900): Promise<void
     camera.position.set(...(h.camera.position as [number, number, number]));
     controls.target.set(...(h.camera.target as [number, number, number]));
     controls.enabled = true;
-    applyHotspotLimits(controls, h);
+    if (h.view.kind === 'orbit') applyHotspotLimits(controls, camera, h.camera.target, h.view);
     return Promise.resolve();
   }
 
@@ -66,7 +73,7 @@ export const tweenTo = (bundle: SceneBundle, h: Hotspot, ms = 900): Promise<void
         requestAnimationFrame(step);
       } else {
         controls.enabled = true;
-        applyHotspotLimits(controls, h);
+        if (h.view.kind === 'orbit') applyHotspotLimits(controls, camera, h.camera.target, h.view);
         resolve();
       }
     };
