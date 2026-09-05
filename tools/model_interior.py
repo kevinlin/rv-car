@@ -78,13 +78,22 @@ def tube(name, points, radius, role):
     return finish(bpy.context.object, name, role)
 
 
-def bowl(name, center, radii, depth, role):
+def bowl(name, center, radii, depth, role, corner=1.0):
     # Revolved section gives an actual hollow bowl, including a rounded lip and underside.
+    # corner is the exponent on the unit circle: 1.0 is an ellipse, and lowering it toward 0
+    # squares the plan off into a superellipse. The galley bowl in the reference is square.
+    def unit(t):
+        a = t * math.tau / 32
+        c, s = math.cos(a), math.sin(a)
+        if corner == 1.0:
+            return c, s
+        return math.copysign(abs(c) ** corner, c), math.copysign(abs(s) ** corner, s)
+
     section = [(0, -depth), (.3, -depth), (.65, -depth * .9), (.88, -depth * .55),
                (1, -.008), (1.015, 0), (1.04, -.01), (.92, -depth * .65),
                (.7, -depth - .014), (0, -depth - .014)]
-    vertices = [(center[0] + radii[0] * r * math.cos(t * math.tau / 32),
-                 center[1] + radii[1] * r * math.sin(t * math.tau / 32), center[2] + z)
+    vertices = [(center[0] + radii[0] * r * unit(t)[0],
+                 center[1] + radii[1] * r * unit(t)[1], center[2] + z)
                 for r, z in section for t in range(32)]
     faces = [(j * 32 + i, j * 32 + (i + 1) % 32,
               (j + 1) * 32 + (i + 1) % 32, (j + 1) * 32 + i)
@@ -183,7 +192,7 @@ def build_shell():
               box('roof_back',(0,2.9,2.015),(.5,2.3,.03),'panel.wall',0)]
     group('ceiling',panels)
     wall('wall_off',*placement('wall_off'),[(.15,0,2.05,1.98)])
-    wall('wall_kerb',*placement('wall_kerb'),[(.32,.9,1.76,1.36),(2.75,.98,3.45,1.3)])
+    wall('wall_kerb',*placement('wall_kerb'),[(.32,.9,1.76,1.36),(2.75,.93,3.45,1.35)])
     # Full-width passage under the overcab mattress and a sleeping opening above it.
     wall('bulkhead',*placement('bulkhead'),[(-1.1,0,1.1,1.98)],axis='y')
     box('wall_rear',*placement('wall_rear'),'panel.wall',.002)
@@ -195,7 +204,8 @@ def build_shell():
     group('slideout_shell',parts)
     window('dinette_window',1.165,1.04,1.13,1.44,.46)
     window('slideout_window',-1.745,1.1,1.115,1.56,.51)
-    window('galley_window',1.165,3.1,1.14,.7,.32)
+    # Taller than before: the reference puts a window over the counter, not a slot.
+    window('galley_window',1.165,3.1,1.14,.7,.42)
     for x in [-1.125,1.125]:
         wall('alcove_flank', (x,-.7,1.675),(.05,1.4,.65),[(-1.15,1.43,-.4,1.82)])
         window('alcove_window',x,-.775,1.625,.75,.39)

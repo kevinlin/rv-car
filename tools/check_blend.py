@@ -9,7 +9,7 @@ modules = ['shell', 'dinette', 'sofa_slideout', 'alcove_bed', 'lockers', 'cab', 
 assert all(scene.get('modelled_' + name) for name in modules)
 
 # The inside bottoms of all three bowls must face up, including the regenerated binaries.
-for name, x, y, z in [('galley_run', .85, 3.69, .746),
+for name, x, y, z in [('galley_run', .85, 2.91, .746),
                       ('washroom_pod', -.84, 3.01, .65),
                       ('washroom_pod', -.76, 3.70, .34)]:
     obj = bpy.data.objects[name]
@@ -24,7 +24,8 @@ for name, x, y, z in [('galley_run', .85, 3.69, .746),
 depsgraph = bpy.context.evaluated_depsgraph_get()
 for origin, direction in [((0, 1.4, 1.8), (0, 0, 1)),
                           ((0, 1.04, 1.13), (1, 0, 0)),
-                          ((-1.3, 1.1, 1.115), (-1, 0, 0))]:
+                          ((-1.3, 1.1, 1.115), (-1, 0, 0)),
+                          ((.9, 3.10, 1.14), (1, 0, 0))]:
     hit, loc, normal, index, obj, matrix = scene.ray_cast(depsgraph, Vector(origin), Vector(direction))
     assert hit
     role = obj.data.materials[obj.data.polygons[index].material_index].name

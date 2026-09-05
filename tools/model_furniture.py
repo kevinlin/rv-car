@@ -118,21 +118,23 @@ def build_galley(a):
     parts = [a.box('galley base floor', (x,y,.045), (w,d,.09), 'wood.cabinet', .016),
              a.box('galley back panel', (x+w/2-.015,y,.45), (.03,d,.80), 'wood.cabinet', .008)]
     # Four strips make an actual countertop opening around the recessed bowl.
-    sink_y = y+.39
+    # Reference: square stainless bowl nearest the aisle, induction hob at the rear, so the
+    # cook faces the window rather than the rear wall. The counter opening mirrors with it.
+    sink_y = y-.39
     parts.extend([
         a.box('counter front length', (x-w/2+.058,y,.879), (.116,d,.042), 'worktop', .01),
         a.box('counter rear length', (x+w/2-.058,y,.879), (.116,d,.042), 'worktop', .01),
-        a.box('counter hob field', (x,y-.30,.879), (w-.20,.90,.042), 'worktop', .01),
-        a.box('counter rear end', (x,y+d/2-.048,.879), (w-.20,.096,.042), 'worktop', .01),
-        a.bowl('stainless sink', (x,sink_y,.886), (.20,.235), .14, 'metal.chrome')])
+        a.box('counter hob field', (x,y+.30,.879), (w-.20,.90,.042), 'worktop', .01),
+        a.box('counter aisle end', (x,y-d/2+.048,.879), (w-.20,.096,.042), 'worktop', .01),
+        a.bowl('stainless sink', (x,sink_y,.886), (.21,.21), .14, 'metal.chrome', corner=.3)])
     for j in range(3):
         cy = y-d/2+(j+.5)*d/3
         parts.append(a.box('galley cabinet door',(x-w/2+.036,cy,.43),(.028,d/3-.02,.77),'wood.cabinet',.012))
         parts.append(a.box('long cabinet pull',(x-w/2+.011,cy,.74),(.022,.34,.023),'metal.chrome',.007))
     a.group('galley_run',parts)
     parts=[]
-    parts.append(a.box('induction glass',(x,y-.40,.906),(.42,.47,.017),'metal.dark',.022))
-    for cy,radius in [(y-.50,.10),(y-.27,.075)]:
+    parts.append(a.box('induction glass',(x,y+.40,.906),(.42,.47,.017),'metal.dark',.022))
+    for cy,radius in [(y+.50,.10),(y+.27,.075)]:
         circle = [(x+radius*math.cos(t*math.tau/32),cy+radius*math.sin(t*math.tau/32),.917) for t in range(33)]
         parts.append(a.tube('induction ring',circle,.003,'metal.chrome'))
     parts.append(a.tube('black gooseneck',[(x+.19,sink_y,.90),(x+.19,sink_y,1.11),(x+.18,sink_y,1.17),(x+.13,sink_y,1.20),(x+.05,sink_y,1.20),(x,sink_y,1.17),(x,sink_y,1.12)],.012,'metal.dark'))

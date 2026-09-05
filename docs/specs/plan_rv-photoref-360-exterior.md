@@ -1643,7 +1643,7 @@ Run: `pnpm check`
 Expected: PASS. `slideout_back` sits inside the `slideout` volume and must not push
 `slideout_bed` off its published 1280 x 1900.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add tools/model_furniture.py model/rv.blend public/models dist/raw \
@@ -1664,7 +1664,7 @@ the counter; the model has an oval bowl and the sink and hob swapped.
 - Produces: no new placements. `galley_sink` moves and becomes rectangular; a new
   `window_galley` aperture is added to `wall_kerb`.
 
-- [ ] **Step 1: Swap sink and hob along the run**
+- [x] **Step 1: Swap sink and hob along the run**
 
 `galley_run` spans Z 2550 to 4050 mm, kerb side. In `build_galley`, put the sink at the aisle
 (low-Z) end and the hob at the rear:
@@ -1676,7 +1676,7 @@ the counter; the model has an oval bowl and the sink and hob swapped.
     box('galley_hob',  (.86, 3.62, .906), (.52, .34, .012), 'metal.dark',   bevel=.004)
 ```
 
-- [ ] **Step 2: Cut the counter window**
+- [x] **Step 2: Cut the counter window**
 
 Add to the `wall_kerb` hole list in `build_shell()`, then regenerate `shell` too:
 
@@ -1684,14 +1684,14 @@ Add to the `wall_kerb` hole list in `build_shell()`, then regenerate `shell` too
     window('window_galley', 1.15, 1.28, 3.10, .62, .42)
 ```
 
-- [ ] **Step 3: Regenerate both collections**
+- [x] **Step 3: Regenerate both collections**
 
 ```bash
 pnpm exec npm run model -- shell && pnpm exec npm run model -- galley
 pnpm exec npm run bake && pnpm exec npm run check:blend
 ```
 
-- [ ] **Step 4: Add the aperture ray to `check_blend.py`**
+- [x] **Step 4: Add the aperture ray to `check_blend.py`**
 
 The existing aperture rays prove the glazing is actually cut. Add the new one to the list at
 `tools/check_blend.py:24`:
@@ -1703,7 +1703,7 @@ The existing aperture rays prove the glazing is actually cut. Add the new one to
 Run: `pnpm exec npm run check:blend`
 Expected: an `APERTURE` line for the new origin reporting `role.glass`.
 
-- [ ] **Step 5: Export and verify**
+- [x] **Step 5: Export and verify**
 
 ```bash
 pnpm exec npm run export && pnpm exec npm run optimize
