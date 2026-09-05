@@ -209,11 +209,26 @@ def build_shell():
         for y in [.45,1.9,3.6]:
             cylinder('downlight_trim',(x*.81,y,1.997),.035,.009,'panel.wall')
             cylinder('downlight',(x*.81,y,1.99),.026,.005,'led.cove')
+    # Dark surround, per the reference, against the walnut band it is punched through.
     for x in [-.27,.27]:
-        box('hatch_frame',(x,1.4,1.995),(.045,.79,.045),'panel.wall')
+        box('hatch_frame',(x,1.4,1.995),(.045,.79,.045),'metal.dark')
     for y in [1.03,1.77]:
-        box('hatch_frame',(0,y,1.995),(.5,.045,.045),'panel.wall')
+        box('hatch_frame',(0,y,1.995),(.5,.045,.045),'metal.dark')
     box('roof_hatch',(0,1.4,2.026),(.5,.7,.006),'glass',0)
+    # Walnut centre band. The reference ceiling is banded, not flat cream; this is the single
+    # largest surface the eye reads in every wide shot. Built in four pieces around the roof
+    # hatch rather than as one slab: the hatch is punched through the band in the reference,
+    # and a solid band caps the aperture that check_blend.py's upward ray exists to prove open.
+    box('ceiling_band_fwd', (0, .525, 1.985), (1.0, 1.05, .03), 'wood.trim', bevel=.004)
+    box('ceiling_band_aft', (0, 2.90, 1.985), (1.0, 2.30, .03), 'wood.trim', bevel=.004)
+    for side, x in (('off', -.375), ('kerb', .375)):
+        box(f'ceiling_band_{side}', (x, 1.40, 1.985), (.25, .70, .03), 'wood.trim', bevel=.004)
+
+    # Stepped cove recesses at both cream-to-wall junctions, each carrying its LED strip.
+    for side, x in (('off', -.86), ('kerb', .86)):
+        box(f'ceiling_cove_{side}', (x, 2.025, 1.955), (.10, 4.05, .07), 'panel.wall', bevel=.004)
+        box(f'cove_strip_{side}_band', (x, 2.025, 1.925), (.04, 4.02, .012), 'led.cove', bevel=0)
+
     # Open, minimal cab envelope, no exterior bodywork.
     box('cab_floor',(0,-.975,-.02),(2.3,1.95,.04),'floor',.01)
     for x in [-1.125,1.125]:

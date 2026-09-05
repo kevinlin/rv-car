@@ -1505,7 +1505,7 @@ Run `pnpm dev`. At every zone button, drag a full turn. Confirm the camera never
 point, the pitch stops before the viewer can look straight up or down, and moving between zones
 still tweens.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add src/look.ts src/look.test.ts src/scene.ts src/camera.ts src/camera.test.ts src/main.ts
@@ -1543,14 +1543,14 @@ of every wide shot and is currently flat cream against a photograph that is band
   `ceiling_cove_off`, `ceiling_cove_kerb`. No new placements — all three sit inside the existing
   `ceiling` placement box.
 
-- [ ] **Step 1: Read the reference**
+- [x] **Step 1: Read the reference**
 
 Open `docs/research/reference/interior-lounge-and-overcab.jpg`. The ceiling is a walnut centre
 band running the full length, roughly the middle 1000 mm of the 2360 mm width, with cream to
 either side, a stepped recess at each cream-to-wall junction carrying the LED strip, and a
 dark-surround roof hatch punched through the band.
 
-- [ ] **Step 2: Add the geometry**
+- [x] **Step 2: Add the geometry**
 
 In `build_shell()`, after the existing ceiling is created, append. Blender frame: X lateral,
 Y rearward, Z up, metres.
@@ -1566,12 +1566,12 @@ Y rearward, Z up, metres.
         box(f'cove_strip_{side}_band', (x, 2.025, 1.925), (.04, 4.02, .012), 'led.cove', bevel=0)
 ```
 
-- [ ] **Step 3: Regenerate and check**
+- [x] **Step 3: Regenerate and check**
 
 Run the phase cycle above with `<collection>` = `shell`.
 Expected: `SAVED_MODEL_CHECK_PASS`, `check:models` passes, budget holds.
 
-- [ ] **Step 4: Compare against the reference**
+- [x] **Step 4: Compare against the reference**
 
 Run `pnpm dev`, go to Lounge, look up. The band should read as a walnut spine with cream
 shoulders and a glowing edge, matching `interior-lounge-and-overcab.jpg`. Save a screenshot to
