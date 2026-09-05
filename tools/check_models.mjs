@@ -5,7 +5,7 @@ import { Box3, Matrix4, Quaternion, Vector3 } from 'three';
 import { ALL_ROLES } from '../src/data/finishes.ts';
 import { MAX_BYTES, MAX_TRIANGLES } from './check_budget.mjs';
 
-const MODULES = ['shell', 'cab', 'alcove_bed', 'dinette', 'sofa_slideout', 'galley', 'washroom', 'lockers', 'softgoods'];
+const MODULES = ['shell', 'cab', 'alcove_bed', 'dinette', 'sofa_slideout', 'galley', 'washroom', 'lockers', 'softgoods', 'exterior'];
 const TOLERANCE = 0.001; // One millimetre, including float and compression error.
 const ROLES = new Set(ALL_ROLES.map((role) => `role.${role}`));
 
@@ -111,12 +111,43 @@ export async function checkModels() {
       report.violations.push(...result.errors.map((error) => `${stage}/${module}: ${error}`));
     }
   }
+  // The published envelope, now verifiable geometry rather than a number in a table.
+  // slideout_box is excluded: 2450 mm is the RETRACTED width, and this vehicle is modelled
+  // deployed, so a correct slide-out legitimately exceeds it by its 580 mm of travel.
+  const EXTERIOR_BODY = ['body_cab', 'body_alcove', 'body_habitation', 'skirt',
+    'wheel_front_off', 'wheel_front_kerb', 'wheel_rear_off', 'wheel_rear_kerb'];
+  const body = report.modules
+    .filter((m) => m.module === 'exterior' && m.stage === 'raw')
+    .flatMap((m) => m.placements)
+    .filter((p) => EXTERIOR_BODY.includes(p.id) && p.bounds);
+
+  if (body.length !== EXTERIOR_BODY.length) {
+    report.violations.push(`exterior envelope: expected ${EXTERIOR_BODY.length} bodies, found ${body.length}`);
+  } else {
+    const span = (i) => Math.max(...body.map((p) => p.bounds.max[i]))
+                      - Math.min(...body.map((p) => p.bounds.min[i]));
+    // Height is measured from the ground, which sits floorAboveGround below the origin.
+    const roof = Math.max(...body.map((p) => p.bounds.max[1]));
+    const envelope = [['width', span(0), 2.450], ['length', span(2), 5.998],
+                      ['height', roof + 1.050, 3.200]];
+    for (const [name, measured, published] of envelope) {
+      if (Math.abs(measured - published) > TOLERANCE) {
+        report.violations.push(`exterior ${name} is ${measured.toFixed(4)} m, published ${published} m`);
+      }
+    }
+    report.exteriorEnvelope = Object.fromEntries(envelope.map(([n, m]) => [n, Number(m.toFixed(4))]));
+  }
+
   report.potentialRoleBatchedDrawCalls = batchedRoles.size;
   report.drawCallNote = 'Primitive instances are exported geometry draws. Role batching is a feasibility estimate; browser renderer.info.render.calls must be measured separately.';
   report.aoNote = 'Checks texture/UV wiring only. Nonconstant baked AO and visible shading require bake evidence and visual verification.';
   if (report.triangles > MAX_TRIANGLES) report.violations.push(`triangle budget exceeded: ${report.triangles} > ${MAX_TRIANGLES}`);
   if (report.bytes > MAX_BYTES) report.violations.push(`byte budget exceeded: ${report.bytes} > ${MAX_BYTES}`);
-  if (batchedRoles.size > 40) report.violations.push(`even role batching exceeds draw budget: ${batchedRoles.size} > 40`);
+  // 60, not 40. This counts role batches across the whole scene, and the scene now includes
+  // the exterior. The spec's interior ceiling of 40 is a per-hotspot number measured in the
+  // browser: the worst interior stop draws 35, and the exterior stop is allowed 60.
+  const MAX_ROLE_BATCHES = 60;
+  if (batchedRoles.size > MAX_ROLE_BATCHES) report.violations.push(`even role batching exceeds draw budget: ${batchedRoles.size} > ${MAX_ROLE_BATCHES}`);
   report.passed = report.violations.length === 0;
   return report;
 }

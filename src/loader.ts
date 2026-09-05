@@ -8,7 +8,7 @@ const KTX2_PATH = 'https://cdn.jsdelivr.net/npm/three/examples/jsm/libs/basis/';
 
 export const MODULE_NAMES = [
   'shell', 'dinette', 'sofa_slideout', 'alcove_bed',
-  'lockers', 'cab', 'galley', 'softgoods', 'washroom',
+  'lockers', 'cab', 'galley', 'softgoods', 'washroom', 'exterior',
 ] as const;
 
 let loader: GLTFLoader | null = null;

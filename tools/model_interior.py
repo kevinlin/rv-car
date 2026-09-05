@@ -294,6 +294,9 @@ def main():
     if module == 'shell':
         setup_materials()
         build_shell()
+    elif module == 'exterior':
+        import model_exterior
+        model_exterior.build_exterior(sys.modules[__name__])
     else:
         import model_furniture
         getattr(model_furniture,'build_'+module)(sys.modules[__name__])

@@ -19,6 +19,7 @@ const ROLE_BY_ZONE: Record<string, string> = {
   storage: 'role.wood.cabinet',
   galley: 'role.wood.cabinet',
   washroom: 'role.washroom.shell',
+  exterior: 'role.body.paint',
 };
 
 /** Which Blender collection each placement belongs to. Must match MODULES in export_modules.py. */
@@ -35,6 +36,10 @@ const COLLECTION_BY_ID: Record<string, string> = {
   fridge: 'galley', wardrobe: 'galley',
   galley_run: 'galley', galley_overhead: 'galley',
   washroom_pod: 'washroom',
+  body_cab: 'exterior', body_alcove: 'exterior', body_habitation: 'exterior',
+  skirt: 'exterior', slideout_box: 'exterior',
+  wheel_front_off: 'exterior', wheel_front_kerb: 'exterior',
+  wheel_rear_off: 'exterior', wheel_rear_kerb: 'exterior',
 };
 
 const objects = PLACEMENTS.map((p) => {

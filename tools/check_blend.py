@@ -3,9 +3,9 @@ import bpy
 from mathutils import Vector
 
 scene = bpy.context.scene
-assert len(bpy.data.collections) == 9
-assert len([m for m in bpy.data.materials if m.name.startswith('role.')]) == 19
-modules = ['shell', 'dinette', 'sofa_slideout', 'alcove_bed', 'lockers', 'cab', 'galley', 'softgoods', 'washroom']
+assert len(bpy.data.collections) == 10
+assert len([m for m in bpy.data.materials if m.name.startswith('role.')]) == 23
+modules = ['shell', 'dinette', 'sofa_slideout', 'alcove_bed', 'lockers', 'cab', 'galley', 'softgoods', 'washroom', 'exterior']
 assert all(scene.get('modelled_' + name) for name in modules)
 
 # The inside bottoms of all three bowls must face up, including the regenerated binaries.
@@ -19,6 +19,14 @@ for name, x, y, z in [('galley_run', .85, 2.91, .746),
              and abs((obj.matrix_world @ p.center).y - y) < .1]
     assert faces and all(p.normal.z > .9 for p in faces), (name, 'reversed bowl normals')
     print('BOWL_NORMAL', name, len(faces), 'upward')
+
+# The exterior body encloses the cabin, so it is held out of the interior ray casts exactly as
+# check.ts holds it out of the overlap and containment tests. Without this the alcove-entrance
+# ray stops on the alcove moulding at y 0 instead of reaching the windscreen.
+exterior = [o for o in bpy.data.collections['exterior'].objects]
+for obj in exterior:
+    obj.hide_viewport = True
+bpy.context.view_layer.update()
 
 # Rays must reach glazing, rather than an uncut wall/ceiling behind the visible trim.
 depsgraph = bpy.context.evaluated_depsgraph_get()
@@ -34,6 +42,10 @@ for origin, direction in [((0, 1.4, 1.8), (0, 0, 1)),
 
 hit, loc, *_ = scene.ray_cast(depsgraph, Vector((0, .1, 1.65)), Vector((0, -1, 0)))
 assert hit and loc.y < -1, 'alcove entrance blocked by head-end lockers'
+
+for obj in exterior:
+    obj.hide_viewport = False
+bpy.context.view_layer.update()
 assert bpy.data.images['rv_object_ao'].packed_file
 for obj in scene.objects:
     if obj.type == 'MESH':

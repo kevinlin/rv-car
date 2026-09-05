@@ -2066,7 +2066,7 @@ the interior. Add the same exclusion there:
     if (p.zone === 'exterior') continue; // the grey-box is an interior debug view
 ```
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/data/vehicle.ts src/check.ts src/greybox.ts src/data/placements.test.ts
@@ -2085,7 +2085,7 @@ git commit -m "feat: add exterior placements derived from the published envelope
 - Produces: a tenth collection `exterior` containing all nine exterior nodes; four new roles
   `body.paint`, `body.graphic`, `tyre`, `wheel`
 
-- [ ] **Step 1: Add the four roles**
+- [x] **Step 1: Add the four roles**
 
 In `src/data/finishes.ts`, extend `Role` and add:
 
@@ -2103,7 +2103,7 @@ Also add the matching materials to the Blender palette so `export_modules.py`'s 
 passes, and raise `check_blend.py:2`'s material count from 19 to 23 and its collection count from
 9 to 10.
 
-- [ ] **Step 2: Write `tools/model_exterior.py`**
+- [x] **Step 2: Write `tools/model_exterior.py`**
 
 ```python
 """The tenth collection: the outside of the vehicle.
@@ -2145,13 +2145,13 @@ def build_exterior(a):
         box(f'body_graphic_{side}', (x, 2.0, .95), (.004, 3.4, .70), 'body.graphic', bevel=0)
 ```
 
-- [ ] **Step 3: Register the collection**
+- [x] **Step 3: Register the collection**
 
 In `tools/model_interior.py`'s `main()` dispatch, add `exterior` alongside the existing builders,
 importing `build_exterior` from the new module. Add `'exterior'` to `MODULES` in
 `tools/export_modules.py:16` and to `MODULE_NAMES` in `src/loader.ts:9`.
 
-- [ ] **Step 4: Build, bake and export**
+- [x] **Step 4: Build, bake and export**
 
 ```bash
 pnpm exec npm run model -- exterior
@@ -2159,7 +2159,7 @@ pnpm exec npm run bake && pnpm exec npm run check:blend
 pnpm exec npm run export && pnpm exec npm run optimize
 ```
 
-- [ ] **Step 5: Assert the envelope in `check_models.mjs`**
+- [x] **Step 5: Assert the envelope in `check_models.mjs`**
 
 Add, alongside the existing world-bounds checks:
 
@@ -2179,7 +2179,7 @@ assert.ok(Math.abs(roof + 1.050 - 3.200) < 0.001, `height ${roof + 1.050}`);
 Reuse whatever the file already calls its world-bounds helper; if it is inlined rather than
 named, extract it first so both call sites share one implementation.
 
-- [ ] **Step 6: Run every check**
+- [x] **Step 6: Run every check**
 
 ```bash
 pnpm exec npm run check:models && pnpm exec npm run budget && pnpm check

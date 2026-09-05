@@ -59,6 +59,10 @@ ROLE_VIEWPORT = {
     "role.glass": (0.87, 0.90, 0.92, 1.0),
     "role.graphic.print": (0.85, 0.84, 0.82, 1.0),
     "role.graphic.screen": (0.10, 0.14, 0.20, 1.0),
+    "role.body.paint": (0.95, 0.95, 0.95, 1.0),
+    "role.body.graphic": (0.85, 0.85, 0.85, 1.0),
+    "role.tyre": (0.10, 0.10, 0.11, 1.0),
+    "role.wheel": (0.66, 0.67, 0.69, 1.0),
 }
 
 

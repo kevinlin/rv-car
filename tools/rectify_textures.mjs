@@ -89,22 +89,28 @@ const rectify = async (entry) => {
   const { width, height } = await image.metadata();
   const { data } = await image.raw().toBuffer({ resolveWithObject: true });
 
-  // Half-size: mirror-tiling doubles it back to the requested output size.
-  const half = Math.round(entry.size / 2);
+  // A tiling map is rendered at half size and mirrored back up; a decal is rendered whole.
+  // "tile": false is what a logo needs — mirroring one turns its lettering into a Rorschach.
+  // "size" may be [width, height] for a decal that is not square.
+  const tiled = entry.tile !== false;
+  const [outW, outH] = Array.isArray(entry.size) ? entry.size : [entry.size, entry.size];
+  const w0 = tiled ? Math.round(outW / 2) : outW;
+  const h0 = tiled ? Math.round(outH / 2) : outH;
+
   const inverse = solveHomography([[0, 0], [1, 0], [1, 1], [0, 1]], entry.corners);
-  const flat = Buffer.alloc(half * half * 3);
+  const flat = Buffer.alloc(w0 * h0 * 3);
   const px = [0, 0, 0];
 
-  for (let y = 0; y < half; y++) {
-    for (let x = 0; x < half; x++) {
-      const [sx, sy] = applyHomography(inverse, (x + 0.5) / half, (y + 0.5) / half);
+  for (let y = 0; y < h0; y++) {
+    for (let x = 0; x < w0; x++) {
+      const [sx, sy] = applyHomography(inverse, (x + 0.5) / w0, (y + 0.5) / h0);
       sample(data, width, height, sx, sy, px);
-      const o = (y * half + x) * 3;
+      const o = (y * w0 + x) * 3;
       flat[o] = px[0]; flat[o + 1] = px[1]; flat[o + 2] = px[2];
     }
   }
 
-  const raw = { raw: { width: half, height: half, channels: 3 } };
+  const raw = { raw: { width: w0, height: h0, channels: 3 } };
 
   // Flat-field: heavy blur is the illumination estimate; divide it out, restore the mean.
   // flatField: 0 skips it, for a decal whose own shading is the point.
@@ -114,7 +120,7 @@ const rectify = async (entry) => {
   // near 140 against a blue one near 55, so a shared mean of 98 scales red by 0.7 and blue by
   // 1.8 and the tile comes out dark blue. Per channel, each one returns to its own average and
   // only the spatial gradient is removed.
-  const blurRadius = entry.flatField ?? Math.round(half / 8);
+  const blurRadius = entry.flatField ?? Math.round(Math.min(w0, h0) / 8);
   let corrected = flat;
   if (blurRadius > 0) {
     const illumination = await sharp(flat, raw).blur(blurRadius).raw().toBuffer();
@@ -155,6 +161,14 @@ const rectify = async (entry) => {
     corrected = mono;
   }
 
+  const outPath = resolve(ROOT, 'public/textures', `${entry.out}.webp`);
+  await mkdir(dirname(outPath), { recursive: true });
+
+  if (!tiled) {
+    await sharp(corrected, raw).webp({ quality: entry.quality ?? 82 }).toFile(outPath);
+    return outPath;
+  }
+
   // Mirror-tile into 2x2 so opposite edges match exactly.
   const tile = sharp(corrected, raw);
   const [a, b, c, d] = await Promise.all([
@@ -164,16 +178,14 @@ const rectify = async (entry) => {
     tile.clone().flip().flop().toBuffer(),
   ]);
 
-  const outPath = resolve(ROOT, 'public/textures', `${entry.out}.webp`);
-  await mkdir(dirname(outPath), { recursive: true });
   await sharp({
-    create: { width: entry.size, height: entry.size, channels: 3, background: '#000' },
+    create: { width: outW, height: outH, channels: 3, background: '#000' },
   })
     .composite([
       { input: a, raw: raw.raw, left: 0, top: 0 },
-      { input: b, raw: raw.raw, left: half, top: 0 },
-      { input: c, raw: raw.raw, left: 0, top: half },
-      { input: d, raw: raw.raw, left: half, top: half },
+      { input: b, raw: raw.raw, left: w0, top: 0 },
+      { input: c, raw: raw.raw, left: 0, top: h0 },
+      { input: d, raw: raw.raw, left: w0, top: h0 },
     ])
     .webp({ quality: entry.quality ?? 82 })
     .toFile(outPath);

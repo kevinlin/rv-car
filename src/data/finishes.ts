@@ -4,7 +4,8 @@ export type Role =
   | 'worktop' | 'floor' | 'washroom.shell' | 'washroom.duckboard'
   | 'metal.brushed' | 'metal.chrome' | 'metal.dark' | 'textile.curtain'
   | 'led.cove' | 'glass'
-  | 'graphic.print' | 'graphic.screen';
+  | 'graphic.print' | 'graphic.screen'
+  | 'body.paint' | 'body.graphic' | 'tyre' | 'wheel';
 
 /**
  * A texture described, not loaded. This file imports nothing, so it cannot hold a
@@ -118,6 +119,14 @@ export const DEFAULT_REGISTRY: Registry = {
   // Emissive rather than transparent: the world outside is not modelled, so the panes are lit
   // to read as blown-out daylight openings the way the reference shots do.
   'glass':             one('clear', 'Clear', { color: 0xdfe6ea, roughness: 0.05, metalness: 0, emissive: 0xeef4ff, emissiveIntensity: 1.4 }),
+
+  'body.paint':   one('white-grp', 'White GRP', { color: 0xf2f3f2, roughness: 0.35, metalness: 0 }),
+  'body.graphic': one('side-decal', 'Side decal', {
+    color: 0xffffff, roughness: 0.4, metalness: 0, transparent: true,
+    map: { url: '/textures/side-graphic.webp' },
+  }),
+  'tyre':         one('rubber', 'Rubber', { color: 0x1a1a1c, roughness: 0.9, metalness: 0 }),
+  'wheel':        one('alloy', 'Alloy', { color: 0xa8acb0, roughness: 0.3, metalness: 1 }),
 };
 
 export const ALL_ROLES = Object.keys(DEFAULT_REGISTRY) as Role[];

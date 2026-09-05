@@ -23,6 +23,7 @@ MODULES = [
     "washroom",
     "lockers",
     "softgoods",
+    "exterior",
 ]
 
 OUT_DIR = os.path.join(os.getcwd(), "dist", "raw")
