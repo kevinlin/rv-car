@@ -18,9 +18,13 @@ export const boxContains = (outer: Box, inner: Box): boolean =>
   inner.min[1]! >= outer.min[1]! && inner.max[1]! <= outer.max[1]! &&
   inner.min[2]! >= outer.min[2]! && inner.max[2]! <= outer.max[2]!;
 
-const furniture = (ps: readonly Placement[]) => ps.filter((p) => p.zone !== 'shell');
+/** Zones the integrity checks skip: both enclose the furniture rather than sit beside it. */
+export const ENCLOSURES = new Set<ZoneId>(['shell', 'exterior']);
+type FurnitureZone = Exclude<ZoneId, 'shell' | 'exterior'>;
 
-const volumeOf = (zone: ZoneId) => VOLUMES[ZONE_VOLUME[zone as Exclude<ZoneId, 'shell'>]];
+const furniture = (ps: readonly Placement[]) => ps.filter((p) => !ENCLOSURES.has(p.zone));
+
+const volumeOf = (zone: ZoneId) => VOLUMES[ZONE_VOLUME[zone as FurnitureZone]];
 
 /** The walkable run: Z = 0 is the bulkhead plane, so sampling starts just inside it. */
 const AISLE_Z_FROM = 50;
@@ -76,7 +80,7 @@ export const checkAll = (ps: readonly Placement[] = PLACEMENTS): Violation[] => 
     if (!boxContains(volumeOf(p.zone), aabb(p))) {
       out.push({
         rule: 'containment',
-        detail: `${p.id} leaves its ${ZONE_VOLUME[p.zone as Exclude<ZoneId, 'shell'>]} volume`,
+        detail: `${p.id} leaves its ${ZONE_VOLUME[p.zone as FurnitureZone]} volume`,
       });
     }
   }

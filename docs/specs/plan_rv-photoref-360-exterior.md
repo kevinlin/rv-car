@@ -1927,7 +1927,7 @@ Run `pnpm dev`, open `?verify`, and read `canvas.dataset.drawCalls` at every int
 Expected: ≤ 40. If any zone exceeds it, merge the decal planes for that zone into a single mesh
 sharing one atlas before continuing.
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add tools/model_furniture.py tools/check_blend.py src/data/vehicle.ts src/data/finishes.ts \
@@ -1954,7 +1954,7 @@ built.
 - Produces: `ZoneId` gains `'exterior'`; nine exterior placements; `check.ts` excludes them
   alongside `shell`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `src/data/placements.test.ts`:
 
@@ -1995,12 +1995,12 @@ describe('exterior', () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `pnpm exec vitest run src/data/placements.test.ts`
 Expected: FAIL — no placement has zone `exterior`.
 
-- [ ] **Step 3: Add the zone and the placements**
+- [x] **Step 3: Add the zone and the placements**
 
 In `src/data/vehicle.ts`, extend `ZoneId` with `| 'exterior'` and append:
 
@@ -2026,7 +2026,7 @@ Three new estimates, and no more: the 400 mm double floor below the habitation f
 computed from those estimates are tagged `derived`, matching how `habLength` is already derived
 from an estimated `cabDepth`. Nothing here touches a published dimension.
 
-- [ ] **Step 4: Widen the check exclusion**
+- [x] **Step 4: Widen the check exclusion**
 
 In `src/check.ts`, replace line 21 and the two casts below it:
 
@@ -2049,14 +2049,14 @@ and the containment message's cast:
 In `src/data/vehicle.ts`, widen `ZONE_VOLUME`'s type to
 `Record<Exclude<ZoneId, 'shell' | 'exterior'>, VolumeId>`.
 
-- [ ] **Step 5: Run the tests and make sure they pass**
+- [x] **Step 5: Run the tests and make sure they pass**
 
 Run: `pnpm check`
 Expected: PASS. The aisle check must be unchanged at 520 mm — the exterior placements straddle
 the centreline and would return 0 if the exclusion were wrong. `check.test.ts` already asserts
 the aisle width; confirm it still does.
 
-- [ ] **Step 6: Confirm the grey-box still builds**
+- [x] **Step 6: Confirm the grey-box still builds**
 
 `src/greybox.ts` renders every placement as a box. Nine exterior boxes will now appear, hiding
 the interior. Add the same exclusion there:

@@ -1,7 +1,8 @@
 import { mm, type Mm } from './units';
 
 export type ZoneId =
-  | 'shell' | 'cab' | 'alcove' | 'dinette' | 'sofa' | 'storage' | 'galley' | 'washroom';
+  | 'shell' | 'cab' | 'alcove' | 'dinette' | 'sofa' | 'storage' | 'galley' | 'washroom'
+  | 'exterior';
 
 export type VolumeId = 'habitation' | 'slideout' | 'alcove' | 'cab';
 
@@ -49,7 +50,7 @@ export const VOLUMES: Record<VolumeId, Box> = {
   cab: { min: [-HAB_HALF_W, 0, -1950], max: [HAB_HALF_W, 1400, 100] },
 };
 
-export const ZONE_VOLUME: Record<Exclude<ZoneId, 'shell'>, VolumeId> = {
+export const ZONE_VOLUME: Record<Exclude<ZoneId, 'shell' | 'exterior'>, VolumeId> = {
   cab: 'cab',
   alcove: 'alcove',
   dinette: 'habitation',
@@ -117,6 +118,23 @@ export const PLACEMENTS: readonly Placement[] = [
   { id: 'galley_run',      zone: 'galley', origin: [e(550), e(0), e(2550)],    size: [e(600), e(900), e(1500)], movable: false },
   { id: 'galley_overhead', zone: 'galley', origin: [e(550), e(1350), e(2550)], size: [e(600), e(450), e(1500)], movable: false },
   { id: 'washroom_pod',    zone: 'washroom', origin: [e(-1150), e(0), e(2650)],size: [e(700), e(1950), e(1400)], movable: false },
+
+  // --- exterior. Every value derives from ENVELOPE, so the published envelope becomes
+  // verifiable geometry. Excluded from overlap and containment checks: the body encloses
+  // everything by design, exactly as the shell does.
+  // Three new estimates and no more: a 400 mm double floor below the habitation floor, a
+  // 1350 mm cab roof line, and a 372 mm wheel radius from a 225/75R16 on the Daily 4.5 t.
+  // Sizes computed from those are tagged derived, matching how habLength already derives
+  // from an estimated cabDepth. Nothing here touches a published dimension.
+  { id: 'body_cab',         zone: 'exterior', origin: [e(-1100), e(-400),  d(-1948)], size: [e(2200), d(1750), d(1948)], movable: false },
+  { id: 'body_alcove',      zone: 'exterior', origin: [d(-1225), e(1350),  d(-1948)], size: [d(2450), d(800),  d(1948)], movable: false },
+  { id: 'body_habitation',  zone: 'exterior', origin: [d(-1225), e(-400),  d(0)],     size: [d(2450), d(2550), d(4050)], movable: false },
+  { id: 'skirt',            zone: 'exterior', origin: [d(-1225), e(-700),  d(0)],     size: [d(2450), d(300),  d(4050)], movable: false },
+  { id: 'slideout_box',     zone: 'exterior', origin: [d(-1805), e(0),     e(150)],   size: [d(580),  e(1300), e(1900)], movable: false },
+  { id: 'wheel_front_off',  zone: 'exterior', origin: [e(-988),  d(-1050), d(-1270)], size: [e(225),  e(744),  e(744)],  movable: false },
+  { id: 'wheel_front_kerb', zone: 'exterior', origin: [e(763),   d(-1050), d(-1270)], size: [e(225),  e(744),  e(744)],  movable: false },
+  { id: 'wheel_rear_off',   zone: 'exterior', origin: [e(-988),  d(-1050), d(2030)],  size: [e(225),  e(744),  e(744)],  movable: false },
+  { id: 'wheel_rear_kerb',  zone: 'exterior', origin: [e(763),   d(-1050), d(2030)],  size: [e(225),  e(744),  e(744)],  movable: false },
 ];
 
 export const aabb = (p: Placement) => ({

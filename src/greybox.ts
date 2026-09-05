@@ -10,6 +10,7 @@ const ZONE_COLOUR: Record<ZoneId, number> = {
   storage: 0xb4a7d6,
   galley: 0xe06666,
   washroom: 0xf0f0f0,
+  exterior: 0x556070,
 };
 
 const UNIT = new THREE.BoxGeometry(1, 1, 1);
@@ -19,6 +20,7 @@ export const buildGreybox = (ps: readonly Placement[] = PLACEMENTS): THREE.Group
   group.name = 'greybox';
 
   for (const p of ps) {
+    if (p.zone === 'exterior') continue; // the grey-box is an interior debug view
     const isShell = p.zone === 'shell';
     const material = new THREE.MeshStandardMaterial({
       color: ZONE_COLOUR[p.zone],

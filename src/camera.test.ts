@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { HOTSPOTS, PLACEMENTS, aabb } from './data/vehicle';
 import * as THREE from 'three';
 import { clamp, easeInOutCubic, tweenTo } from './camera';
+import { ENCLOSURES } from './check';
 import type { SceneBundle } from './scene';
 
 describe('clamp', () => {
@@ -103,7 +104,9 @@ describe('hotspot cameras stand in free space', () => {
   // camera in the alcove mattress, the washroom camera in the storage band's header.
   it('puts no camera inside a placement', () => {
     const inside = HOTSPOTS.filter((h) =>
-      PLACEMENTS.filter((p) => p.zone !== 'shell').some((p) => {
+      // Same exclusion the dimensional checks use: an enclosure contains every camera
+      // by design, so 'inside the body' is not the collision this guards against.
+      PLACEMENTS.filter((p) => !ENCLOSURES.has(p.zone)).some((p) => {
         const b = aabb(p);
         return h.camera.position.every(
           (v, i) => v * 1000 >= b.min[i]! - 60 && v * 1000 <= b.max[i]! + 60,

@@ -4,9 +4,12 @@ import { buildGreybox } from './greybox';
 import { PLACEMENTS } from './data/vehicle';
 
 describe('buildGreybox', () => {
-  it('creates one mesh per placement, named by id', () => {
+  it('creates one mesh per interior placement, named by id', () => {
     const g = buildGreybox();
-    expect(g.children.length).toBe(PLACEMENTS.length);
+    // The exterior body would hide everything it encloses, so the interior debug view skips it.
+    const interior = PLACEMENTS.filter((p) => p.zone !== 'exterior');
+    expect(g.children.length).toBe(interior.length);
+    expect(g.getObjectByName('body_habitation')).toBeUndefined();
     expect(g.getObjectByName('alcove_bed')).toBeInstanceOf(THREE.Mesh);
     expect(g.getObjectByName('washroom_pod')).toBeInstanceOf(THREE.Mesh);
   });
