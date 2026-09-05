@@ -12,8 +12,10 @@
     "test": "vitest run",
     "check": "vitest run && tsc --noEmit",
     "export": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend -P tools/export_modules.py",
-    "optimize": "pnpm dlx @gltf-transform/cli optimize dist/raw --output public/models --texture-compress ktx2 --compress draco",
-    "budget": "node tools/check_budget.mjs"
+    "optimize": "bash tools/optimize.sh",
+    "budget": "node tools/check_budget.mjs",
+    "dump": "npx --yes tsx tools/dump_placements.ts",
+    "starter": "npm run dump && /Applications/Blender.app/Contents/MacOS/Blender -b -P tools/make_starter_blend.py"
   },
   "keywords": [],
   "author": "",
