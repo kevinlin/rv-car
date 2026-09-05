@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-09-05T18:37:57.992Z",
+  "checkedAt": "2026-09-05T18:39:28.645Z",
   "toleranceMetres": 0.001,
   "modules": [
     {
@@ -364,8 +364,8 @@
           "errors": []
         }
       ],
-      "primitives": 11,
-      "aoPrimitives": 11,
+      "primitives": 12,
+      "aoPrimitives": 12,
       "errors": []
     },
     {
@@ -416,8 +416,8 @@
           "errors": []
         }
       ],
-      "primitives": 11,
-      "aoPrimitives": 11,
+      "primitives": 12,
+      "aoPrimitives": 12,
       "errors": []
     },
     {
@@ -1232,9 +1232,9 @@
     }
   ],
   "violations": [],
-  "triangles": 66568,
-  "bytes": 9887048,
-  "optimizedPrimitiveInstances": 77,
+  "triangles": 67036,
+  "bytes": 9940960,
+  "optimizedPrimitiveInstances": 78,
   "potentialRoleBatchedDrawCalls": 36,
   "drawCallNote": "Primitive instances are exported geometry draws. Role batching is a feasibility estimate; browser renderer.info.render.calls must be measured separately.",
   "aoNote": "Checks texture/UV wiring only. Nonconstant baked AO and visible shading require bake evidence and visual verification.",

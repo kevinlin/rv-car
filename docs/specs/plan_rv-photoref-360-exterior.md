@@ -1774,7 +1774,7 @@ sample point, update those coordinates rather than deleting the check.
 Open `docs/research/reference/underseat-drawers-washroom.jpg` beside the Washroom hotspot. Save
 to `docs/research/corrected/washroom.png`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add tools/model_furniture.py tools/check_blend.py model/rv.blend public/models dist/raw \
@@ -1796,7 +1796,7 @@ tunnel, which is what the photographs show between the seats.
 - Produces: no new placements. New meshes `cab_tunnel`, `cab_dash_binnacle`, `cab_wheel_rim`,
   `cab_wheel_hub`.
 
-- [ ] **Step 1: Add the engine tunnel**
+- [x] **Step 1: Add the engine tunnel**
 
 The photographs show a black-clad tunnel rising between the two cab seats, which is why the cab
 render currently reads as an empty white void:
@@ -1805,7 +1805,7 @@ render currently reads as an empty white void:
     box('cab_tunnel', (0, -1.30, .28), (.52, 1.20, .56), 'metal.dark', bevel=.04)
 ```
 
-- [ ] **Step 2: Add the binnacle and wheel**
+- [x] **Step 2: Add the binnacle and wheel**
 
 Left-hand drive, so the wheel is on the off side:
 
@@ -1815,11 +1815,11 @@ Left-hand drive, so the wheel is on the off side:
     cylinder('cab_wheel_hub', (-.62, -1.62, .88), .062, .050, 'metal.dark', rotation=(1.15, 0, 0))
 ```
 
-- [ ] **Step 3: Regenerate and check**
+- [x] **Step 3: Regenerate and check**
 
 Run the phase cycle with `<collection>` = `cab`.
 
-- [ ] **Step 4: Confirm the cab camera still stands in free space**
+- [x] **Step 4: Confirm the cab camera still stands in free space**
 
 Run: `pnpm exec vitest run src/camera.test.ts`
 Expected: PASS. The cab hotspot sits at `[0, 1.05, -0.05]`; `cab_tunnel` reaches Z 0.56 m in

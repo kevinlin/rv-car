@@ -110,6 +110,13 @@ def build_cab(a):
         parts.append(a.box('dashboard vent', (x,-1.621,.77), (.16,.014,.055), 'metal.brushed', .01))
     circle = [(-.625+.16*math.cos(t*math.tau/32),-1.56+.05*math.sin(t*math.tau/32),.90+.15*math.sin(t*math.tau/32)) for t in range(33)]
     parts.append(a.tube('steering wheel', circle,.017,'metal.brushed'))
+    # Black-clad tunnel between the seats. Without it the cab renders as an empty white void,
+    # and the photographs show it as the dominant mass down there.
+    parts.append(a.box('cab_tunnel', (0,-1.30,.28), (.52,1.20,.56), 'metal.dark', .04))
+    # Left-hand drive, so the binnacle and wheel hub sit on the off side.
+    parts.append(a.box('cab_dash_binnacle', (-.62,-1.78,.96), (.62,.26,.22), 'metal.dark', .03))
+    parts.append(a.cylinder('cab_wheel_hub', (-.625,-1.56,.90), .062, .050, 'metal.dark',
+                            rotation=(1.15, 0, 0)))
     a.group('cab_dashboard', parts)
 
 
