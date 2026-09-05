@@ -62,6 +62,7 @@ ROLE_VIEWPORT = {
 
 def make_material(name):
     mat = bpy.data.materials.new(name)
+    mat.use_fake_user = True  # Retain the unused canonical roles when the starter is reopened.
     mat.use_nodes = True
     colour = ROLE_VIEWPORT.get(name, (0.8, 0.8, 0.8, 1.0))
     mat.diffuse_color = colour
@@ -121,4 +122,5 @@ def main():
     print(f"  {len(data['objects'])} objects, {len(COLLECTIONS)} collections, {len(ROLES)} role materials")
 
 
-main()
+if __name__ == '__main__':
+    main()

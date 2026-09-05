@@ -61,6 +61,17 @@ def export_collection(name):
         obj.select_set(True)
     bpy.context.view_layer.objects.active = objects[0]
 
+    # Authoring uses +Y rearward. glTF's Y-up rotation maps Blender +Y to -Z;
+    # reflect Y once at the module root to retain +X kerb / +Z rear in the runtime.
+    # Keep the reflection as a transform, so normals and winding remain consistent.
+    frame = bpy.data.objects.new(name + '_runtime_frame', None)
+    bpy.context.scene.collection.objects.link(frame)
+    roots = [o for o in objects if o.parent is None]
+    for obj in roots:
+        obj.parent = frame
+    frame.scale.y = -1
+    frame.select_set(True)
+
     path = os.path.join(OUT_DIR, f"{name}.glb")
     bpy.ops.export_scene.gltf(
         filepath=path,
@@ -76,6 +87,9 @@ def export_collection(name):
         export_lights=False,
         export_draco_mesh_compression_enable=False,  # gltf-transform does this later
     )
+    for obj in roots:
+        obj.parent = None
+    bpy.data.objects.remove(frame, do_unlink=True)
     print(f"  wrote {path}")
 
 

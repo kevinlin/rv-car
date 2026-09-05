@@ -36,11 +36,13 @@ fi
 
 for src in "${files[@]}"; do
   name=$(basename "$src")
-  npx --yes @gltf-transform/cli optimize "$src" "$OUT_DIR/$name" \
+  npx --yes @gltf-transform/cli@4.5.0 optimize "$src" "$OUT_DIR/$name" \
     --compress draco \
     --simplify false \
+    --flatten false --join false --instance false --palette false \
+    --prune-attributes false \
     ${texture_args[@]+"${texture_args[@]}"} \
-    >/dev/null 2>&1
+    >"$RAW_DIR/optimize-${name%.glb}.log" 2>&1 || { cat "$RAW_DIR/optimize-${name%.glb}.log" >&2; exit 1; }
   printf '  %-20s %7s -> %7s bytes\n' "$name" \
     "$(stat -f%z "$src")" "$(stat -f%z "$OUT_DIR/$name")"
 done
