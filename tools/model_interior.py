@@ -172,23 +172,13 @@ def wall(name, center, size, holes, axis='x'):
     return group(name, pieces)
 
 
-def window(name, x, y, z, width, height, axis='x'):
-    """Jambs, sills and a pane filling an opening. `axis` names the wall's normal.
-
-    The rear galley wants a window over its counter, and that counter is against the rear
-    wall, so this takes an axis for the same reason entry_door does rather than growing a
-    second copy.
-    """
+def window(name, x, y, z, width, height):
     parts = []
-    def part(label, across, up, thick, wide, tall, role, bevel=.01):
-        centre = (x, y+across, z+up) if axis == 'x' else (x+across, y, z+up)
-        size = (thick, wide, tall) if axis == 'x' else (wide, thick, tall)
-        parts.append(box(label, centre, size, role, bevel))
-    for across in [-width/2, width/2]:
-        part(name+'_jamb', across, 0, .055, .04, height+.08, 'panel.wall')
-    for up in [-height/2, height/2]:
-        part(name+'_sill', 0, up, .055, width, .04, 'panel.wall')
-    part(name+'_pane', 0, 0, .006, width-.035, height-.035, 'glass', 0)
+    for yy in [y-width/2, y+width/2]:
+        parts.append(box(name+'_jamb', (x, yy, z), (.055,.04,height+.08), 'panel.wall'))
+    for zz in [z-height/2, z+height/2]:
+        parts.append(box(name+'_sill', (x,y,zz), (.055,width,.04), 'panel.wall'))
+    parts.append(box(name+'_pane',(x,y,z),(.006,width-.035,height-.035),'glass',0))
     return group(name, parts)
 
 
@@ -238,23 +228,24 @@ def build_shell():
               box('roof_front',(0,.525,2.015),(.5,1.05,.03),'panel.wall',0),
               box('roof_back',(0,2.9,2.015),(.5,2.3,.03),'panel.wall',0)]
     group('ceiling',panels)
-    # The lounge window is on the off flank now, over the booth; the slide-out aperture is on
-    # the kerb flank, because that is the side the slide deploys to.
-    wall('wall_off',*placement('wall_off'),[(.32,.9,1.76,1.36)])
+    # The off flank carries both of this side's windows: the lounge one over the booth and the
+    # galley one over the counter. The slide-out aperture is on the kerb flank, because that is
+    # the side the slide deploys to.
+    wall('wall_off',*placement('wall_off'),[(.32,.9,1.76,1.36),(2.9,.93,3.54,1.35)])
     # The entry door is an opening in the wall, so it belongs to the shell alongside the
     # windows rather than to a zone. As a furniture placement it overlapped the wardrobe and
     # the galley at once, which is what the overlap check exists to forbid.
-    # One boarding door, at the rear corner of the kerb flank, where both walkaround stills
-    # put it. The service-room window lights the vestibule between it and the partition.
+    # The kerb flank has no door: the washroom pod takes its rear corner. Its one window lights
+    # the aisle between the wardrobe and the pod.
     wall('wall_kerb',*placement('wall_kerb'),
-         [(.15,0,2.05,1.98),(2.605,.93,3.245,1.35),(3.35,0,4.02,1.85)])
+         [(.15,0,2.05,1.98),(2.45,.93,3.0,1.35)])
     # Full-width passage under the overcab mattress and a sleeping opening above it.
     wall('bulkhead',*placement('bulkhead'),[(-1.1,0,1.1,1.98)],axis='y')
-    # 后置厨房 takes the rear wall, so there is no rear boarding door any more — which is also
-    # what the evidence says: neither walkaround still ever showed one, and both show the
-    # kerb-corner door that survives here. The rear wall carries a window over the counter.
-    wall('wall_rear',*placement('wall_rear'),[(-1.05,.93,-.15,1.35)],axis='y')
-    entry_door(1.165,3.685,.925,.67,1.85)
+    # 后上门: the boarding door is in the rear wall, opening onto the vestibule between the end
+    # of the galley run and the washroom pod. Offset off the centreline, because the pod takes
+    # the kerb corner of that wall.
+    wall('wall_rear',*placement('wall_rear'),[(-.45,0,.25,1.85)],axis='y')
+    entry_door(-.10,4.065,.925,.70,1.85,axis='y')
     # The sliding partition. A wall with a doorway in it, not a curtain and not a half-height
     # unit, because the brief is explicit that it has to read as a real room divider. The leaf
     # is drawn back on its track over the wardrobe side, which is the parked daytime state the
@@ -271,9 +262,9 @@ def build_shell():
     group('slideout_shell',parts)
     window('dinette_window',-1.165,1.04,1.13,1.44,.46)
     window('slideout_window',1.745,1.1,1.115,1.56,.51)
-    window('service_window',1.165,2.925,1.14,.64,.42)
-    # Over the rear counter, which is where the reference puts the galley window.
-    window('rear_window',-.60,4.065,1.14,.90,.42,axis='y')
+    window('service_window',1.165,2.725,1.14,.55,.42)
+    # Over the counter, which is where the reference puts the galley window.
+    window('galley_window',-1.165,3.22,1.14,.64,.42)
     for x in [-1.125,1.125]:
         wall('alcove_flank', (x,-.7,1.675),(.05,1.4,.65),[(-1.15,1.43,-.4,1.82)])
         window('alcove_window',x,-.775,1.625,.75,.39)

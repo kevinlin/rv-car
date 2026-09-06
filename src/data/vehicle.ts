@@ -125,15 +125,14 @@ export const PLACEMENTS: readonly Placement[] = [
   // also filled the floor in front of the entry door.
   { id: 'wardrobe', zone: 'storage', origin: [e(600), e(0), e(2100)],   size: [e(550), e(1900), e(250)], movable: false },
 
-  // --- rear wet zone. 后置厨房: the galley is a run across the REAR WALL, not along a flank,
-  // so the counter faces forward into the service room and the cook stands with their back to
-  // the partition. It stops 50 mm short of the centreline, leaving the kerb half of the rear
-  // as the entry bay for the boarding door at the rear corner of the kerb flank — the one
-  // door both walkaround stills show. The washroom takes the off side forward of the counter;
-  // it loses the 500 mm of length the counter now occupies and gains 100 mm of width for it.
-  { id: 'galley_run',      zone: 'galley', origin: [e(-1150), e(0), e(3450)],    size: [e(1100), e(900), e(600)], movable: false },
-  { id: 'galley_overhead', zone: 'galley', origin: [e(-1150), e(1350), e(3450)], size: [e(1100), e(450), e(600)], movable: false },
-  { id: 'washroom_pod',    zone: 'washroom', origin: [e(-1150), e(0), e(2550)],size: [e(800), e(1950), e(900)], movable: false },
+  // --- rear wet zone. The galley is a 1200 mm run along the OFF flank, continuing the line the
+  // fridge starts, and the washroom is a corner pod in the REAR KERB corner. That corner is
+  // where the boarding door used to be, so the door returns to the rear wall — 后上门 — offset
+  // off the centreline to clear the pod. Enter, and the counter is on your left, the washroom
+  // door on your right. The aisle between them is 800 mm.
+  { id: 'galley_run',      zone: 'galley', origin: [e(-1150), e(0), e(2550)],    size: [e(600), e(900), e(1200)], movable: false },
+  { id: 'galley_overhead', zone: 'galley', origin: [e(-1150), e(1350), e(2550)], size: [e(600), e(450), e(1200)], movable: false },
+  { id: 'washroom_pod',    zone: 'washroom', origin: [e(250), e(0), e(3050)],  size: [e(900), e(1950), e(1000)], movable: false },
 
   // --- exterior. Every value derives from ENVELOPE, so the published envelope becomes
   // verifiable geometry. Excluded from overlap and containment checks: the body encloses
@@ -215,20 +214,19 @@ export const HOTSPOTS: readonly Hotspot[] = [
   },
   {
     id: 'galley',
-    // In the entry bay on the kerb side, looking aft and outboard along the counter. The
-    // counter is against the rear wall now, so the old eye stood inside the overhead run, and
-    // an eye tucked beside the washroom pod stood 200 mm off its wall with nothing else in frame.
+    // Just aft of the partition, in the aisle at the forward end of the run, looking down its
+    // length. The counter is on the off flank, so this is the classic galley shot: worktop
+    // receding on one side, overheads above it, window over the counter.
     label: 'Galley',
-    camera: { position: [0.55, 1.6, 3.1], target: [-0.5, 1.15, 3.9] },
+    camera: { position: [0.45, 1.6, 2.65], target: [-0.85, 1.2, 3.3] },
     view: { kind: 'look', pitch: [-40 * D, 30 * D] },
   },
   {
     id: 'washroom',
-    // The old eye sat exactly in the partition plane. Moved aft of it, to the pod's forward
-    // corner: an eye further aft looks straight into the shower curtain, which hangs across
-    // the forward half of its rail.
+    // In the aisle inboard of the pod, looking into its opening. The pod moved to the rear
+    // kerb corner, so this stop crossed the cabin with it.
     label: 'Washroom',
-    camera: { position: [0.42, 1.6, 2.75], target: [-0.9, 1.05, 3.0] },
+    camera: { position: [-0.3, 1.6, 2.95], target: [0.7, 1.1, 3.65] },
     view: { kind: 'look', pitch: [-40 * D, 30 * D] },
   },
   {

@@ -50,12 +50,11 @@ def build_exterior(a):
         a.cylinder(name + '_face', (cx + outboard, cy, cz), radius * .60, width * .44,
                    'wheel', rotation=(0, 1.5708, 0))
 
-    # The one boarding door, matching the opening cut into wall_kerb: at the rear corner, aft
-    # of the rear wheel, where the manufacturer's walkaround photography puts it. The rear-wall
-    # door went with the galley moving onto the rear wall, and no still ever showed it.
-    # Recessed a millimetre, so the published 5998 x 2450 mm envelope stays exactly what
+    # The one boarding door, matching the opening cut into wall_rear: 后上门, offset off the
+    # centreline because the washroom pod takes the kerb corner of that wall. Recessed a
+    # millimetre, so the published 5998 x 2450 mm envelope stays exactly what
     # check_models.mjs measures off the body placements.
-    _door_reveal(a, 'body_door_kerb', (1.219, 3.685, .925), .73, 1.89, 'x')
+    _door_reveal(a, 'body_door_rear', (-.10, 4.043, .925), .76, 1.89, 'y')
 
     # Side graphic as a decal plane just proud of the body, one per flank.
     for side, x in (('off', -1.228), ('kerb', 1.228)):

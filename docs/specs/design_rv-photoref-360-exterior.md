@@ -548,47 +548,48 @@ Re-measured: 76,036 triangles, 9.57 MB, 116 tests, `tsc` clean. Placement bounds
 
 ---
 
-## Rear-galley correction (2026-09-06)
+## Rear service room correction (2026-09-06)
 
-Driven by two frames of the manufacturer's own walkthrough video. Both contradict the plan on
+Driven by two frames of the manufacturer's own walkthrough video, which contradict the plan on
 things the still photography had been read as supporting.
 
 ### Fixed
 
 | # | Was | Now | Evidence |
 |---|---|---|---|
-| 1 | Galley a 750 mm run along the kerb flank, forward of the boarding door | A 1100 mm run across the REAR WALL, off half, counter facing forward into the service room | The walkthrough frame of the galley shows a counter under a rear window with the washroom door beside it; no flank run appears |
-| 2 | Booth on the kerb flank, slide-out and its bed on the off flank | Swapped: booth off, slide-out kerb | The lounge frame puts the sofa bed and the seat pair on the opposite flanks to the model |
-| 3 | Two boarding doors, one in the rear wall on the centreline | One, at the rear corner of the kerb flank | Follows from 1 — the galley takes the rear wall. This is the door the walkaround stills show, and the rear-wall one was already recorded as the single piece of geometry with no photograph behind it |
-| 4 | Washroom 700 x 1400, Z 2650-4050 | 800 x 900, Z 2550-3450 | Follows from 1 — the counter takes the rear 600 mm. The width the pod gives up in length it takes back across, landing it inside the brief's 800-950 x 900-1100 class for the first time |
+| 1 | Galley a 750 mm run along the kerb flank, forward of the boarding door | A 1200 mm run along the OFF flank, continuing the line the fridge starts | The galley frame puts the counter on the vehicle's left with the washroom door opposite it |
+| 2 | Washroom a 700 x 1400 pod along the off flank | A 900 x 1000 corner pod in the REAR KERB corner | Same frame: the door the presenter opens is in the rear corner on the right, not partway along a flank |
+| 3 | Booth on the kerb flank, slide-out and its bed on the off flank | Swapped: booth off, slide-out kerb | The lounge frame puts the sofa bed and the seat pair on the opposite flanks to the model |
+| 4 | Two boarding doors, one in the rear wall and one at the kerb rear corner | One, in the rear wall, offset 100 mm off the centreline | Follows from 2 — the pod takes the kerb rear corner. 后上门 stands; the kerb-corner door does not |
 
-The galley window moves with the run, from the kerb flank to the rear wall over the counter,
-and `window()` grows the `axis` parameter `entry_door` already had. The kerb flank keeps a
-window over the vestibule between the partition and the door.
+The galley window moves with the run to the off flank, over the counter. The kerb flank keeps
+one window, lighting the aisle between the wardrobe and the pod.
 
-### The counter stops 50 mm short of the centreline, and that is load-bearing
+Enter through the rear door and the counter is on your left, the washroom door on your right,
+and the partition doorway ahead. The aisle between the counter and the pod is 800 mm.
 
-`minAisleWidth` returns 0 for any box that straddles the centreline, because such a box blocks
-the corridor outright. A counter across the full rear wall is the one case where that reading is
-wrong, because there is nothing to walk to behind a kitchen. Teaching the check to tell the two
-apart costs more than the 350 mm of worktop it would buy. So the run ends at X -50, and the kerb
-half of the rear becomes the entry bay in front of the boarding door — which is where that floor
-was going anyway.
+### A wrong turn worth recording
+
+An intermediate pass read "the kitchen is at the back" as "against the rear wall" and built the
+galley as a run across it. That layout is dimensionally sound and passes every check, and it is
+still wrong: a counter on the rear wall leaves the washroom nowhere to go but a flank, and puts
+the pod between every viewpoint and the counter's far half. The frame shows a flank run and a
+corner pod. 后置厨卫 places the kitchen and bathroom in the rear *zone*, not on the rear *wall*.
 
 ### Two modules had to be rebuilt rather than moved
 
 Both for the reason the last pass recorded and has still not finished paying off: geometry
 measured in absolute metres rather than from its placement's own faces.
 
-- `build_galley` was written for a run along a flank, with the carcass back at `x + w/2` and the
-  doors at `x - w/2`. Against the rear wall those two axes swap, so the module is now written in
-  terms of `x0`/`x1` along the run and `front`/`back` across it. Nothing in it is a constant that
-  a resize can invalidate.
+- `build_galley` had the carcass back at `x + w/2` and the doors at `x - w/2`, correct only on
+  the kerb flank. It is now written in terms of `back`/`front` across the run and `y0`/`y1` along
+  it, so which flank it sits on is a data question.
 - `build_washroom` carried thirteen positions written out as absolute metres: the vanity at
-  `y 2.86`, the curtain rail from `3.18` to `3.96`, the grab handle at `3.96`. Shortening the pod
-  by 500 mm left every one of them behind the wall it was measured from. They now derive from the
-  pod's four faces, and the shower curtain's width is a fraction of its rail rather than a fixed
-  370 mm, so a shorter pod gathers the curtain tighter instead of curtaining the opening off.
+  `y 2.86`, the curtain rail from `3.18` to `3.96`, the grab handle at `3.96`. It now derives
+  `side` from which half of the cabin the pod sits in, and measures everything from the pod's
+  outer wall or its inboard opening, so moving the pod across the vehicle is also a data change.
+  The vanity and the shower curtain are sized as fractions of the pod rather than fixed, so a
+  shorter pod does not put the basin through the toilet or curtain the whole opening off.
 
 ### One defect found in the runtime
 
@@ -601,29 +602,28 @@ vehicle. A whole turn is now written as no limit at all, which is what OrbitCont
 
 ### Stops re-placed
 
-- **Galley.** The old eye stood where the overhead run now is. It moves to the vestibule at
-  X 550, looking aft and outboard along the counter. This stop is cramped by construction: the
-  washroom pod faces the counter's off half across a 1.5 m room, so nothing sees the whole run
-  except a viewpoint at the counter's own depth, which reads as a corridor rather than a kitchen.
-- **Washroom.** Moves 130 mm aft with the pod.
+- **Galley.** To the aisle just aft of the partition, at the forward end of the run, looking down
+  its length.
+- **Washroom.** To the open corner diagonally forward and inboard of the pod, which is the only
+  angle that sees into both of its open faces.
 - **Lounge** and **Slide-out bed** mirror with the furniture.
-- **Exterior.** Moves to the off three-quarter, because the flat flank is the off one now.
+- **Exterior.** To the off three-quarter, because the flat flank is the off one now.
 
 ### Re-measured
 
 | Axis | Ceiling | Result |
 |---|---|---|
 | Triangles | 350,000 | 73,404 |
-| Bytes | 25 MB | 9.51 MB |
-| Draw calls, worst interior | 40 | 31 |
+| Bytes | 25 MB | 9.48 MB |
+| Draw calls, worst interior | 40 | 30 |
 | Draw calls, exterior | 60 | 40 |
-| Frame rate | 60 fps at 1080p | 120, vsync-capped, at 1600 x 900 |
+| Frame rate | 60 fps at 1080p | 118-120, vsync-capped, at 1600 x 900 |
 | vitest + `tsc` | — | 117 tests, clean |
 | Aisle | 400 mm | 560 mm, unchanged |
 
 Placement bounds, the exterior envelope (5998 x 2450 x 3200 mm), the AO wiring and texel density
-all still pass. `check_blend.py` gains a ray across the vestibule to the boarding door, replacing
-the one that walked the centreline to the rear-wall door.
+all still pass. `check_blend.py`'s rear-entry ray is unchanged in intent and passes again, now
+that the rear door is back.
 
 ### Still open
 

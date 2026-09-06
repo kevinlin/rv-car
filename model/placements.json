@@ -108,14 +108,14 @@
       "label": "Galley",
       "camera": {
         "position": [
-          -0.15,
+          0.2,
           1.6,
-          3.25
+          2.62
         ],
         "target": [
-          -0.75,
-          1,
-          4
+          -0.85,
+          1.15,
+          3.35
         ]
       }
     },
@@ -124,14 +124,14 @@
       "label": "Washroom",
       "camera": {
         "position": [
-          0.4,
+          -0.35,
           1.6,
-          2.62
+          3.45
         ],
         "target": [
-          -0.9,
-          1,
-          2.9
+          0.75,
+          1.05,
+          3.6
         ]
       }
     },
@@ -549,14 +549,14 @@
       "zone": "galley",
       "material": "role.wood.cabinet",
       "location": [
-        -0.6,
+        -0.85,
         0.45,
-        3.75
+        3.15
       ],
       "dimensions": [
-        1.1,
+        0.6,
         0.9,
-        0.6
+        1.2
       ],
       "movable": false
     },
@@ -566,14 +566,14 @@
       "zone": "galley",
       "material": "role.wood.cabinet",
       "location": [
-        -0.6,
+        -0.85,
         1.575,
-        3.75
+        3.15
       ],
       "dimensions": [
-        1.1,
+        0.6,
         0.45,
-        0.6
+        1.2
       ],
       "movable": false
     },
@@ -583,14 +583,14 @@
       "zone": "washroom",
       "material": "role.washroom.shell",
       "location": [
-        -0.75,
+        0.7,
         0.975,
-        3
+        3.55
       ],
       "dimensions": [
-        0.8,
+        0.9,
         1.95,
-        0.9
+        1
       ],
       "movable": false
     },

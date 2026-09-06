@@ -127,68 +127,67 @@ def build_cab(a):
 
 def build_galley(a):
     (x,y,z), (w,d,h) = a.placement('galley_run')
-    # 后置厨房: the run is against the REAR wall and runs across the vehicle, so `w` is its
-    # length and `d` its counter depth — the transpose of the kerb-flank run this replaces.
-    # Everything lateral is measured from the run's own two ends and everything fore-aft from
-    # its two faces, so the module is correct at any length. Hard-coded offsets are what broke
-    # the last time this run was resized.
-    x0, x1 = x-w/2, x+w/2                    # off end, aisle end
-    front, back = y-d/2, y+d/2               # aisle face, rear wall face
+    # A run along the OFF flank: `d` is its length fore-aft and `w` its counter depth. The wall
+    # is at -x and the aisle at +x. Everything across the run is measured from those two faces
+    # and everything along it from the run's own two ends, so neither a resize nor a move to the
+    # other flank can strand a constant — which is what happened the last two times this moved.
+    back, front = x-w/2, x+w/2               # off wall face, aisle face
+    y0, y1 = y-d/2, y+d/2                    # forward end, rear end
     parts = [a.box('galley base floor', (x,y,.045), (w,d,.09), 'wood.cabinet', .016),
-             a.box('galley back panel', (x,back-.015,.45), (w,.03,.80), 'wood.cabinet', .008)]
+             a.box('galley back panel', (back+.015,y,.45), (.03,d,.80), 'wood.cabinet', .008)]
     # Four strips make an actual countertop opening around the recessed bowl.
-    # Reference: square stainless bowl nearest the aisle end, induction hob at the far end, so
-    # the cook works away from the boarding door rather than across it.
+    # Reference: square stainless bowl at the forward end under the window, induction hob aft,
+    # so the cook stands clear of the boarding door.
     lip = .058                               # half-width of the counter's front and back rails
-    bowl_r = min(.21, (d-4*lip)/2-.01)       # square bowl, inside the rails
-    sink_x = x1-.09-bowl_r
-    split = sink_x-bowl_r                    # where the bowl opening ends and the run resumes
-    hob_len = min(.42, (split-x0)-.20)
-    hob_x = x0+.10+hob_len/2
+    bowl_r = min(.21, (w-4*lip)/2-.01)       # square bowl, inside the rails
+    sink_y = y0+.09+bowl_r
+    split = sink_y+bowl_r                    # where the bowl opening ends and the run resumes
+    hob_len = min(.42, (y1-split)-.20)
+    hob_y = y1-.10-hob_len/2
     parts.extend([
-        a.box('counter front length', (x,front+lip,.879), (w,2*lip,.042), 'worktop', .01),
-        a.box('counter rear length', (x,back-lip,.879), (w,2*lip,.042), 'worktop', .01),
-        a.box('counter hob field', ((x0+split)/2,y,.879), (split-x0,d-4*lip,.042), 'worktop', .01),
-        a.box('counter aisle end', ((x1+sink_x+bowl_r)/2,y,.879), (x1-sink_x-bowl_r,d-4*lip,.042), 'worktop', .01),
-        a.bowl('stainless sink', (sink_x,y,.886), (bowl_r,bowl_r), .14, 'metal.chrome', corner=.3)])
+        a.box('counter front length', (front-lip,y,.879), (2*lip,d,.042), 'worktop', .01),
+        a.box('counter rear length', (back+lip,y,.879), (2*lip,d,.042), 'worktop', .01),
+        a.box('counter hob field', (x,(split+y1)/2,.879), (w-4*lip,y1-split,.042), 'worktop', .01),
+        a.box('counter forward end', (x,(y0+sink_y-bowl_r)/2,.879), (w-4*lip,sink_y-bowl_r-y0,.042), 'worktop', .01),
+        a.bowl('stainless sink', (x,sink_y,.886), (bowl_r,bowl_r), .14, 'metal.chrome', corner=.3)])
     # Fittings are sized off the bay, not off a fixed constant.
-    bay = w/3
+    bay = d/3
     for j in range(3):
-        cx = x0+(j+.5)*bay
+        cy = y0+(j+.5)*bay
         if j == 2:
-            # The 5 kg washer-dryer takes the aisle-end bay, under the sink plumbing. Given a
-            # wooden door in front of it, it would be a box nobody can see, so it is the door.
-            parts.append(a.box('washer',(cx,front+.036,.43),(bay-.02,.028,.77),'metal.brushed',.012))
-            parts.append(a.box('washer_door',(cx,front+.018,.40),(min(.34,bay-.06),.026,.34),'metal.dark',.15))
-            parts.append(a.box('washer_fascia',(cx,front+.018,.70),(min(.30,bay-.10),.026,.09),'graphic.screen',.008))
+            # The 5 kg washer-dryer takes the rear bay, nearest the boarding door. Given a wooden
+            # door in front of it, it would be a box nobody can see, so the appliance is the door.
+            parts.append(a.box('washer',(front-.036,cy,.43),(.028,bay-.02,.77),'metal.brushed',.012))
+            parts.append(a.box('washer_door',(front-.018,cy,.40),(.026,min(.34,bay-.06),.34),'metal.dark',.15))
+            parts.append(a.box('washer_fascia',(front-.018,cy,.70),(.026,min(.30,bay-.10),.09),'graphic.screen',.008))
             continue
-        parts.append(a.box('galley cabinet door',(cx,front+.036,.43),(bay-.02,.028,.77),'wood.cabinet',.012))
-        parts.append(a.box('long cabinet pull',(cx,front+.011,.74),(min(.34,bay-.06),.022,.023),'metal.chrome',.007))
+        parts.append(a.box('galley cabinet door',(front-.036,cy,.43),(.028,bay-.02,.77),'wood.cabinet',.012))
+        parts.append(a.box('long cabinet pull',(front-.011,cy,.74),(.022,min(.34,bay-.06),.023),'metal.chrome',.007))
     a.group('galley_run',parts)
     parts=[]
-    parts.append(a.box('induction glass',(hob_x,y,.906),(hob_len,.42,.017),'metal.dark',.022))
-    for cx,radius in [(hob_x+hob_len/4,hob_len*.21),(hob_x-hob_len/4,hob_len*.16)]:
-        circle = [(cx+radius*math.cos(t*math.tau/32),y+radius*math.sin(t*math.tau/32),.917) for t in range(33)]
+    parts.append(a.box('induction glass',(x,hob_y,.906),(w-.18,hob_len,.017),'metal.dark',.022))
+    for cy,radius in [(hob_y+hob_len/4,hob_len*.21),(hob_y-hob_len/4,hob_len*.16)]:
+        circle = [(x+radius*math.cos(t*math.tau/32),cy+radius*math.sin(t*math.tau/32),.917) for t in range(33)]
         parts.append(a.tube('induction ring',circle,.003,'metal.chrome'))
-    parts.append(a.tube('black gooseneck',[(sink_x,y+.19,.90),(sink_x,y+.19,1.11),(sink_x,y+.18,1.17),(sink_x,y+.13,1.20),(sink_x,y+.05,1.20),(sink_x,y,1.17),(sink_x,y,1.12)],.012,'metal.dark'))
+    parts.append(a.tube('black gooseneck',[(back+.11,sink_y,.90),(back+.11,sink_y,1.11),(back+.12,sink_y,1.17),(back+.17,sink_y,1.20),(back+.25,sink_y,1.20),(back+.30,sink_y,1.17),(back+.30,sink_y,1.12)],.012,'metal.dark'))
     a.group('galley_appliances',parts)
     (x,y,z),(w,d,h)=a.placement('galley_overhead')
-    x0, x1 = x-w/2, x+w/2
-    front, back = y-d/2, y+d/2
-    parts=[a.box('overhead walnut carcass',(x,y+.022,z),(w,d-.044,h),'wood.cabinet',.016)]
-    bay = w/3
+    back, front = x-w/2, x+w/2
+    y0, y1 = y-d/2, y+d/2
+    parts=[a.box('overhead walnut carcass',(x-.022,y,z),(w-.044,d,h),'wood.cabinet',.016)]
+    bay = d/3
     for i in range(3):
-        cx=x0+(i+.5)*bay
-        parts.append(a.box('overhead walnut door',(cx,front+.032,z),(bay-.015,.023,h-.024),'wood.cabinet',.016))
-        parts.append(a.box('overhead handle',(cx,front+.008,z-.12),(.12,.016,.023),'metal.chrome',.006))
-    a.box('extractor_hood',(hob_x,y-.02,z-h/2-.045),(min(.48,hob_len+.08),d-.04,.09),'metal.dark',.02)
+        cy=y0+(i+.5)*bay
+        parts.append(a.box('overhead walnut door',(front-.032,cy,z),(.023,bay-.015,h-.024),'wood.cabinet',.016))
+        parts.append(a.box('overhead handle',(front-.008,cy,z-.12),(.016,.12,.023),'metal.chrome',.006))
+    a.box('extractor_hood',(x+.02,hob_y,z-h/2-.045),(w-.04,min(.48,hob_len+.08),.09),'metal.dark',.02)
     a.group('galley_overhead',parts)
-    # Microwave/steam oven, set into the overhead run at its aisle end.
-    oven_len = min(.42, w*.35)
-    oven_x = x1-.05-oven_len/2
-    a.box('oven',(oven_x,y-.06,z),(oven_len,d-.12,h-.06),'metal.dark',.015)
+    # Microwave/steam oven, set into the overhead run at its forward end.
+    oven_len = min(.42, d*.35)
+    oven_y = y0+.05+oven_len/2
+    a.box('oven',(x+.06,oven_y,z),(w-.12,oven_len,h-.06),'metal.dark',.015)
     # Proud of the oven's own front face, or it renders inside the box it labels.
-    a.box('oven_fascia',(oven_x,front-.004,z),(oven_len-.08,.016,h-.16),'graphic.screen',.006)
+    a.box('oven_fascia',(front+.004,oven_y,z),(.016,oven_len-.08,h-.16),'graphic.screen',.006)
     for name,direction in [('fridge',1),('wardrobe',-1)]:
         (x,y,z),(w,d,h)=a.placement(name)
         parts=[a.box(name+' carcass',(x-direction*.03,y,z),(w-.06,d,h),'wood.cabinet',.018)]
@@ -264,59 +263,63 @@ def build_softgoods(a):
 def build_washroom(a):
     """Corner vanity, mirror cabinet, ribbed shell, recessed niches and a drawn curtain.
 
-    The pod is an 800 x 900 mm moulding — 100 mm wider and 500 mm shorter than it was, because
-    the galley took the rear wall — so almost nothing here has room to move. Every position is
-    derived from the pod's own four faces rather than written out in absolute metres, which is
-    what let the pod be resized at all: the previous version's fixed offsets left the basin,
-    the toilet and the curtain 500 mm behind the wall they were measured from.
+    The pod is a 900 x 1000 mm moulding in the rear kerb corner. Which flank it hugs follows from
+    which side of the centreline it sits on, so `side` is derived rather than written down: every
+    position here is measured from the pod's outer wall or its inboard opening, and mirroring the
+    pod across the cabin is a data change. Absolute metres are what stranded the basin, the
+    toilet and the curtain behind their own walls the last time this moved.
     """
     (x,y,z), (w,d,h) = a.placement('washroom_pod')
-    x0, x1 = x-w/2, x+w/2                  # outer wall, inboard opening
+    side = 1 if x > 0 else -1              # +1: outer wall on the kerb flank
+    outer, inner = x+side*w/2, x-side*w/2  # solid flank, aisle opening
     y0, y1 = y-d/2, y+d/2                  # forward opening, rear wall
     parts = [a.box('wetroom tray',(x,y,.047),(w,d,.09),'washroom.shell',.04),
-             a.box('moulded outer wall',(x0+.025,y,z),(.05,d,h),'washroom.shell',.022),
+             a.box('moulded outer wall',(outer-side*.025,y,z),(.05,d,h),'washroom.shell',.022),
              a.box('moulded rear wall',(x,y1-.025,z),(w,.05,h),'washroom.shell',.024)]
     # Rounded junction of two real walls; the aisle opening remains accessible.
     radius=.14
-    cx=x0+radius+.022
+    cx=outer-side*(radius+.022)
     cy=y1-radius-.022
     for i in range(12):
         angle=(i+.5)*math.pi/24
-        wall=a.box('curved GRP corner',(cx-radius*math.cos(angle),cy+radius*math.sin(angle),z),(.04,.022,h),'washroom.shell',.009)
-        wall.rotation_euler[2]=-angle
+        wall=a.box('curved GRP corner',(cx+side*radius*math.cos(angle),cy+radius*math.sin(angle),z),(.04,.022,h),'washroom.shell',.009)
+        wall.rotation_euler[2]=side*angle
         parts.append(wall)
     slats=max(1,int((d-.10)/.10))
     pitch=(d-.10)/slats
     for j in range(slats):
         parts.append(a.box('teak duckboard slat',(x,y0+.05+(j+.5)*pitch,.107),(w-.10,pitch*.80,.028),'washroom.duckboard',.006))
 
-    # Corner vanity with a mirror cabinet over it, in the forward-outer corner. Shallower than
-    # before: at 900 mm of depth a 400 mm vanity and the toilet pan would share floor.
-    basin_x, basin_y = x0+.20, y0+.13
-    parts.append(a.box('washroom_vanity',(basin_x,basin_y,.40),(.40,.26,.80),'washroom.shell',.03))
-    parts.append(a.bowl('washroom_basin',(basin_x,basin_y,.82),(.15,.115),.10,'washroom.shell',corner=.6))
-    parts.append(a.tube('vanity chrome tap',[(x0+.03,basin_y,.80),(x0+.03,basin_y,.95),(x0+.08,basin_y,.97),(x0+.13,basin_y,.95)],.012,'metal.chrome'))
-    parts.append(a.box('washroom_mirror_cabinet',(basin_x,y0+.06,1.42),(.40,.12,.52),'washroom.shell',.02))
-    parts.append(a.box('mirror',(basin_x,y0+.126,1.42),(.34,.012,.44),'metal.chrome',.01))
+    # Corner vanity with a mirror cabinet over it, in the forward corner against the outer wall.
+    # Both are sized off the pod so a shorter pod does not put the basin through the toilet.
+    vanity_w = min(.50, w-.34)
+    vanity_d = min(.36, d-.64)
+    basin_x = outer-side*(.05+vanity_w/2)
+    basin_y = y0+.01+vanity_d/2
+    parts.append(a.box('washroom_vanity',(basin_x,basin_y,.40),(vanity_w,vanity_d,.80),'washroom.shell',.03))
+    parts.append(a.bowl('washroom_basin',(basin_x,basin_y,.82),(vanity_w/2-.06,vanity_d/2-.04),.10,'washroom.shell',corner=.6))
+    parts.append(a.tube('vanity chrome tap',[(outer-side*.03,basin_y,.80),(outer-side*.03,basin_y,.95),(outer-side*.08,basin_y,.97),(outer-side*.13,basin_y,.95)],.012,'metal.chrome'))
+    parts.append(a.box('washroom_mirror_cabinet',(basin_x,y0+.06,1.42),(vanity_w,.12,.52),'washroom.shell',.02))
+    parts.append(a.box('mirror',(basin_x,y0+.126,1.42),(vanity_w-.06,.012,.44),'metal.chrome',.01))
 
     # Ribbed shell: horizontal mouldings on the outer wall, which is what the photograph shows
     # and what the washroom.shell map alone is too subtle to suggest.
     for level in (.45,.85,1.25,1.65):
-        parts.append(a.box('washroom_ribs',(x0+.058,y,level),(.02,d-.10,.05),'washroom.shell',.008))
+        parts.append(a.box('washroom_ribs',(outer-side*.058,y,level),(.02,d-.10,.05),'washroom.shell',.008))
 
     # Recessed, not projecting: the GRP pod is a single moulding, so shelves are formed into it.
     for i, level in enumerate((1.02,1.30)):
-        parts.append(a.box(f'washroom_niche_{i}',(x0+.05,y0+.65,level),(.06,.44,.16),'washroom.shell',.012))
-        parts.append(a.tube('niche retaining rail',[(x0+.085,y0+.45,level+.055),(x0+.085,y0+.85,level+.055)],.007,'metal.chrome'))
+        parts.append(a.box(f'washroom_niche_{i}',(outer-side*.05,y0+.70,level),(.06,.44,.16),'washroom.shell',.012))
+        parts.append(a.tube('niche retaining rail',[(outer-side*.085,y0+.50,level+.055),(outer-side*.085,y0+.90,level+.055)],.007,'metal.chrome'))
 
-    toilet_x=x1-.23
+    toilet_x=inner+side*.23
     parts.append(a.box('toilet pedestal',(toilet_x,y1-.33,.22),(.32,.43,.22),'washroom.shell',.11))
     parts.append(a.bowl('toilet pan',(toilet_x,y1-.35,.49),(.18,.23),.15,'washroom.shell'))
     parts.append(a.box('toilet raised lid',(toilet_x,y1-.15,.61),(.34,.055,.40),'washroom.shell',.10))
     parts.append(a.box('toilet cistern',(toilet_x,y1-.11,.38),(.37,.13,.47),'washroom.shell',.045))
-    parts.append(a.tube('shower riser',[(x0+.11,y1-.47,.95),(x0+.11,y1-.47,1.73),(x0+.19,y1-.47,1.78)],.011,'metal.chrome'))
-    parts.append(a.cylinder('shower head',(x0+.22,y1-.47,1.76),.065,.022,'metal.chrome'))
-    parts.append(a.tube('shower hose',[(x0+.10,y1-.47,1.05),(x0+.18,y1-.58,.76),(x0+.22,y1-.58,.81),(x0+.14,y1-.47,1.30)],.007,'metal.chrome'))
+    parts.append(a.tube('shower riser',[(outer-side*.11,y1-.47,.95),(outer-side*.11,y1-.47,1.73),(outer-side*.19,y1-.47,1.78)],.011,'metal.chrome'))
+    parts.append(a.cylinder('shower head',(outer-side*.22,y1-.47,1.76),.065,.022,'metal.chrome'))
+    parts.append(a.tube('shower hose',[(outer-side*.10,y1-.47,1.05),(outer-side*.18,y1-.58,.76),(outer-side*.22,y1-.58,.81),(outer-side*.14,y1-.47,1.30)],.007,'metal.chrome'))
 
     # Damask curtain on a chrome rail across the inboard opening, gathered against the rear end
     # rather than drawn: full width, it stands between the hotspot and everything the hotspot
@@ -324,8 +327,8 @@ def build_washroom(a):
     # instead of curtaining the whole opening off.
     rail_a, rail_b = y0+.30, y1-.09
     gathered = (rail_b-rail_a)*.47
-    parts.append(a.tube('washroom_rail',[(x1-.03,rail_a,1.86),(x1-.03,rail_b,1.86)],.010,'metal.chrome'))
-    parts.append(a.box('washroom_curtain',(x1-.03,rail_b-gathered/2,1.05),(.014,gathered,1.55),'textile.curtain',.004))
+    parts.append(a.tube('washroom_rail',[(inner+side*.03,rail_a,1.86),(inner+side*.03,rail_b,1.86)],.010,'metal.chrome'))
+    parts.append(a.box('washroom_curtain',(inner+side*.03,rail_b-gathered/2,1.05),(.014,gathered,1.55),'textile.curtain',.004))
     # Grab handle on the rear wall, clear of the cistern below and the niches outboard.
-    parts.append(a.tube('washroom_grab',[(x0+.05,y1-.09,1.10),(x0+.45,y1-.09,1.10)],.012,'metal.chrome'))
+    parts.append(a.tube('washroom_grab',[(outer-side*.05,y1-.09,1.10),(outer-side*.45,y1-.09,1.10)],.012,'metal.chrome'))
     a.group('washroom_pod',parts)

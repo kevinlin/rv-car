@@ -131,14 +131,16 @@ A fourth pass rearranged those three seats into the 卡座 booth the vehicle act
 forward seat facing aft, two abreast facing forward, stowable table between them. The lounge
 seating correction at the end of the same spec is the record.
 
-A fifth pass, against the manufacturer's walkthrough video, put the galley across the **rear
-wall** rather than along the kerb flank, and swapped the lounge sides: booth off, slide-out and
-its bed kerb. The galley now occupies that wall, so the rear-wall boarding door goes with it and
-the kerb-corner door both walkaround stills show is the only entry. The washroom shortens to
-800 × 900 and the exterior stop moves to the off flank, which is the flat one now. The
-rear-galley correction at the end of the photo-reference spec is the record.
+A fifth pass, against the manufacturer's walkthrough video, rebuilt the rear service room and
+swapped the lounge sides. The galley is a 1200 mm run along the **off flank**, continuing the
+line the fridge starts; the washroom is a 900 × 1000 corner pod in the **rear kerb corner**; the
+booth is off and the slide-out and its bed are kerb. The pod takes the corner the kerb boarding
+door used to occupy, so the one entry is 后上门, in the rear wall, offset 100 mm off the
+centreline. The exterior stop moves to the off flank, which is the flat one now. The rear service
+room correction at the end of the photo-reference spec is the record. It also records the
+intermediate reading this pass replaced: the galley across the rear wall.
 
-Measured: 73,404 triangles of 350,000, 9.5 MB transferred of 25 MB, 31 draw calls at the worst
+Measured: 73,404 triangles of 350,000, 9.5 MB transferred of 25 MB, 30 draw calls at the worst
 interior stop against a ceiling of 40, and 40 at the exterior against 60. Results tables in the
 photo-reference spec.
 
@@ -155,8 +157,8 @@ Three conventions worth knowing before editing geometry:
   `tools/model_furniture.py` builders receive a centre and a size; a hard-coded `y - .39` is
   correct only at the length it was tuned at. Shortening the galley run exposed four of these
   at once, and `check_models.mjs` caught them as "geometry exceeds placement box". Moving the
-  galley to the rear wall and shortening the washroom pod forced both modules to be rewritten
-  for the same reason; they are now written in terms of their placement's four faces.
+  galley and the washroom pod across the cabin forced both modules to be rewritten for the same
+  reason; both now derive which flank they hug from their placement and measure from its faces.
 
 ## Conventions
 
