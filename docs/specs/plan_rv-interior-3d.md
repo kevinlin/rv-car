@@ -6,7 +6,9 @@
 
 **Tech Stack:** TypeScript, Vite, Vitest, Three.js (vanilla, no framework), Blender 5.2.1 LTS with `bpy` export scripting, `@gltf-transform/cli` for Draco + KTX2 optimisation.
 
-**Spec:** [design_rv-interior-3d.md](design_rv-interior-3d.md)
+**Spec:** [design_rv-interior-3d.md](design_rv-interior-3d.md) — the single design spec, which
+has since absorbed the photo-reference and exterior child spec. Section numbers below refer to
+the merged document.
 **Evidence:** [../research/2026-09-04-dachi-wujijing-500-reference.md](../research/2026-09-04-dachi-wujijing-500-reference.md)
 
 ## Status — 2026-09-05
@@ -21,7 +23,8 @@ One success criterion is unmet: the mid-range-phone frame rate was never measure
 | 12–13 | **Complete.** Modelled shell and all eight furniture collections, packed UV2 AO, Draco/KTX2 exports, browser loading and per-collection commits. |
 | 14–15 | **Complete.** Lighting tuned against the references, six hotspot cameras re-placed against real furniture, success criteria recorded. |
 
-Results are in the spec's [Verification section](design_rv-interior-3d.md#verification-2026-09-05).
+Results are in the spec's [Acceptance pass](design_rv-interior-3d.md#acceptance-pass-2026-09-05)
+record entry.
 Still not claimed: photoreal reference parity, or any frame rate measured on a phone.
 
 ---
@@ -45,9 +48,9 @@ Still not claimed: photoreal reference parity, or any frame rate measured on a p
 
 Found while turning the design into concrete numbers. All three are improvements, and the spec's affected values were tagged `derived` or `estimated`, so nothing published moves.
 
-1. **Overlap checking is 3D AABB, not 2D footprint.** Spec §7 says "no footprint overlaps". A 2D footprint test fails on every overhead locker, because a locker legitimately sits above the furniture below it. The check compares full 3D boxes instead.
+1. **Overlap checking is 3D AABB, not 2D footprint.** The spec asked for "no footprint overlaps" (§11). A 2D footprint test fails on every overhead locker, because a locker legitimately sits above the furniture below it. The check compares full 3D boxes instead.
 2. **Containment is per-volume, not against one box.** The alcove bed sits forward of and above the habitation box; the slide-out bed extends outboard of it. A single bounding box either rejects both or is so loose it catches nothing. Each zone maps to a named volume, and placements are checked against their own volume.
-3. **Aisle width is 520 mm, not the spec's ~560 mm.** Spec §2's width budget (1100 + 700 + 560) describes the vehicle **retracted**. This build models it **deployed**, where the sofa becomes a 1280 mm bed and the geometry differs. 520 mm clears the ≥ 400 mm requirement. Recorded here rather than silently changed.
+3. **Aisle width is 520 mm, not the spec's original ~560 mm.** The spec's first width budget (1100 + 700 + 560) described the vehicle **retracted**. This build models it **deployed**, where the sofa becomes a 1280 mm bed and the geometry differs. 520 mm clears the ≥ 400 mm requirement. The later booth rearrangement moved the pinch point off the table and brought it back to 560 mm, which is the figure §2 now carries.
 
 ---
 
@@ -103,7 +106,7 @@ Rendered `PLACEMENTS` as coloured boxes via `src/greybox.ts`, wired into `src/sc
 
 ### Task 7: Blender export script
 
-Created `tools/export_modules.py` — headless export of one `.glb` per module collection, with convention checks (unit scale, `role.*` material names, collection completeness). Also `model/README.md` documenting the authoring rules. See [guide_rv-blender-modelling.md](guide_rv-blender-modelling.md).
+Created `tools/export_modules.py` — headless export of one `.glb` per module collection, with convention checks (unit scale, `role.*` material names, collection completeness). Also `model/README.md`, which is now the authoring reference: the separate Blender modelling guide it accompanied has been retired.
 
 ### Task 8: Budget checker
 
@@ -141,7 +144,7 @@ Created `src/ui.ts` with zone navigation buttons and wood finish swatches. Wired
 
 ## Self-Review
 
-**Spec coverage.** Every section maps to at least one task: §1 goals → Tasks 6, 14, 15; §2 dimensional reconstruction → Tasks 2–6; §3 data model → Tasks 2, 3, 4, 10, 11; §4 asset pipeline → Tasks 7, 8, 12, 13; §5 runtime architecture → every file in the table has an owning task; §6 lighting → Task 14; §7 verification → Tasks 5, 8, 15; §8 phasing → task order; §9 risks → risk 1 and 4 are the Task 6 gate, risk 3 is Task 13's ordering, risk 5 is Task 14's light count test.
+**Spec coverage.** Every section maps to at least one task. Against the merged spec's numbering: §1 goals → Tasks 6, 14, 15; §2 dimensional reconstruction → Tasks 2–6; §3 data model → Tasks 2, 3, 4, 10, 11; §5 asset pipeline → Tasks 7, 8, 12, 13; §6 runtime architecture → every file in the table has an owning task; §7 lighting → Task 14; §11 verification → Tasks 5, 8, 15; §12 phasing → task order; §13 risks → the no-floorplan and standing-height risks are the Task 6 gate, the washroom is Task 13's ordering, and `RectAreaLight` cost is Task 14's light-count test. §4, §8, §9 and §10's raised draw-call ceiling belong to the follow-on plan.
 
 **Type consistency.** `Mm`, `Confidence`, `Placement`, `Box`, `ZoneId`, `VolumeId`, `Hotspot`, `Role`, `Registry`, `MaterialParams`, `Variant`, `SceneBundle`, `CoveSpec`, `Violation` are each defined once and used with the same shape throughout. `aabb()`, `toM()`, `toMTriple()`, `roleOf()`, `applyFinishes()`, `bindPlacements()`, `checkAll()`, `minAisleWidth()`, `tweenTo()`, `applyHotspotLimits()`, `coveLightSpecs()`, `installLighting()`, `loadModules()`, `buildGreybox()`, `buildUi()` keep one signature each.
 
@@ -287,4 +290,7 @@ and the numbers are in the spec's Verification section; what follows is what cha
 
 ## Changelog
 
+- 2026-09-06 — **Re-pointed at the merged design spec.** `design_rv-photoref-360-exterior.md` was
+  folded into [design_rv-interior-3d.md](design_rv-interior-3d.md); this plan's section
+  references and anchors now target the merged document.
 - 2026-09-05 — **Compacted post-implementation.** Removed step-by-step tasks, file-by-file diffs, code snippets, and verification commands now that the feature has shipped. Preserved Goal, Global Constraints, Design Decisions, File Structure, execution log, and follow-ups. Original plan recoverable via git history.

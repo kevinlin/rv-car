@@ -7,11 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 A Three.js walkthrough of a 大驰 无极境500 C-type motorhome — six interior stops with free look,
 plus an exterior stop that orbits the body. Portfolio piece, not a product.
 
-Specs, in order: [docs/specs/design_rv-interior-3d.md](docs/specs/design_rv-interior-3d.md) and its
-[plan](docs/specs/plan_rv-interior-3d.md) build the interior;
-[docs/specs/design_rv-photoref-360-exterior.md](docs/specs/design_rv-photoref-360-exterior.md) and
-its [plan](docs/specs/plan_rv-photoref-360-exterior.md) correct it against the manufacturer's
-photography, add photo-derived textures, replace orbit with free look, and add the exterior.
+[docs/specs/design_rv-interior-3d.md](docs/specs/design_rv-interior-3d.md) is the single design
+spec. Sections 1–14 state the design as built; the implementation record after them keeps the
+dated passes in order, including the layout readings each one replaced. Two plans built it:
+[plan_rv-interior-3d.md](docs/specs/plan_rv-interior-3d.md) for the interior, and
+[plan_rv-photoref-360-exterior.md](docs/specs/plan_rv-photoref-360-exterior.md) for the
+photo-referenced correction, the textures, free look and the exterior.
 
 Read the design spec before making architectural changes: it records decisions (no lightmaps,
 slide-out deployed only, AO-only bakes) that the code depends on and that should not be
@@ -115,34 +116,23 @@ Enforced by [tools/export_modules.py](tools/export_modules.py) on the way out an
 
 ## Current state
 
-Both specs are implemented. Ten Blender collections export to ten `.glb`s; the grey-box in
+Both plans are implemented. Ten Blender collections export to ten `.glb`s; the grey-box in
 `greybox.ts` is now only the fallback for a checkout with no `public/models/`, and it skips the
 `exterior` zone because that body would hide everything it encloses.
 
-A third pass (2026-09-06) corrected the plan against
-[docs/research/spatial-brief_大驰无极境500MAX.md](docs/research/spatial-brief_大驰无极境500MAX.md)
-and the manufacturer's walkaround stills: three lounge seats rather than four, a full-width
-sliding partition at Z 2500 dividing the lounge from the rear service room, two boarding doors
-(rear wall on the centreline, kerb wall at the rear corner), and a galley run shortened to
-750 mm to clear the side door. The correction section at the end of the photo-reference spec is
-the record; the parent spec's zone table is superseded for those rows.
-
-A fourth pass rearranged those three seats into the 卡座 booth the vehicle actually has: one
-forward seat facing aft, two abreast facing forward, stowable table between them. The lounge
-seating correction at the end of the same spec is the record.
-
-A fifth pass, against the manufacturer's walkthrough video, rebuilt the rear service room and
-swapped the lounge sides. The galley is a 1200 mm run along the **off flank**, continuing the
-line the fridge starts; the washroom is a 900 × 1000 corner pod in the **rear kerb corner**; the
-booth is off and the slide-out and its bed are kerb. The pod takes the corner the kerb boarding
-door used to occupy, so the one entry is 后上门, in the rear wall, offset 100 mm off the
-centreline. The exterior stop moves to the off flank, which is the flat one now. The rear service
-room correction at the end of the photo-reference spec is the record. It also records the
-intermediate reading this pass replaced: the galley across the rear wall.
+The layout took three corrections after the first build, and the spec's implementation record is
+where each one is written down. Where it landed: a 卡座 booth on the **off** flank (one seat
+forward facing aft, two abreast facing forward, stowable table between); the slide-out and its bed
+**kerb**; a full-width sliding partition at Z 2500; a 1200 mm galley run along the **off** flank
+in the rear service room, continuing the line the fridge starts; a 900 × 1000 washroom pod in the
+**rear kerb corner**; and one entry, 后上门, in the rear wall, offset 100 mm off the centreline
+because the pod takes the corner the kerb door used to occupy. The exterior stop sits off flank,
+which is the flat one now. Do not re-derive any of this from the stills — two passes did, and both
+were wrong; the walkthrough video is what settled it.
 
 Measured: 73,404 triangles of 350,000, 9.5 MB transferred of 25 MB, 30 draw calls at the worst
 interior stop against a ceiling of 40, and 40 at the exterior against 60. Results tables in the
-photo-reference spec.
+spec's implementation record.
 
 Three conventions worth knowing before editing geometry:
 

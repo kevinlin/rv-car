@@ -15,8 +15,9 @@ carries orbit limits. The exterior is a tenth Blender module whose every dimensi
 **Tech Stack:** TypeScript, Vite, Vitest, Three.js r185 (vanilla), Blender 5.2.1 LTS with `bpy`,
 `@gltf-transform/cli` 4.5.0, `sharp` (new devDependency, build tooling only).
 
-**Spec:** [design_rv-photoref-360-exterior.md](design_rv-photoref-360-exterior.md)
-**Parent spec:** [design_rv-interior-3d.md](design_rv-interior-3d.md)
+**Spec:** [design_rv-interior-3d.md](design_rv-interior-3d.md). This work was designed in a
+child spec, `design_rv-photoref-360-exterior.md`, which has since been folded into the single
+design spec — section numbers below refer to the merged document.
 **Parent plan:** [plan_rv-interior-3d.md](plan_rv-interior-3d.md)
 
 ## Global Constraints
@@ -48,8 +49,9 @@ Inherited from the parent plan and still binding:
 
 Found while turning the design into concrete numbers. Recorded rather than silently applied.
 
-1. **Runtime textures ship as WebP, not KTX2.** Spec §4 said KTX2. `tools/optimize.sh` already
-   skips KTX2 compression when the `ktx` binary is absent, and the parent plan records that
+1. **Runtime textures ship as WebP, not KTX2.** The spec said KTX2; §4 now records the WebP
+   outcome. `tools/optimize.sh` already skips KTX2 compression when the `ktx` binary is absent,
+   and the parent plan records that
    KTX-Software was only ever extracted to a temporary directory, never installed. WebP needs no
    binary and loads through `THREE.TextureLoader` with no plumbing. KTX2 wins on GPU memory; the
    binding constraint here is transferred bytes, where WebP is equal or better. Revisit if GPU
@@ -58,9 +60,9 @@ Found while turning the design into concrete numbers. Recorded rather than silen
    encode. Node has none of these built in, and neither ImageMagick nor Pillow is present on the
    build machine. `sharp` is the mature choice; the homography itself is forty lines on top of
    its raw pixel buffers.
-3. **The neutral-saturation threshold is 0.05, not the spec's 0.10.** §9 set 0.10 so the existing
-   registry values would pass. Since Task 1 changes those values anyway, the threshold is set from
-   the photographs instead: they measure 0.015 to 0.034. At 0.05 the test fails today on both
+3. **The neutral-saturation threshold is 0.05, not the spec's 0.10.** The spec set 0.10 so the
+   existing registry values would pass. Since Task 1 changes those values anyway, the threshold is
+   set from the photographs instead: they measure 0.015 to 0.034. At 0.05 the test fails on both
    `floor` (0.088) and `upholstery.seat` (0.082), which is what makes it a real test.
 4. **The exterior envelope check excludes `slideout_box`.** The published 2450 mm width is the
    retracted width. A deployed slide-out legitimately exceeds it by 580 mm, so including it would
@@ -125,7 +127,8 @@ weakening it concentrated the coves' orange.
 ### Task 3: Measure UV1 texel density
 
 Added a texel-density measurement to `tools/check_blend.py` and an assertion that spread stays
-within tolerance across all textured roles. Risk 1 fired: `role.floor` measured 4.30 spread.
+within tolerance across all textured roles. The texel-density risk fired: `role.floor` measured
+4.30 spread.
 `normalise_uv_density()` rescaled each unwrap to a fixed 1.0 UV/m, dropping worst spread from
 8.57 to 1.40 without invalidating UV2 or the AO atlas.
 
@@ -237,24 +240,25 @@ propagate to all of them.
 
 ### Task 18: Full verification pass and documentation
 
-Ran every automated check and recorded the browser-measured numbers into the design spec's
-Results section. Updated `CLAUDE.md` to reflect the current state. See
-[design_rv-photoref-360-exterior.md](design_rv-photoref-360-exterior.md) §Results for the full
-table.
+Ran every automated check and recorded the browser-measured numbers into the design spec. Updated
+`CLAUDE.md` to reflect the current state. See the design spec's
+[Photo-reference, free look and exterior](design_rv-interior-3d.md#photo-reference-free-look-and-exterior-2026-09-06)
+record entry for the full table.
 
 ---
 
 ## Self-Review
 
-**Spec coverage.** Every section of the design maps to at least one task: §2 new evidence →
-Tasks 1 and 14 (handedness confirmed by the entry door placement); §3 warm cast → Tasks 1 and 2;
-§4 textures → Tasks 3, 4, 5, 6; §5 navigation → Tasks 7 and 8; §6 model corrections rows 1–10 →
-Tasks 1, 2, 9, 10, 11, 12, 13, 14; §7 exterior → Tasks 15, 16, 17; §8 budget → Tasks 6, 14, 17,
-18; §9 verification → the check steps in every task plus Task 18; §10 phasing → the phase
-headings; §11 risks → risk 1 is Task 3's whole purpose, risk 2 is the rectifier's flat-field
-stage, risk 5 is Task 14 step 8, risk 6 is Task 17 step 4; §12 open questions → the wheel radius
-is tagged `estimated` in Task 15 and the side graphic in Task 16; §13 cut list → Tasks 12 and 13
-are the two named, and they sit late in their phase for that reason.
+**Spec coverage.** Every part of the design maps to at least one task. Against the merged
+spec's numbering: new evidence → Tasks 1 and 14; the warm cast (§7) → Tasks 1 and 2; textures
+(§4) → Tasks 3, 4, 5, 6; navigation (§8) → Tasks 7 and 8; the ten model-correction rows →
+Tasks 1, 2, 9, 10, 11, 12, 13, 14; exterior (§9) → Tasks 15, 16, 17; budget (§10) → Tasks 6, 14,
+17, 18; verification (§11) → the check steps in every task plus Task 18; phasing (§12) → the
+phase headings; risks (§13) → texel density is Task 3's whole purpose, baked lighting in the crops
+is the rectifier's flat-field stage, the draw-call ceiling is Task 14, and the probe trap is
+Task 17; open questions (§14) → the wheel radius is tagged `estimated` in Task 15 and the side
+graphic in Task 16. The design's cut list named the washroom (Task 12) and the cab (Task 13);
+both sit late in their phase for that reason, and neither was cut.
 
 **Type consistency.** `TextureSpec`, `MaterialParams`, `Resolve`, `Registry`, `Role`, `Hotspot`,
 `LookControls`, `Heading`, `Patch`, `CalibrationRow`, `Placement`, `Box`, `ZoneId`, `VolumeId`
@@ -278,6 +282,9 @@ The parent plan has the same gap for the same reason, and this plan does not clo
 
 ## Changelog
 
+- 2026-09-06 — **Re-pointed at the merged design spec.** `design_rv-photoref-360-exterior.md`
+  was folded into [design_rv-interior-3d.md](design_rv-interior-3d.md); this plan's spec links
+  and section references now target the merged document.
 - 2026-09-06 — **Compacted post-implementation.** Removed step-by-step tasks, file-by-file diffs,
   code snippets, and verification commands now that the feature has shipped. Preserved Goal,
   Global Constraints, Design Decisions (four corrections), Critical Files summary, task intents,
