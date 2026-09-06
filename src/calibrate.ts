@@ -21,13 +21,21 @@ export interface Patch {
 }
 
 /**
- * Each must land on bare material — no prop, no highlight, no cove strip. Verified against a
- * marked screenshot; adjust `u`/`v` and reload if a patch drifts onto something else.
+ * Each must land on bare material — no prop, no highlight, no cove strip. Re-derived after the
+ * cabin mirrored, by raycasting the live scene on a grid and keeping only coordinates whose
+ * whole neighbourhood returns the intended role — not by flipping the previous `u`, which is
+ * how they were carried across the last correction and left unverified. Adjust `u`/`v` and
+ * reload if a patch drifts onto something else.
+ *
+ * All three land on a flat face whose surface normal is constant across the patch. That
+ * matters more than it looks: an 8-px square straddling a bevel underside reads 0.144 where
+ * the panel beside it reads 0.082, so a patch chosen without checking the normal measures
+ * the self-shadow rather than the material.
  */
 export const PATCHES: readonly Patch[] = [
-  { label: 'aisle floor',   role: 'floor',            hotspot: 'dinette',  u: 0.54, v: 0.86 },
-  { label: 'chair panel',   role: 'upholstery.seat',  hotspot: 'dinette',  u: 0.28, v: 0.62 },
-  { label: 'washroom wall', role: 'washroom.shell',   hotspot: 'washroom', u: 0.30, v: 0.40 },
+  { label: 'aisle floor',   role: 'floor',            hotspot: 'dinette',  u: 0.45, v: 0.79 },
+  { label: 'chair panel',   role: 'upholstery.seat',  hotspot: 'dinette',  u: 0.62, v: 0.44 },
+  { label: 'washroom wall', role: 'washroom.shell',   hotspot: 'washroom', u: 0.40, v: 0.50 },
 ];
 
 /** Mean colour of a square of the drawing buffer. Call immediately after a render. */
