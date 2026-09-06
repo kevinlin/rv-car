@@ -7,9 +7,6 @@ __pycache__/
 # Build output
 dist/
 
-# Generated assets (pnpm export / optimize)
-public/models/
-
 # Blender
 model/*.blend1
 

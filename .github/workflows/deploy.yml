@@ -1,0 +1,57 @@
+name: Deploy to Pages
+
+on:
+  push:
+    branches: [main]
+  # So a failed deploy can be retried without an empty commit.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never cancel a run mid-publish; queue behind it instead.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Version comes from the packageManager field, so CI and local stay pinned together.
+      # This must precede setup-node, which needs pnpm on PATH to resolve its cache.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # vitest plus tsc. The Blender-dependent gates stay local by design: `pnpm budget` and
+      # `pnpm check:models` read dist/raw, which only exists on a machine that has run
+      # `pnpm export`, and no runner here has Blender.
+      - name: Test and typecheck
+        run: pnpm check
+
+      - name: Build
+        run: pnpm build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

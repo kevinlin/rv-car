@@ -36,6 +36,14 @@ export interface LoadResult {
  * built in Blender, and the app has to stay runnable throughout. `bindPlacements` is what
  * enforces the naming contract once a module is actually present.
  */
+/**
+ * Rebases an absolute registry path onto the deployment root. Pages serves this project from a
+ * subpath, where `/models/shell.glb` would resolve against the domain root and 404. `BASE_URL`
+ * is `/` under `pnpm dev` and `./` in the built site.
+ */
+export const assetUrl = (path: string): string =>
+  `${import.meta.env.BASE_URL}${path.replace(/^\//, '')}`;
+
 export const loadModules = async (
   renderer: THREE.WebGLRenderer,
   names: readonly string[] = MODULE_NAMES,
@@ -48,7 +56,7 @@ export const loadModules = async (
   const missing: string[] = [];
 
   const results = await Promise.allSettled(
-    names.map((n) => gltfLoader.loadAsync(`/models/${n}.glb`)),
+    names.map((n) => gltfLoader.loadAsync(assetUrl(`/models/${n}.glb`))),
   );
 
   results.forEach((r, i) => {

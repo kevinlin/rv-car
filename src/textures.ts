@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { TextureSpec } from './data/finishes';
+import { assetUrl } from './loader';
 
 export type Resolve = (spec: TextureSpec) => THREE.Texture | null;
 
@@ -16,7 +17,7 @@ export const createTextureResolver = (): Resolve => {
     const hit = cache.get(key);
     if (hit) return hit;
 
-    const texture = loader.load(spec.url);
+    const texture = loader.load(assetUrl(spec.url));
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
     if (spec.repeat) texture.repeat.set(spec.repeat[0], spec.repeat[1]);

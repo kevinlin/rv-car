@@ -43,9 +43,23 @@ pnpm exec npm run check:models            # placement bounds, roles, exterior en
 pnpm exec npm run textures                # rectify photographs into public/textures/*.webp
 ```
 
-`public/models/` and `dist/` are gitignored: the `.glb`s regenerate from `model/rv.blend`, which
-is committed. `public/textures/` is committed, because it regenerates from committed reference
-images with no Blender needed.
+`dist/` is gitignored. `public/models/` is **committed**, along with `public/textures/` and
+`model/rv.blend`. The `.glb`s do regenerate from the `.blend`, but only on a machine with
+Blender, and the GitHub Pages runner has none — so an un-tracked `public/models/` deploys the
+grey-box fallback instead of the vehicle. Re-run `pnpm export && pnpm optimize` and commit the
+result whenever geometry changes.
+
+## Deployment
+
+[.github/workflows/deploy.yml](.github/workflows/deploy.yml) runs `pnpm check` then `pnpm build`
+on every push to `main` and publishes `dist/` to GitHub Pages. `pnpm budget` and
+`pnpm check:models` are deliberately not in CI: they read `dist/raw`, which only exists after a
+local `pnpm export`.
+
+`vite.config.ts` sets `base: './'` so the bundle works from the Pages project subpath, and
+`assetUrl()` in [src/loader.ts](src/loader.ts) rebases the registry's absolute `/models/…` and
+`/textures/…` paths onto it. Both are load-bearing: without them every asset 404s on Pages and
+the app quietly falls back to the grey-box.
 
 Dev-only query flags: `?verify` exposes `window.__rv` and writes draw calls, triangles and fps to
 `canvas.dataset`; `?calibrate` samples fixed screen patches over neutral surfaces and reports

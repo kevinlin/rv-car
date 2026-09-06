@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  // Relative, so the built site works from a GitHub Pages project subpath without the repo
+  // name being compiled in. `pnpm dev` still serves from `/`.
+  base: './',
   server: { port: 5173 },
   build: {
     target: 'es2022',
