@@ -9,9 +9,9 @@ modules = ['shell', 'dinette', 'sofa_slideout', 'alcove_bed', 'lockers', 'cab', 
 assert all(scene.get('modelled_' + name) for name in modules)
 
 # The inside bottoms of all three bowls must face up, including the regenerated binaries.
-for name, x, y, z in [('galley_run', .85, 2.765, .746),
-                      ('washroom_pod', -.90, 2.86, .72),
-                      ('washroom_pod', -.76, 3.70, .34)]:
+for name, x, y, z in [('galley_run', -.314, 3.75, .746),
+                      ('washroom_pod', -.95, 2.68, .72),
+                      ('washroom_pod', -.58, 3.10, .34)]:
     obj = bpy.data.objects[name]
     faces = [p for p in obj.data.polygons
              if abs((obj.matrix_world @ p.center).z - z) < .001
@@ -31,9 +31,11 @@ bpy.context.view_layer.update()
 # Rays must reach glazing, rather than an uncut wall/ceiling behind the visible trim.
 depsgraph = bpy.context.evaluated_depsgraph_get()
 for origin, direction in [((0, 1.4, 1.8), (0, 0, 1)),
-                          ((0, 1.04, 1.13), (1, 0, 0)),
-                          ((-1.3, 1.1, 1.115), (-1, 0, 0)),
-                          ((.9, 2.925, 1.14), (1, 0, 0))]:
+                          ((0, 1.04, 1.13), (-1, 0, 0)),
+                          ((1.3, 1.1, 1.115), (1, 0, 0)),
+                          ((.9, 2.925, 1.14), (1, 0, 0)),
+                          ((-.6, 3.46, 1.14), (0, 1, 0)),
+                          ((.7, 3.685, 1.3875), (1, 0, 0))]:
     hit, loc, normal, index, obj, matrix = scene.ray_cast(depsgraph, Vector(origin), Vector(direction))
     assert hit
     role = obj.data.materials[obj.data.polygons[index].material_index].name
@@ -43,19 +45,26 @@ for origin, direction in [((0, 1.4, 1.8), (0, 0, 1)),
 hit, loc, *_ = scene.ray_cast(depsgraph, Vector((0, .1, 1.65)), Vector((0, -1, 0)))
 assert hit and loc.y < -1, 'alcove entrance blocked by head-end lockers'
 
-# Rear entry (后上门) plus an open partition doorway, in one ray: from the lounge centreline
-# the first thing aft must be the rear wall itself. A sealed partition stops this at y 2.5,
-# and moving the boarding door back to the kerb wall leaves nothing to walk to.
+# An open partition doorway and a clear vestibule, in one ray: from the lounge centreline the
+# first thing aft must be the rear wall itself, over the galley counter. A sealed partition
+# stops this at y 2.5, and a washroom or a counter grown across the centreline stops it sooner.
 hit, loc, *_ = scene.ray_cast(depsgraph, Vector((0, 2.0, 1.0)), Vector((0, 1, 0)))
 assert hit and loc.y > 4.0, ('aisle from the lounge must run through the partition doorway '
-                             'to the rear boarding door', loc.y if hit else None)
+                             'and the vestibule to the rear wall', loc.y if hit else None)
 print('REAR_ENTRY aisle clear to y=%.3f' % loc.y)
 
-# And that door is glazed, in the rear wall, rather than a blank panel.
+# The boarding door is glazed and on the kerb flank, reachable across that vestibule. The
+# aperture ray above proves the glass; this proves nothing was parked in front of it.
+hit, loc, *_ = scene.ray_cast(depsgraph, Vector((-.2, 3.685, 1.0)), Vector((1, 0, 0)))
+assert hit and loc.x > 1.1, ('vestibule must be clear across to the kerb boarding door',
+                             loc.x if hit else None)
+print('BOARDING vestibule clear to x=%.3f' % loc.x)
+
+# The rear wall is glazed over the counter rather than a blank panel behind the cook.
 details = bpy.data.objects['shell_details']
 glass = [i for i, m in enumerate(details.data.materials) if m and m.name == 'role.glass']
 assert any(p.material_index in glass and (details.matrix_world @ p.center).y > 4.0
-           for p in details.data.polygons), 'no glazing in the rear wall: entry is not 后上门'
+           for p in details.data.polygons), 'no glazing in the rear wall'
 
 for obj in exterior:
     obj.hide_viewport = False

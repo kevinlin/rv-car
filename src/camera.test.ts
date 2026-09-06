@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { HOTSPOTS, PLACEMENTS, aabb } from './data/vehicle';
 import * as THREE from 'three';
-import { clamp, easeInOutCubic, tweenTo } from './camera';
+import { applyHotspotLimits, clamp, easeInOutCubic, tweenTo } from './camera';
 import { ENCLOSURES } from './check';
 import type { SceneBundle } from './scene';
 
@@ -183,6 +183,21 @@ describe('the exterior stop', () => {
     // Nearest body face is 1.225 m from the centreline; the ring must clear it.
     if (exterior?.view.kind !== 'orbit') throw new Error('exterior must orbit');
     expect(exterior.view.distance[0]).toBeGreaterThan(1.225);
+  });
+
+  it('is left unclamped in azimuth, because a whole turn is not a range', () => {
+    if (exterior?.view.kind !== 'orbit') throw new Error('exterior must orbit');
+    const camera = new THREE.PerspectiveCamera();
+    camera.position.set(...(exterior.camera.position as [number, number, number]));
+    const controls = {
+      minAzimuthAngle: 0, maxAzimuthAngle: 0,
+      minPolarAngle: 0, maxPolarAngle: 0,
+      minDistance: 0, maxDistance: 0,
+      update: () => {},
+    } as unknown as Parameters<typeof applyHotspotLimits>[0];
+    applyHotspotLimits(controls, camera, exterior.camera.target, exterior.view);
+    expect(controls.minAzimuthAngle).toBe(-Infinity);
+    expect(controls.maxAzimuthAngle).toBe(Infinity);
   });
 
   it('never looks up from below the ground plane', () => {

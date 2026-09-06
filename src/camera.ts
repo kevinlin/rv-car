@@ -23,8 +23,13 @@ export const applyHotspotLimits = (
     camera.position.x - target[0]!,
     camera.position.z - target[2]!,
   );
-  controls.minAzimuthAngle = centreAzimuth + view.azimuth[0]!;
-  controls.maxAzimuthAngle = centreAzimuth + view.azimuth[1]!;
+  // A whole turn has to be written as no limit at all. Expressed as centre ± PI the two bounds
+  // are the same angle, and OrbitControls decides whether that is "min < max" on float error —
+  // when it lands the wrong way it clamps the heading to that one angle and teleports the
+  // camera to the far corner of the vehicle, which is what the exterior stop did.
+  const wholeTurn = view.azimuth[1]! - view.azimuth[0]! >= 2 * Math.PI;
+  controls.minAzimuthAngle = wholeTurn ? -Infinity : centreAzimuth + view.azimuth[0]!;
+  controls.maxAzimuthAngle = wholeTurn ? Infinity : centreAzimuth + view.azimuth[1]!;
   controls.minPolarAngle = view.polar[0]!;
   controls.maxPolarAngle = view.polar[1]!;
   controls.minDistance = view.distance[0]!;

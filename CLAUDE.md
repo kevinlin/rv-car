@@ -131,7 +131,14 @@ A fourth pass rearranged those three seats into the 卡座 booth the vehicle act
 forward seat facing aft, two abreast facing forward, stowable table between them. The lounge
 seating correction at the end of the same spec is the record.
 
-Measured: 76,036 triangles of 350,000, 9.5 MB transferred of 25 MB, 32 draw calls at the worst
+A fifth pass, against the manufacturer's walkthrough video, put the galley across the **rear
+wall** rather than along the kerb flank, and swapped the lounge sides: booth off, slide-out and
+its bed kerb. The galley now occupies that wall, so the rear-wall boarding door goes with it and
+the kerb-corner door both walkaround stills show is the only entry. The washroom shortens to
+800 × 900 and the exterior stop moves to the off flank, which is the flat one now. The
+rear-galley correction at the end of the photo-reference spec is the record.
+
+Measured: 73,404 triangles of 350,000, 9.5 MB transferred of 25 MB, 31 draw calls at the worst
 interior stop against a ceiling of 40, and 40 at the exterior against 60. Results tables in the
 photo-reference spec.
 
@@ -147,7 +154,9 @@ Three conventions worth knowing before editing geometry:
 - **Furniture geometry measures from its placement's own ends, never from fixed offsets.**
   `tools/model_furniture.py` builders receive a centre and a size; a hard-coded `y - .39` is
   correct only at the length it was tuned at. Shortening the galley run exposed four of these
-  at once, and `check_models.mjs` caught them as "geometry exceeds placement box".
+  at once, and `check_models.mjs` caught them as "geometry exceeds placement box". Moving the
+  galley to the rear wall and shortening the washroom pod forced both modules to be rewritten
+  for the same reason; they are now written in terms of their placement's four faces.
 
 ## Conventions
 

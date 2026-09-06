@@ -42,7 +42,7 @@ describe('minAisleWidth', () => {
   });
 
   it('reports 560 mm for the deployed layout', () => {
-    // Slide-out bed inboard edge at -450, lounge seat pair's inboard edge at +110.
+    // Lounge seat pair's inboard edge at -110, slide-out bed inboard edge at +450.
     expect(minAisleWidth(PLACEMENTS)).toBe(560);
   });
 });
@@ -73,9 +73,15 @@ describe('checkAll', () => {
   });
 
   it('reports an aisle violation when the bed is widened into the walkway', () => {
+    // The bed grows inboard from its outboard edge at X 1730, so the extra 520 mm comes out
+    // of the aisle rather than out of the slide-out box.
     const broken: Placement[] = PLACEMENTS.map((p) =>
       p.id === 'slideout_bed'
-        ? { ...p, size: [{ v: 1800, c: 'estimated' as const }, p.size[1], p.size[2]] as const }
+        ? {
+            ...p,
+            origin: [{ v: -70, c: 'estimated' as const }, p.origin[1], p.origin[2]] as const,
+            size: [{ v: 1800, c: 'estimated' as const }, p.size[1], p.size[2]] as const,
+          }
         : p,
     );
     expect(checkAll(broken).some((v) => v.rule === 'aisle')).toBe(true);

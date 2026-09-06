@@ -25,8 +25,8 @@ export interface Patch {
  * marked screenshot; adjust `u`/`v` and reload if a patch drifts onto something else.
  */
 export const PATCHES: readonly Patch[] = [
-  { label: 'aisle floor',   role: 'floor',            hotspot: 'dinette',  u: 0.46, v: 0.86 },
-  { label: 'chair panel',   role: 'upholstery.seat',  hotspot: 'dinette',  u: 0.72, v: 0.62 },
+  { label: 'aisle floor',   role: 'floor',            hotspot: 'dinette',  u: 0.54, v: 0.86 },
+  { label: 'chair panel',   role: 'upholstery.seat',  hotspot: 'dinette',  u: 0.28, v: 0.62 },
   { label: 'washroom wall', role: 'washroom.shell',   hotspot: 'washroom', u: 0.30, v: 0.40 },
 ];
 
