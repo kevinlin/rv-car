@@ -182,17 +182,40 @@ def window(name, x, y, z, width, height):
     return group(name, parts)
 
 
-def entry_door(x, y, z, width, height):
-    """Leaf, frame and pleated flyscreen filling an opening in the kerb wall."""
-    parts = [box('entry_door_leaf', (x, y, z), (.035, width-.06, height-.06), 'panel.wall', .012),
-             box('entry_door_glass', (x-.004, y, z+height/4), (.006, width-.24, height/3), 'glass', 0),
-             box('entry_door_handle', (x-.032, y-width/2+.14, z), (.03, .04, .17), 'metal.brushed', .012)]
+def entry_door(x, y, z, width, height, axis='x'):
+    """Leaf, frame and pleated flyscreen filling an opening in a wall.
+
+    `axis` names the wall's normal. 后上门 puts this vehicle's boarding door in the rear wall,
+    so 'y' is the variant in use; the door itself is the same either way, which is why this
+    takes an axis rather than growing a second copy. Both the kerb wall and the rear wall sit
+    at the positive end of their axis, so "into the cabin" is the negative direction on both,
+    and `inset` is measured that way.
+    """
+    def part(name, inset, across, up, thick, wide, tall, role, bevel):
+        centre = ((x-inset, y+across, z+up) if axis == 'x' else (x+across, y-inset, z+up))
+        size = ((thick, wide, tall) if axis == 'x' else (wide, thick, tall))
+        return box(name, centre, size, role, bevel)
+
+    # The leaf is a frame around the glazed aperture, not a slab with a pane laid inside it.
+    # A solid leaf buries the 6 mm pane in 35 mm of panel, so the door reads blank from
+    # indoors — which is what both boarding doors did until the entry moved somewhere the
+    # camera actually looks at it.
+    aw, ah = (width-.24)/2, height/6        # aperture half-width, half-height
+    ac = height/4                            # aperture centre: RV door glass sits high
+    lw, lh = (width-.06)/2, (height-.06)/2   # leaf half-width, half-height
+    parts = [part('entry_door_rail', 0, 0, (ac-ah-lh)/2, .035, lw*2, ac-ah+lh, 'panel.wall', .012),
+             part('entry_door_rail', 0, 0, (ac+ah+lh)/2, .035, lw*2, lh-ac-ah, 'panel.wall', .012),
+             part('entry_door_stile', 0, -(aw+lw)/2, ac, .035, lw-aw, ah*2, 'panel.wall', .012),
+             part('entry_door_stile', 0, (aw+lw)/2, ac, .035, lw-aw, ah*2, 'panel.wall', .012),
+             part('entry_door_glass', 0, 0, ac, .006, aw*2, ah*2, 'glass', 0),
+             part('entry_door_handle', .032, -width/2+.14, 0, .03, .04, .17, 'metal.brushed', .012),
+             part('entry_door_head', 0, 0, height/2, .055, width, .04, 'panel.wall', .006),
+             # Pleated flyscreen, gathered against one jamb.
+             part('entry_door_flyscreen', .05, -width/2+.07, 0, .012, .12, height-.10,
+                  'textile.curtain', .004)]
     for side in (-1, 1):
-        parts.append(box('entry_door_jamb', (x, y+side*width/2, z), (.055, .04, height), 'panel.wall', .006))
-    parts.append(box('entry_door_head', (x, y, z+height/2), (.055, width, .04), 'panel.wall', .006))
-    # Pleated flyscreen, gathered against the forward jamb.
-    parts.append(box('entry_door_flyscreen', (x-.05, y-width/2+.07, z), (.012, .12, height-.10),
-                     'textile.curtain', .004))
+        parts.append(part('entry_door_jamb', 0, side*width/2, 0, .055, .04, height,
+                          'panel.wall', .006))
     return group('entry_door', parts)
 
 
@@ -210,11 +233,28 @@ def build_shell():
     # windows rather than to a zone. As a furniture placement it overlapped the wardrobe,
     # the galley run and the galley overhead at once, and there is no free kerb wall to
     # move it to: the galley run fills that side from the storage band to the rear.
+    # Two boarding doors, which is what the vehicle has: the kerb-side one lands just aft of
+    # the partition, in the only clear stretch of kerb wall in the service room, and the
+    # galley window moves aft over the shortened counter to make room for it.
     wall('wall_kerb',*placement('wall_kerb'),
-         [(.32,.9,1.76,1.36),(2.75,.93,3.45,1.35),(2.35,0,3.00,1.85)])
+         [(.32,.9,1.76,1.36),(2.605,.93,3.245,1.35),(3.35,0,4.02,1.85)])
     # Full-width passage under the overcab mattress and a sleeping opening above it.
     wall('bulkhead',*placement('bulkhead'),[(-1.1,0,1.1,1.98)],axis='y')
-    box('wall_rear',*placement('wall_rear'),'panel.wall',.002)
+    # 后上门: the boarding door is in the REAR wall, opening onto the vestibule between the
+    # galley run and the washroom pod. The photograph that put it on the kerb side shows it
+    # "beside the galley run" — which is equally true of a rear door, because the galley
+    # terminates at the rear wall right next to it.
+    wall('wall_rear',*placement('wall_rear'),[(-.40,0,.40,1.85)],axis='y')
+    entry_door(0,4.065,.925,.80,1.85,axis='y')
+    entry_door(1.165,3.685,.925,.67,1.85)
+    # The sliding partition. A wall with a doorway in it, not a curtain and not a half-height
+    # unit, because the brief is explicit that it has to read as a real room divider. The leaf
+    # is drawn back on its track over the wardrobe side, which is the parked daytime state the
+    # rest of the model depicts — slide-out deployed, table up.
+    wall('partition',*placement('partition'),[(-.38,0,.38,1.84)],axis='y')
+    box('partition_leaf',(.78,2.46,.92),(.80,.04,1.84),'wood.cabinet',.008)
+    box('partition_track',(.40,2.46,1.8625),(1.56,.045,.045),'metal.brushed',.006)
+    box('partition_pull',(.42,2.435,1.00),(.02,.014,.28),'metal.chrome',.006)
     parts = [wall('slide_back',(-1.745,1.1,1),(.03,1.9,2),[(.32,.86,1.88,1.37)]),
              box('slide_front',(-1.47,.165,1),(.55,.03,2),'panel.wall',.002),
              box('slide_rear',(-1.47,2.035,1),(.55,.03,2),'panel.wall',.002),
@@ -224,8 +264,7 @@ def build_shell():
     window('dinette_window',1.165,1.04,1.13,1.44,.46)
     window('slideout_window',-1.745,1.1,1.115,1.56,.51)
     # Taller than before: the reference puts a window over the counter, not a slot.
-    window('galley_window',1.165,3.1,1.14,.7,.42)
-    entry_door(1.165,2.675,.925,.65,1.85)
+    window('galley_window',1.165,2.925,1.14,.64,.42)
     for x in [-1.125,1.125]:
         wall('alcove_flank', (x,-.7,1.675),(.05,1.4,.65),[(-1.15,1.43,-.4,1.82)])
         window('alcove_window',x,-.775,1.625,.75,.39)

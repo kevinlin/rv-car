@@ -43,10 +43,42 @@ describe('placements', () => {
   });
 
   it('marks the dinette chairs and table movable, and nothing structural', () => {
-    expect(byId('dinette_chair_fwd_in').movable).toBe(true);
+    expect(byId('dinette_chair_fwd').movable).toBe(true);
     expect(byId('dinette_table').movable).toBe(true);
     expect(byId('washroom_pod').movable).toBe(false);
     expect(byId('floor').movable).toBe(false);
+  });
+
+  it('seats three in the lounge, which is what the published occupancy leaves', () => {
+    // S4 gives the layout as 中部3人汽车座椅, and 5 seated minus the cab's two agrees.
+    // Four lounge chairs would need six belts in a vehicle sold as a five-seater.
+    const lounge = PLACEMENTS.filter((p) => p.id.startsWith('dinette_chair_'));
+    const cab = PLACEMENTS.filter((p) => p.id.startsWith('cab_seat_'));
+    expect(lounge).toHaveLength(3);
+    expect(lounge.length + cab.length).toBe(5);
+  });
+
+  it('lines the lounge seats up along the kerb wall rather than facing them off in pairs', () => {
+    const lounge = PLACEMENTS.filter((p) => p.id.startsWith('dinette_chair_'));
+    // One column, not two: every seat shares the same inboard edge.
+    expect(new Set(lounge.map((p) => p.origin[0].v)).size).toBe(1);
+    // And they step down the vehicle, so no two share a Z.
+    expect(new Set(lounge.map((p) => p.origin[2].v)).size).toBe(3);
+  });
+
+  it('divides the rear service room off with a full-width partition', () => {
+    // 尾部独立厨卫区: the rear kitchen and washroom are only independent if something closes.
+    const box = aabb(byId('partition'));
+    expect(box.min[0]).toBe(-ENVELOPE.habWidth!.v / 2);
+    expect(box.max[0]).toBe(ENVELOPE.habWidth!.v / 2);
+    expect(box.max[1]).toBe(ENVELOPE.habHeight!.v); // floor to ceiling, not a half-height unit
+    // Aft of everything in the lounge, forward of everything in the service room.
+    const maxZ = (zone: string) =>
+      Math.max(...PLACEMENTS.filter((p) => p.zone === zone).map((p) => aabb(p).max[2]!));
+    const minZ = (zone: string) =>
+      Math.min(...PLACEMENTS.filter((p) => p.zone === zone).map((p) => aabb(p).min[2]!));
+    expect(box.min[2]).toBeGreaterThanOrEqual(maxZ('dinette'));
+    expect(box.max[2]).toBeLessThanOrEqual(Math.min(minZ('galley'), minZ('washroom')));
   });
 
   it('has at least one placement in every zone', () => {

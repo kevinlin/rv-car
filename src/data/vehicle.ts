@@ -84,6 +84,11 @@ export const PLACEMENTS: readonly Placement[] = [
   { id: 'wall_kerb',zone: 'shell', origin: [d(1150), d(0), d(0)],      size: [d(W), d(2000), d(4050)], movable: false },
   { id: 'bulkhead', zone: 'shell', origin: [d(-1180), d(0), d(-W)],    size: [d(2360), d(2000), d(W)], movable: false },
   { id: 'wall_rear',zone: 'shell', origin: [d(-1180), d(0), d(4050)],  size: [d(2360), d(2000), d(W)], movable: false },
+  // The sliding partition, and the defining feature of the 尾部独立厨卫区 layout: the rear
+  // service room is only "independent" if something actually closes it off. Shell rather than
+  // furniture, for the same reason the entry door is — it is a wall with a doorway in it, and
+  // an enclosure cannot be held to the overlap and aisle rules it exists to divide.
+  { id: 'partition', zone: 'shell', origin: [e(-1180), d(0), e(2500)], size: [d(2360), d(2000), e(50)], movable: false },
   { id: 'slideout_shell', zone: 'shell', origin: [d(-1760), d(0), d(150)], size: [d(580), d(2000), d(1900)], movable: false },
 
   // --- cab ---
@@ -95,12 +100,17 @@ export const PLACEMENTS: readonly Placement[] = [
   // Head-end lockers: the former -300 mm position blocked the sleeping-area entrance.
   { id: 'alcove_lockers', zone: 'alcove', origin: [e(-1100), e(1500), e(-1400)], size: [e(2200), e(400), e(300)],      movable: false },
 
-  // --- dinette: four captain chairs face to face around a pedestal table ---
-  { id: 'dinette_chair_fwd_in',  zone: 'dinette', origin: [e(70), e(0), e(100)],  size: [e(520), e(1150), e(520)], movable: true },
-  { id: 'dinette_chair_fwd_out', zone: 'dinette', origin: [e(630), e(0), e(100)], size: [e(520), e(1150), e(520)], movable: true },
-  { id: 'dinette_chair_aft_in',  zone: 'dinette', origin: [e(70), e(0), e(1360)], size: [e(520), e(1150), e(520)], movable: true },
-  { id: 'dinette_chair_aft_out', zone: 'dinette', origin: [e(630), e(0), e(1360)],size: [e(520), e(1150), e(520)], movable: true },
-  { id: 'dinette_table',         zone: 'dinette', origin: [e(120), e(0), e(640)], size: [e(980), e(720), e(700)],  movable: true },
+  // --- lounge: three automotive seats in a row against the kerb wall, table alongside ---
+  // Three, not four. S4 gives the 境 layout as 中部3人汽车座椅 + 长条沙发, and the published
+  // 5-seat occupancy pins it arithmetically: two in the cab leaves three back here. The
+  // face-to-face pair-of-pairs the grey-box carried was read off a photograph and was wrong.
+  { id: 'dinette_chair_fwd', zone: 'dinette', origin: [e(630), e(0), e(130)],  size: [e(520), e(1150), e(520)], movable: true },
+  { id: 'dinette_chair_mid', zone: 'dinette', origin: [e(630), e(0), e(700)],  size: [e(520), e(1150), e(520)], movable: true },
+  { id: 'dinette_chair_aft', zone: 'dinette', origin: [e(630), e(0), e(1270)], size: [e(520), e(1150), e(520)], movable: true },
+  // Deployed inboard of the seat row, where the middle and aft seats swivel to reach it and
+  // the sofa opposite can too. Its inboard edge holds the 520 mm aisle the old inboard chair
+  // column set, so the narrowest point of the walkway is unchanged.
+  { id: 'dinette_table',     zone: 'dinette', origin: [e(70), e(0), e(950)],   size: [e(550), e(720), e(700)],  movable: true },
   { id: 'lockers_kerb',          zone: 'dinette', origin: [e(700), e(1400), e(100)], size: [e(450), e(450), e(1900)], movable: false },
 
   // --- side slide-out: bench base plus the 1280 x 1900 bed (published) ---
@@ -114,9 +124,12 @@ export const PLACEMENTS: readonly Placement[] = [
   // also filled the floor in front of the entry door.
   { id: 'wardrobe', zone: 'storage', origin: [e(600), e(0), e(2100)],   size: [e(550), e(1900), e(250)], movable: false },
 
-  // --- rear wet zone. Which side is which is open question 5 in the spec. ---
-  { id: 'galley_run',      zone: 'galley', origin: [e(550), e(0), e(2550)],    size: [e(600), e(900), e(1500)], movable: false },
-  { id: 'galley_overhead', zone: 'galley', origin: [e(550), e(1350), e(2550)], size: [e(600), e(450), e(1500)], movable: false },
+  // --- rear wet zone. Galley kerb, washroom off, per the photoref spec's regulatory argument.
+  // The run gives up its rear 750 mm to the kerb-side boarding door. The manufacturer's own
+  // walkaround photograph puts that door at the rear corner of the kerb flank, aft of the
+  // rear wheel, so the galley sits forward of it, straight behind the partition.
+  { id: 'galley_run',      zone: 'galley', origin: [e(550), e(0), e(2550)],    size: [e(600), e(900), e(750)], movable: false },
+  { id: 'galley_overhead', zone: 'galley', origin: [e(550), e(1350), e(2550)], size: [e(600), e(450), e(750)], movable: false },
   { id: 'washroom_pod',    zone: 'washroom', origin: [e(-1150), e(0), e(2650)],size: [e(700), e(1950), e(1400)], movable: false },
 
   // --- exterior. Every value derives from ENVELOPE, so the published envelope becomes
@@ -179,8 +192,10 @@ export const HOTSPOTS: readonly Hotspot[] = [
   // +40 to -10 and +20 to -10. Rounded outward to give the viewer somewhere to go.
   {
     id: 'dinette',
+    // Forward of the partition at Z 2500, in the gap between the fridge and the wardrobe.
+    // The old Z 2.6 stop now stood in the service room looking through a doorway.
     label: 'Lounge',
-    camera: { position: [-0.2, 1.55, 2.6], target: [0.1, 0.95, 0.3] },
+    camera: { position: [-0.15, 1.55, 2.3], target: [0.15, 0.95, 0.3] },
     view: { kind: 'look', pitch: [-35 * D, 35 * D] },
   },
   {
@@ -197,14 +212,19 @@ export const HOTSPOTS: readonly Hotspot[] = [
   },
   {
     id: 'galley',
+    // Aft of the partition, standing in the rear service room rather than looking into it
+    // from the lounge. Both rear stops share this corridor and face opposite walls.
     label: 'Galley',
-    camera: { position: [-0.35, 1.6, 2.35], target: [0.85, 0.95, 3.4] },
+    camera: { position: [-0.2, 1.6, 3.55], target: [0.85, 1.0, 2.9] },
     view: { kind: 'look', pitch: [-40 * D, 30 * D] },
   },
   {
     id: 'washroom',
+    // The old eye sat exactly in the partition plane. Moved aft of it, to the pod's forward
+    // corner: an eye further aft looks straight into the shower curtain, which hangs across
+    // the forward half of its rail.
     label: 'Washroom',
-    camera: { position: [0.4, 1.6, 2.5], target: [-0.85, 0.95, 3.5] },
+    camera: { position: [0.4, 1.6, 2.62], target: [-0.9, 1.0, 2.9] },
     view: { kind: 'look', pitch: [-40 * D, 30 * D] },
   },
   {

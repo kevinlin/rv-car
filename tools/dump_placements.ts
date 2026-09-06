@@ -25,11 +25,10 @@ const ROLE_BY_ZONE: Record<string, string> = {
 /** Which Blender collection each placement belongs to. Must match MODULES in export_modules.py. */
 const COLLECTION_BY_ID: Record<string, string> = {
   floor: 'shell', ceiling: 'shell', wall_off: 'shell', wall_kerb: 'shell',
-  bulkhead: 'shell', wall_rear: 'shell', slideout_shell: 'shell',
+  bulkhead: 'shell', wall_rear: 'shell', slideout_shell: 'shell', partition: 'shell',
   cab_seat_off: 'cab', cab_seat_kerb: 'cab',
   alcove_bed: 'alcove_bed', alcove_lockers: 'alcove_bed',
-  dinette_chair_fwd_in: 'dinette', dinette_chair_fwd_out: 'dinette',
-  dinette_chair_aft_in: 'dinette', dinette_chair_aft_out: 'dinette',
+  dinette_chair_fwd: 'dinette', dinette_chair_mid: 'dinette', dinette_chair_aft: 'dinette',
   dinette_table: 'dinette',
   lockers_kerb: 'lockers', lockers_off: 'lockers',
   slideout_base: 'sofa_slideout', slideout_bed: 'sofa_slideout',

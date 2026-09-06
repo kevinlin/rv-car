@@ -36,7 +36,7 @@ describe('bindPlacements', () => {
     const subset = PLACEMENTS.filter((p) => p.zone === 'dinette');
     const incomplete = treeWith(subset.slice(1).map((p) => p.id));
     expect(() => bindPlacements(incomplete, subset)).toThrow(BindingError);
-    expect(() => bindPlacements(incomplete, subset)).toThrow(/dinette_chair_fwd_in/);
+    expect(() => bindPlacements(incomplete, subset)).toThrow(/dinette_chair_fwd/);
   });
 
   it('lists every missing node in one error, not just the first', () => {
@@ -46,7 +46,7 @@ describe('bindPlacements', () => {
       expect.unreachable('should have thrown');
     } catch (err) {
       expect((err as Error).message).toContain('dinette_table');
-      expect((err as Error).message).toContain('dinette_chair_aft_out');
+      expect((err as Error).message).toContain('dinette_chair_aft');
     }
   });
 });

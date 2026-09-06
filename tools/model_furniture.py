@@ -29,9 +29,10 @@ def _chair(a, name, direction=1, cab=False):
 
 
 def build_dinette(a):
-    for end, direction in [('fwd', 1), ('aft', -1)]:
-        for side in ('in', 'out'):
-            _chair(a, f'dinette_chair_{end}_{side}', direction)
+    # Three seats in one row against the kerb wall, all facing forward. They are travel seats
+    # with belts, not a dinette: direction -1 puts the backrest aft.
+    for name in ('dinette_chair_fwd', 'dinette_chair_mid', 'dinette_chair_aft'):
+        _chair(a, name, -1)
     (x, y, z), (w, d, h) = a.placement('dinette_table')
     # Reference: a walnut edge band around a pale top, on a chrome column rather than brushed.
     # The pale top sits proud of the walnut band. Flush would put the two top faces on the same
@@ -127,28 +128,40 @@ def build_galley(a):
     # Four strips make an actual countertop opening around the recessed bowl.
     # Reference: square stainless bowl nearest the aisle, induction hob at the rear, so the
     # cook faces the window rather than the rear wall. The counter opening mirrors with it.
-    sink_y = y-.39
+    #
+    # Everything fore-aft is measured from the run's own two ends rather than from fixed
+    # offsets. The run lost half its length to the kerb boarding door, and the old constants
+    # were tuned to 1500 mm: at 750 the sink alone hung out past the front of the cabinet.
+    y0, y1 = y-d/2, y+d/2                    # aisle end, rear end
+    bowl_r = min(.21, (d-.42)/2)             # square bowl, leaving the hob its share
+    sink_y = y0+.05+bowl_r
+    split = sink_y+bowl_r                    # where the bowl opening ends and the hob begins
+    hob_len = y1-split-.05
+    hob_y = (split+y1)/2
     parts.extend([
         a.box('counter front length', (x-w/2+.058,y,.879), (.116,d,.042), 'worktop', .01),
         a.box('counter rear length', (x+w/2-.058,y,.879), (.116,d,.042), 'worktop', .01),
-        a.box('counter hob field', (x,y+.30,.879), (w-.20,.90,.042), 'worktop', .01),
-        a.box('counter aisle end', (x,y-d/2+.048,.879), (w-.20,.096,.042), 'worktop', .01),
-        a.bowl('stainless sink', (x,sink_y,.886), (.21,.21), .14, 'metal.chrome', corner=.3)])
+        a.box('counter hob field', (x,hob_y,.879), (w-.20,y1-split,.042), 'worktop', .01),
+        a.box('counter aisle end', (x,y0+.024,.879), (w-.20,.048,.042), 'worktop', .01),
+        a.bowl('stainless sink', (x,sink_y,.886), (bowl_r,bowl_r), .14, 'metal.chrome', corner=.3)])
+    # Fittings are sized off the bay, not off the old 1500 mm run: at 750 the bays are 250 mm
+    # and the fixed 340 mm pulls hung 45 mm past both ends of the cabinet.
+    bay = d/3
     for j in range(3):
-        cy = y-d/2+(j+.5)*d/3
+        cy = y-d/2+(j+.5)*bay
         if j == 2:
             # The 5 kg washer-dryer takes the rear bay. Given a wooden door in front of it, it
             # would be a box nobody can see, so the appliance is the door.
-            parts.append(a.box('washer',(x-w/2+.036,cy,.43),(.028,d/3-.02,.77),'metal.brushed',.012))
-            parts.append(a.box('washer_door',(x-w/2+.018,cy,.40),(.026,.34,.34),'metal.dark',.15))
-            parts.append(a.box('washer_fascia',(x-w/2+.018,cy,.70),(.026,.30,.09),'graphic.screen',.008))
+            parts.append(a.box('washer',(x-w/2+.036,cy,.43),(.028,bay-.02,.77),'metal.brushed',.012))
+            parts.append(a.box('washer_door',(x-w/2+.018,cy,.40),(.026,min(.34,bay-.06),.34),'metal.dark',.15))
+            parts.append(a.box('washer_fascia',(x-w/2+.018,cy,.70),(.026,min(.30,bay-.10),.09),'graphic.screen',.008))
             continue
-        parts.append(a.box('galley cabinet door',(x-w/2+.036,cy,.43),(.028,d/3-.02,.77),'wood.cabinet',.012))
-        parts.append(a.box('long cabinet pull',(x-w/2+.011,cy,.74),(.022,.34,.023),'metal.chrome',.007))
+        parts.append(a.box('galley cabinet door',(x-w/2+.036,cy,.43),(.028,bay-.02,.77),'wood.cabinet',.012))
+        parts.append(a.box('long cabinet pull',(x-w/2+.011,cy,.74),(.022,min(.34,bay-.06),.023),'metal.chrome',.007))
     a.group('galley_run',parts)
     parts=[]
-    parts.append(a.box('induction glass',(x,y+.40,.906),(.42,.47,.017),'metal.dark',.022))
-    for cy,radius in [(y+.50,.10),(y+.27,.075)]:
+    parts.append(a.box('induction glass',(x,hob_y,.906),(.42,hob_len,.017),'metal.dark',.022))
+    for cy,radius in [(hob_y+hob_len/4,hob_len*.21),(hob_y-hob_len/4,hob_len*.16)]:
         circle = [(x+radius*math.cos(t*math.tau/32),cy+radius*math.sin(t*math.tau/32),.917) for t in range(33)]
         parts.append(a.tube('induction ring',circle,.003,'metal.chrome'))
     parts.append(a.tube('black gooseneck',[(x+.19,sink_y,.90),(x+.19,sink_y,1.11),(x+.18,sink_y,1.17),(x+.13,sink_y,1.20),(x+.05,sink_y,1.20),(x,sink_y,1.17),(x,sink_y,1.12)],.012,'metal.dark'))
@@ -159,12 +172,14 @@ def build_galley(a):
         cy=y-d/2+(i+.5)*d/3
         parts.append(a.box('overhead walnut door',(x-w/2+.032,cy,z),(.023,d/3-.015,h-.024),'wood.cabinet',.016))
         parts.append(a.box('overhead handle',(x-w/2+.008,cy,z-.12),(.016,.12,.023),'metal.chrome',.006))
-    a.box('extractor_hood',(x-.02,y-.4,z-h/2-.045),(w-.04,.48,.09),'metal.dark',.02)
+    a.box('extractor_hood',(x-.02,hob_y,z-h/2-.045),(w-.04,min(.48,hob_len+.08),.09),'metal.dark',.02)
     a.group('galley_overhead',parts)
     # Microwave/steam oven, set into the overhead run at its aisle end.
-    a.box('oven',(x-.06,y-.52,z),(w-.12,.42,h-.06),'metal.dark',.015)
+    oven_len = min(.42, d*.35)
+    oven_y = y-d/2+.05+oven_len/2
+    a.box('oven',(x-.06,oven_y,z),(w-.12,oven_len,h-.06),'metal.dark',.015)
     # Proud of the oven's own front face at x-w/2, or it renders inside the box it labels.
-    a.box('oven_fascia',(x-w/2-.004,y-.52,z),(.016,.34,h-.16),'graphic.screen',.006)
+    a.box('oven_fascia',(x-w/2-.004,oven_y,z),(.016,oven_len-.08,h-.16),'graphic.screen',.006)
     for name,direction in [('fridge',1),('wardrobe',-1)]:
         (x,y,z),(w,d,h)=a.placement(name)
         parts=[a.box(name+' carcass',(x-direction*.03,y,z),(w-.06,d,h),'wood.cabinet',.018)]

@@ -54,8 +54,10 @@ describe('checkAll', () => {
 
   it('reports an overlap when two pieces are pushed into each other', () => {
     const broken: Placement[] = PLACEMENTS.map((p) =>
+      // Outboard, into the seat column. Sliding it fore-aft no longer collides with anything:
+      // the seats are a single row against the kerb wall, and the table sits inboard of them.
       p.id === 'dinette_table'
-        ? { ...p, origin: [p.origin[0], p.origin[1], { v: 100, c: 'estimated' as const }] as const }
+        ? { ...p, origin: [{ v: 700, c: 'estimated' as const }, p.origin[1], p.origin[2]] as const }
         : p,
     );
     expect(checkAll(broken).some((v) => v.rule === 'overlap')).toBe(true);

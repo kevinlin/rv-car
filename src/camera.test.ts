@@ -118,6 +118,23 @@ describe('hotspot cameras stand in free space', () => {
   });
 });
 
+describe('the partition splits the stops in two', () => {
+  // With a real divider across the vehicle, a stop on the wrong side of it looks at a wall or
+  // squints through a doorway. The lounge camera used to stand at Z 2.6, aft of where the
+  // partition now is; the washroom camera stood exactly in its plane.
+  const partition = aabb(PLACEMENTS.find((p) => p.id === 'partition')!);
+
+  it('keeps the lounge stops forward of it and the service stops aft', () => {
+    const side = (id: string) => HOTSPOTS.find((h) => h.id === id)!.camera.position[2]! * 1000;
+    for (const id of ['dinette', 'sofa', 'alcove', 'cab']) {
+      expect(side(id)).toBeLessThan(partition.min[2]!);
+    }
+    for (const id of ['galley', 'washroom']) {
+      expect(side(id)).toBeGreaterThan(partition.max[2]!);
+    }
+  });
+});
+
 describe('tweenTo', () => {
   /** Minimal stand-ins: tweenTo only touches the camera and the controls' limits and target. */
   const bundle = () => {

@@ -9,7 +9,7 @@ modules = ['shell', 'dinette', 'sofa_slideout', 'alcove_bed', 'lockers', 'cab', 
 assert all(scene.get('modelled_' + name) for name in modules)
 
 # The inside bottoms of all three bowls must face up, including the regenerated binaries.
-for name, x, y, z in [('galley_run', .85, 2.91, .746),
+for name, x, y, z in [('galley_run', .85, 2.765, .746),
                       ('washroom_pod', -.90, 2.86, .72),
                       ('washroom_pod', -.76, 3.70, .34)]:
     obj = bpy.data.objects[name]
@@ -33,7 +33,7 @@ depsgraph = bpy.context.evaluated_depsgraph_get()
 for origin, direction in [((0, 1.4, 1.8), (0, 0, 1)),
                           ((0, 1.04, 1.13), (1, 0, 0)),
                           ((-1.3, 1.1, 1.115), (-1, 0, 0)),
-                          ((.9, 3.10, 1.14), (1, 0, 0))]:
+                          ((.9, 2.925, 1.14), (1, 0, 0))]:
     hit, loc, normal, index, obj, matrix = scene.ray_cast(depsgraph, Vector(origin), Vector(direction))
     assert hit
     role = obj.data.materials[obj.data.polygons[index].material_index].name
@@ -42,6 +42,20 @@ for origin, direction in [((0, 1.4, 1.8), (0, 0, 1)),
 
 hit, loc, *_ = scene.ray_cast(depsgraph, Vector((0, .1, 1.65)), Vector((0, -1, 0)))
 assert hit and loc.y < -1, 'alcove entrance blocked by head-end lockers'
+
+# Rear entry (后上门) plus an open partition doorway, in one ray: from the lounge centreline
+# the first thing aft must be the rear wall itself. A sealed partition stops this at y 2.5,
+# and moving the boarding door back to the kerb wall leaves nothing to walk to.
+hit, loc, *_ = scene.ray_cast(depsgraph, Vector((0, 2.0, 1.0)), Vector((0, 1, 0)))
+assert hit and loc.y > 4.0, ('aisle from the lounge must run through the partition doorway '
+                             'to the rear boarding door', loc.y if hit else None)
+print('REAR_ENTRY aisle clear to y=%.3f' % loc.y)
+
+# And that door is glazed, in the rear wall, rather than a blank panel.
+details = bpy.data.objects['shell_details']
+glass = [i for i, m in enumerate(details.data.materials) if m and m.name == 'role.glass']
+assert any(p.material_index in glass and (details.matrix_world @ p.center).y > 4.0
+           for p in details.data.polygons), 'no glazing in the rear wall: entry is not 后上门'
 
 for obj in exterior:
     obj.hide_viewport = False

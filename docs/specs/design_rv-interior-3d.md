@@ -92,6 +92,10 @@ build on.
 | Galley | 2300 → 4050 | one side, *estimated* | Entry door adjacent; see open question 5 |
 | Washroom | 2300 → 4050 | opposite the galley | Moulded GRP wet room, ~900 × 1100 footprint |
 
+**Superseded 2026-09-06** for the dinette and galley rows, and for the missing sliding partition
+between the lounge and the wet zone. See the layout correction at the end of
+[design_rv-photoref-360-exterior.md](design_rv-photoref-360-exterior.md).
+
 ### Sleeping surfaces
 
 **Alcove bed, 2200 × 1400 (published).** Runs transversely: 2200 mm across the

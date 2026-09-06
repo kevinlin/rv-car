@@ -105,11 +105,19 @@ Both specs are implemented. Ten Blender collections export to ten `.glb`s; the g
 `greybox.ts` is now only the fallback for a checkout with no `public/models/`, and it skips the
 `exterior` zone because that body would hide everything it encloses.
 
-Measured: 71,980 triangles of 350,000, 9.8 MB transferred of 25 MB, 36 draw calls at the worst
-interior stop against a ceiling of 40, and 45 at the exterior against 60. Results table in the
+A third pass (2026-09-06) corrected the plan against
+[docs/research/spatial-brief_大驰无极境500MAX.md](docs/research/spatial-brief_大驰无极境500MAX.md)
+and the manufacturer's walkaround stills: three lounge seats in a row rather than four facing
+off, a full-width sliding partition at Z 2500 dividing the lounge from the rear service room,
+two boarding doors (rear wall on the centreline, kerb wall at the rear corner), and a galley run
+shortened to 750 mm to clear the side door. The correction section at the end of the
+photo-reference spec is the record; the parent spec's zone table is superseded for those rows.
+
+Measured: 76,036 triangles of 350,000, 9.5 MB transferred of 25 MB, 32 draw calls at the worst
+interior stop against a ceiling of 40, and 40 at the exterior against 60. Results tables in the
 photo-reference spec.
 
-Two conventions worth knowing before editing geometry:
+Three conventions worth knowing before editing geometry:
 
 - **UVMap runs at exactly 1.0 UV unit per metre**, held there by `normalise_uv_density()` in
   `tools/model_interior.py` and asserted by `check_blend.py`. Every `repeat` in the finish
@@ -118,6 +126,10 @@ Two conventions worth knowing before editing geometry:
   camera checks via `ENCLOSURES` in `check.ts`. Anything that wraps the cabin belongs in one of
   them; a built-in appliance cannot be a placement, because it shares the volume of the
   cabinetry it sits in.
+- **Furniture geometry measures from its placement's own ends, never from fixed offsets.**
+  `tools/model_furniture.py` builders receive a centre and a size; a hard-coded `y - .39` is
+  correct only at the length it was tuned at. Shortening the galley run exposed four of these
+  at once, and `check_models.mjs` caught them as "geometry exceeds placement box".
 
 ## Conventions
 

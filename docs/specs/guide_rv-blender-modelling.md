@@ -78,7 +78,7 @@ it as the weakest zone.
 
 | Order | Collection | Objects | Reference image |
 |---|---|---|---|
-| 1 | `dinette` | `dinette_chair_fwd_in`, `dinette_chair_fwd_out`, `dinette_chair_aft_in`, `dinette_chair_aft_out`, `dinette_table` | `dinette-and-slideout-bed.jpg`, `galley-wardrobe-dinette.jpg` |
+| 1 | `dinette` | `dinette_chair_fwd`, `dinette_chair_mid`, `dinette_chair_aft`, `dinette_table` | `dinette-and-slideout-bed.jpg`, `galley-wardrobe-dinette.jpg` |
 | 2 | `sofa_slideout` | `slideout_base`, `slideout_bed` | `bed-dimensions.jpg`, `dinette-and-slideout-bed.jpg` |
 | 3 | `alcove_bed` | `alcove_bed`, `alcove_lockers` | `interior-lounge-and-overcab.jpg` |
 | 4 | `lockers` | `lockers_kerb`, `lockers_off` | `interior-lounge-and-overcab.jpg` |

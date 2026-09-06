@@ -52,7 +52,7 @@ describe('role batching', () => {
   it('keeps movable mesh roots independent and both wood roles finishable', () => {
     const root = new THREE.Group();
     const chair = mesh(), detail = mesh('wood.trim'), cabinet = mesh();
-    chair.name = 'dinette_chair_fwd_in';
+    chair.name = 'dinette_chair_fwd';
     chair.position.set(0.3, 0.5, 1.4);
     chair.rotation.y = 0.7;
     detail.position.set(0, 1, 0);

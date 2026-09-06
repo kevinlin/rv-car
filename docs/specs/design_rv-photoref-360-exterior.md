@@ -61,6 +61,9 @@ is what `PLACEMENTS` already encodes. No data change; the question is answered.
 The brochure interior shots cannot settle handedness on their own — they are internally
 consistent with either mirroring. The regulatory constraint is what settles it.
 
+**Superseded in part, 2026-09-06.** Handedness stands. The door's position does not: it sits at
+the rear corner of the kerb flank, not partway along it. See the layout correction at the end.
+
 ### Equipment present in the photographs and absent from the model
 
 Entry door with pleated flyscreen, 5 kg washer-dryer, microwave/steam oven, systems touch panel,
@@ -437,3 +440,85 @@ than no check. `emptyOutDir: false` in `vite.config.ts` fixes it.
   hatches are not modelled.
 - **The side livery is a stripe band, not the full artwork**, for the UV reason recorded in
   [../research/final/README.md](../research/final/README.md).
+
+---
+
+## Layout correction (2026-09-06)
+
+Driven by [../research/spatial-brief_大驰无极境500MAX.md](../research/spatial-brief_大驰无极境500MAX.md)
+and the manufacturer's walkaround photography. Four things about the plan were wrong, and the
+evidence for three of them was already sitting in this project's own research note.
+
+### Fixed
+
+| # | Was | Now | Evidence |
+|---|---|---|---|
+| 1 | Four swivel chairs face to face around the table | Three automotive seats in one row along the kerb wall, table deployed inboard | S4's 中部3人汽车座椅, and the published 5-seat occupancy: two in the cab leaves three |
+| 2 | Lounge ran straight into the rear wet zone | Full-width sliding partition at Z 2500, doorway 760 mm, leaf parked over the wardrobe side | 尾部独立厨卫区 — the rear room is only "independent" if something closes it |
+| 3 | One boarding door, cut into the kerb wall at Z 2350–3000 | Two: a rear-wall door on the centreline, and the kerb-side door at the rear corner, Z 3350–4020 | 后上门, plus two walkaround stills that put the side door aft of the rear wheel |
+| 4 | Galley run 1500 mm, filling the kerb wall to the rear | 750 mm, Z 2550–3300, forward of the door bay | Follows from 3 |
+
+Row 1's four chairs came from a photograph. The photograph was over-read, and the occupancy
+figure settles it arithmetically. Row 3's door was over-read the same way: §2 closed open
+question 5 by arguing the galley photograph shows the door "immediately beside the galley run",
+which is equally true of a door in the rear corner beside a galley that terminates there.
+
+### Checked against the brief and deliberately kept
+
+- **Slide-out bed stays 1280 × 1900.** The brief gives 2000 × 1350, which is the figure §2
+  already recorded as contradicted and resolved: the manufacturer's own poster beats Sohu and
+  Sina, and the brief's number traces to the 境280 predecessor.
+- **Table stays a chrome pedestal.** The brief calls it wall-mounted or folding. The
+  photography this spec is built on shows a pedestal, and a photograph beats a text description.
+- **Washroom stays 700 × 1400.** The brief's class is 800–950 × 900–1100, which is the same
+  floor area to within a few per cent, and the 700 mm width is the parent spec's phase-1 fix
+  for a corridor that pinched to 220 mm.
+- **Zone id stays `dinette`.** It is the wrong word for a three-seat lounge, but renaming it
+  reaches into `ZoneId`, the grey-box palette, the collection names and nine `.glb` filenames
+  to buy nothing. The hotspot has read "Lounge" since the first pass.
+
+### Two defects the rework exposed
+
+Both were latent, and both were the same mistake: geometry measured in absolute offsets from a
+placement's centre rather than from its own ends.
+
+- `build_galley` put the sink at `y − .39` and the cabinet pulls at a fixed 340 mm. At the
+  shortened 750 mm run the sink hung past the front of the cabinet and the pulls overhung both
+  ends by 45 mm, which `check_models.mjs` caught as "geometry exceeds placement box". Everything
+  fore-aft now derives from the run's two ends, so the module is correct at either length.
+- `entry_door` built the leaf as one 35 mm slab with the 6 mm pane buried inside it. The door
+  read as a blank panel from indoors. The leaf is now a frame around the aperture. The exterior
+  door is a four-strip reveal with nothing across the opening for the same reason: the body is
+  one solid mass, so anything filling that rectangle turns the interior glazing black.
+
+### Checks added
+
+| Check | Kind | Asserts |
+|---|---|---|
+| Lounge seat count | vitest | Three `dinette_chair_*`, and lounge plus cab equals the published five |
+| Seat row | vitest | One column of three seats, each at a different Z |
+| Partition | vitest | Spans the full habitation width, floor to ceiling, between the lounge and the service zone |
+| Stop sides | vitest | Lounge stops forward of the partition, service stops aft of it |
+| Rear entry | `check_blend.py` | A ray aft along the lounge centreline reaches y 4.048, through the partition doorway to the rear door; a sealed partition stops it at 2.5 |
+| Rear glazing | `check_blend.py` | `role.glass` exists in the rear wall |
+
+### Re-measured
+
+| Axis | Ceiling | Result |
+|---|---|---|
+| Triangles | 350,000 | 76,036 |
+| Bytes | 25 MB | 9.52 MB |
+| Draw calls, worst interior | 40 | 32 |
+| Draw calls, exterior | 60 | 40 |
+| Frame rate | 60 fps at 1080p | 116–120, vsync-capped, at 1600 × 900 |
+| vitest + `tsc` | — | 113 tests, clean |
+
+Placement bounds, the exterior envelope (5998 × 2450 × 3200 mm), texel density and the AO wiring
+all still pass unchanged.
+
+### Still open
+
+Neither walkaround still shows the rear-wall door; both show only the kerb-side one at the rear
+corner. It is modelled because the layout brief is explicit about a rear entry sequence and
+because that was the call taken during this pass, but it is the one piece of geometry here with
+no photograph behind it. Removing it is a two-line change to `build_shell`.
