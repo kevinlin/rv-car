@@ -9,9 +9,9 @@ modules = ['shell', 'dinette', 'sofa_slideout', 'alcove_bed', 'lockers', 'cab', 
 assert all(scene.get('modelled_' + name) for name in modules)
 
 # The inside bottoms of all three bowls must face up, including the regenerated binaries.
-for name, x, y, z in [('galley_run', -.85, 2.814, .746),
-                      ('washroom_pod', .85, 3.24, .72),
-                      ('washroom_pod', .48, 3.70, .34)]:
+for name, x, y, z in [('galley_run', .85, 2.814, .746),
+                      ('washroom_pod', -.85, 3.24, .72),
+                      ('washroom_pod', -.48, 3.70, .34)]:
     obj = bpy.data.objects[name]
     faces = [p for p in obj.data.polygons
              if abs((obj.matrix_world @ p.center).z - z) < .001
@@ -30,11 +30,13 @@ bpy.context.view_layer.update()
 
 # Rays must reach glazing, rather than an uncut wall/ceiling behind the visible trim.
 depsgraph = bpy.context.evaluated_depsgraph_get()
+# Sides follow the layout: the lounge and galley windows are on the kerb flank (+x), the
+# slide-out and service ones on the off flank (-x).
 for origin, direction in [((0, 1.4, 1.8), (0, 0, 1)),
-                          ((0, 1.04, 1.13), (-1, 0, 0)),
-                          ((1.3, 1.1, 1.115), (1, 0, 0)),
-                          ((0, 2.7, 1.14), (1, 0, 0)),
-                          ((-.4, 3.22, 1.14), (-1, 0, 0)),
+                          ((0, 1.04, 1.13), (1, 0, 0)),
+                          ((-1.3, 1.1, 1.115), (-1, 0, 0)),
+                          ((0, 2.7, 1.14), (-1, 0, 0)),
+                          ((.4, 3.22, 1.14), (1, 0, 0)),
                           ((0, 3.9, 1.3875), (0, 1, 0))]:
     hit, loc, normal, index, obj, matrix = scene.ray_cast(depsgraph, Vector(origin), Vector(direction))
     assert hit

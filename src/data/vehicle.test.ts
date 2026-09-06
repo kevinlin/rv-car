@@ -48,8 +48,8 @@ describe('volumes', () => {
   });
 
   it('extends the slide-out volume outboard of the habitation box', () => {
-    // Outboard on the kerb flank, which is the side the slide-out deploys to.
-    expect(VOLUMES.slideout.max[0]!).toBeGreaterThan(VOLUMES.habitation.max[0]!);
+    // Outboard on the off flank, which is the side the slide-out deploys to.
+    expect(VOLUMES.slideout.min[0]!).toBeLessThan(VOLUMES.habitation.min[0]!);
   });
 
   it('places the alcove volume forward of the bulkhead and above the floor', () => {

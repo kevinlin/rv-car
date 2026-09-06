@@ -51,10 +51,10 @@ def build_exterior(a):
                    'wheel', rotation=(0, 1.5708, 0))
 
     # The one boarding door, matching the opening cut into wall_rear: 后上门, offset off the
-    # centreline because the washroom pod takes the kerb corner of that wall. Recessed a
+    # centreline because the washroom pod takes the off corner of that wall. Recessed a
     # millimetre, so the published 5998 x 2450 mm envelope stays exactly what
     # check_models.mjs measures off the body placements.
-    _door_reveal(a, 'body_door_rear', (-.10, 4.043, .925), .76, 1.89, 'y')
+    _door_reveal(a, 'body_door_rear', (.10, 4.043, .925), .76, 1.89, 'y')
 
     # Side graphic as a decal plane just proud of the body, one per flank.
     for side, x in (('off', -1.228), ('kerb', 1.228)):

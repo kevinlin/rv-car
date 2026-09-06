@@ -47,14 +47,16 @@ def build_dinette(a):
 
 def build_sofa_slideout(a):
     (x,y,z), (w,d,h) = a.placement('slideout_base')
-    # The slide deploys to the kerb flank, so the plinth is flush outboard at +x and the
-    # drawers face the aisle at -x. Everything lateral is measured from the base's own two
-    # ends rather than from a signed constant, which is what made the mirror a sign flip.
-    parts = [a.box('walnut bed plinth', (x+.02,y,z), (w-.04,d,h), 'wood.cabinet', .02)]
+    # `side` is which flank the slide deploys to, derived rather than written down: the plinth
+    # sits flush outboard and the drawers face the aisle, and both follow the sign. A hard-coded
+    # +x outboard is precisely the constant that had to be rewritten each time this crossed the
+    # cabin.
+    side = 1 if x > 0 else -1
+    parts = [a.box('walnut bed plinth', (x+side*.02,y,z), (w-.04,d,h), 'wood.cabinet', .02)]
     for j in range(3):
         cy = y-d/2+(j+.5)*d/3
-        parts.append(a.box('sofa drawer', (x-w/2+.029,cy,z), (.022,d/3-.025,h-.055), 'wood.cabinet', .009))
-        parts.append(a.box('sofa drawer pull', (x-w/2+.009,cy,z+.07), (.018,.14,.025), 'metal.brushed', .007))
+        parts.append(a.box('sofa drawer', (x-side*(w/2-.029),cy,z), (.022,d/3-.025,h-.055), 'wood.cabinet', .009))
+        parts.append(a.box('sofa drawer pull', (x-side*(w/2-.009),cy,z+.07), (.018,.14,.025), 'metal.brushed', .007))
     a.group('slideout_base', parts)
     (x,y,z), (w,d,h) = a.placement('slideout_bed')
     # The perimeter foundation retains the published 1280 x 1900 mm outline.
@@ -67,8 +69,9 @@ def build_sofa_slideout(a):
     # The deployed slide-out is a bed, but the reference keeps a back cushion against the
     # outboard wall rather than laying every cushion flat. Deliberately NOT joined into
     # slideout_bed: the cushion rises above that placement box, which carries the published
-    # 1280 x 1900 footprint and is checked to the millimetre.
-    a.box('slideout_back', (1.66, 1.10, .74), (.12, 1.86, .28), 'upholstery.sofa', .03)
+    # 1280 x 1900 footprint and is checked to the millimetre. Measured off the bed's own
+    # outboard face, so it follows the flank.
+    a.box('slideout_back', (x+side*(w/2-.07), y, .74), (.12, d-.04, .28), 'upholstery.sofa', .03)
 
 
 def build_alcove_bed(a):
@@ -86,8 +89,11 @@ def build_alcove_bed(a):
 
 
 def build_lockers(a):
-    for name, direction in [('lockers_kerb', -1), ('lockers_off', 1)]:
+    for name in ('lockers_kerb', 'lockers_off'):
         (x,y,z), (w,d,h) = a.placement(name)
+        # Doors face the aisle, so the direction is the inboard one: away from the flank the
+        # run hugs. Derived, because the two runs swap flanks when the cabin mirrors.
+        direction = -1 if x > 0 else 1
         parts = [a.box('locker walnut case', (x-direction*.024,y,z), (w-.048,d,h), 'wood.cabinet', .025)]
         face = x + direction*(w/2-.034)
         for i in range(3):
@@ -127,14 +133,19 @@ def build_cab(a):
 
 def build_galley(a):
     (x,y,z), (w,d,h) = a.placement('galley_run')
-    # A run along the OFF flank: `d` is its length fore-aft and `w` its counter depth. The wall
-    # is at -x and the aisle at +x. Everything across the run is measured from those two faces
-    # and everything along it from the run's own two ends, so neither a resize nor a move to the
-    # other flank can strand a constant — which is what happened the last two times this moved.
-    back, front = x-w/2, x+w/2               # off wall face, aisle face
+    # A run along one flank: `d` is its length fore-aft and `w` its counter depth. Which flank
+    # follows from the sign of x, so `inward` walks a distance from the wall face toward the
+    # aisle and `outward` the other way. Everything across the run is measured from those two
+    # faces and everything along it from the run's own two ends, so neither a resize nor a move
+    # to the other flank can strand a constant — which is what happened the last two times this
+    # moved, and what the walkthrough correction moved it again.
+    side = 1 if x > 0 else -1                # +1: the run hugs the kerb wall
+    back, front = x+side*w/2, x-side*w/2     # wall face, aisle face
+    inward = lambda face, dist: face - side*dist   # from the wall, toward the aisle
+    outward = lambda face, dist: face + side*dist  # from the aisle, toward the wall
     y0, y1 = y-d/2, y+d/2                    # forward end, rear end
     parts = [a.box('galley base floor', (x,y,.045), (w,d,.09), 'wood.cabinet', .016),
-             a.box('galley back panel', (back+.015,y,.45), (.03,d,.80), 'wood.cabinet', .008)]
+             a.box('galley back panel', (inward(back,.015),y,.45), (.03,d,.80), 'wood.cabinet', .008)]
     # Four strips make an actual countertop opening around the recessed bowl.
     # Reference: square stainless bowl at the forward end under the window, induction hob aft,
     # so the cook stands clear of the boarding door.
@@ -145,8 +156,8 @@ def build_galley(a):
     hob_len = min(.42, (y1-split)-.20)
     hob_y = y1-.10-hob_len/2
     parts.extend([
-        a.box('counter front length', (front-lip,y,.879), (2*lip,d,.042), 'worktop', .01),
-        a.box('counter rear length', (back+lip,y,.879), (2*lip,d,.042), 'worktop', .01),
+        a.box('counter front length', (outward(front,lip),y,.879), (2*lip,d,.042), 'worktop', .01),
+        a.box('counter rear length', (inward(back,lip),y,.879), (2*lip,d,.042), 'worktop', .01),
         a.box('counter hob field', (x,(split+y1)/2,.879), (w-4*lip,y1-split,.042), 'worktop', .01),
         a.box('counter forward end', (x,(y0+sink_y-bowl_r)/2,.879), (w-4*lip,sink_y-bowl_r-y0,.042), 'worktop', .01),
         a.bowl('stainless sink', (x,sink_y,.886), (bowl_r,bowl_r), .14, 'metal.chrome', corner=.3)])
@@ -157,39 +168,44 @@ def build_galley(a):
         if j == 2:
             # The 5 kg washer-dryer takes the rear bay, nearest the boarding door. Given a wooden
             # door in front of it, it would be a box nobody can see, so the appliance is the door.
-            parts.append(a.box('washer',(front-.036,cy,.43),(.028,bay-.02,.77),'metal.brushed',.012))
-            parts.append(a.box('washer_door',(front-.018,cy,.40),(.026,min(.34,bay-.06),.34),'metal.dark',.15))
-            parts.append(a.box('washer_fascia',(front-.018,cy,.70),(.026,min(.30,bay-.10),.09),'graphic.screen',.008))
+            parts.append(a.box('washer',(outward(front,.036),cy,.43),(.028,bay-.02,.77),'metal.brushed',.012))
+            parts.append(a.box('washer_door',(outward(front,.018),cy,.40),(.026,min(.34,bay-.06),.34),'metal.dark',.15))
+            parts.append(a.box('washer_fascia',(outward(front,.018),cy,.70),(.026,min(.30,bay-.10),.09),'graphic.screen',.008))
             continue
-        parts.append(a.box('galley cabinet door',(front-.036,cy,.43),(.028,bay-.02,.77),'wood.cabinet',.012))
-        parts.append(a.box('long cabinet pull',(front-.011,cy,.74),(.022,min(.34,bay-.06),.023),'metal.chrome',.007))
+        parts.append(a.box('galley cabinet door',(outward(front,.036),cy,.43),(.028,bay-.02,.77),'wood.cabinet',.012))
+        parts.append(a.box('long cabinet pull',(outward(front,.011),cy,.74),(.022,min(.34,bay-.06),.023),'metal.chrome',.007))
     a.group('galley_run',parts)
     parts=[]
     parts.append(a.box('induction glass',(x,hob_y,.906),(w-.18,hob_len,.017),'metal.dark',.022))
     for cy,radius in [(hob_y+hob_len/4,hob_len*.21),(hob_y-hob_len/4,hob_len*.16)]:
         circle = [(x+radius*math.cos(t*math.tau/32),cy+radius*math.sin(t*math.tau/32),.917) for t in range(33)]
         parts.append(a.tube('induction ring',circle,.003,'metal.chrome'))
-    parts.append(a.tube('black gooseneck',[(back+.11,sink_y,.90),(back+.11,sink_y,1.11),(back+.12,sink_y,1.17),(back+.17,sink_y,1.20),(back+.25,sink_y,1.20),(back+.30,sink_y,1.17),(back+.30,sink_y,1.12)],.012,'metal.dark'))
+    parts.append(a.tube('black gooseneck',[(inward(back,r),sink_y,zz) for r,zz in
+                                           [(.11,.90),(.11,1.11),(.12,1.17),(.17,1.20),
+                                            (.25,1.20),(.30,1.17),(.30,1.12)]],.012,'metal.dark'))
     a.group('galley_appliances',parts)
     (x,y,z),(w,d,h)=a.placement('galley_overhead')
-    back, front = x-w/2, x+w/2
+    back, front = x+side*w/2, x-side*w/2
     y0, y1 = y-d/2, y+d/2
-    parts=[a.box('overhead walnut carcass',(x-.022,y,z),(w-.044,d,h),'wood.cabinet',.016)]
+    parts=[a.box('overhead walnut carcass',(outward(x,.022),y,z),(w-.044,d,h),'wood.cabinet',.016)]
     bay = d/3
     for i in range(3):
         cy=y0+(i+.5)*bay
-        parts.append(a.box('overhead walnut door',(front-.032,cy,z),(.023,bay-.015,h-.024),'wood.cabinet',.016))
-        parts.append(a.box('overhead handle',(front-.008,cy,z-.12),(.016,.12,.023),'metal.chrome',.006))
-    a.box('extractor_hood',(x+.02,hob_y,z-h/2-.045),(w-.04,min(.48,hob_len+.08),.09),'metal.dark',.02)
+        parts.append(a.box('overhead walnut door',(outward(front,.032),cy,z),(.023,bay-.015,h-.024),'wood.cabinet',.016))
+        parts.append(a.box('overhead handle',(outward(front,.008),cy,z-.12),(.016,.12,.023),'metal.chrome',.006))
+    a.box('extractor_hood',(inward(x,.02),hob_y,z-h/2-.045),(w-.04,min(.48,hob_len+.08),.09),'metal.dark',.02)
     a.group('galley_overhead',parts)
     # Microwave/steam oven, set into the overhead run at its forward end.
     oven_len = min(.42, d*.35)
     oven_y = y0+.05+oven_len/2
-    a.box('oven',(x+.06,oven_y,z),(w-.12,oven_len,h-.06),'metal.dark',.015)
+    a.box('oven',(inward(x,.06),oven_y,z),(w-.12,oven_len,h-.06),'metal.dark',.015)
     # Proud of the oven's own front face, or it renders inside the box it labels.
-    a.box('oven_fascia',(front+.004,oven_y,z),(.016,oven_len-.08,h-.16),'graphic.screen',.006)
-    for name,direction in [('fridge',1),('wardrobe',-1)]:
+    a.box('oven_fascia',(inward(front,.004),oven_y,z),(.016,oven_len-.08,h-.16),'graphic.screen',.006)
+    # The fridge and the wardrobe front the aisle from opposite flanks; their door direction is
+    # the inboard one, so it derives from which side of the centreline each sits on.
+    for name in ('fridge','wardrobe'):
         (x,y,z),(w,d,h)=a.placement(name)
+        direction = -1 if x > 0 else 1
         parts=[a.box(name+' carcass',(x-direction*.03,y,z),(w-.06,d,h),'wood.cabinet',.018)]
         face_x=x+direction*(w/2-.043)
         if name=='fridge':
@@ -198,7 +214,7 @@ def build_galley(a):
                 parts.append(a.box('fridge handle',(face_x+direction*.028,y-.12,high-.17),(.03,.025,.22),'metal.chrome',.008))
         else:
             parts.append(a.box('wardrobe door',(face_x,y,z),(.024,d-.022,h-.035),'wood.cabinet',.012))
-            parts.append(a.box('wardrobe handle',(face_x-.028,y-.11,z),(.02,.02,.32),'metal.chrome',.008))
+            parts.append(a.box('wardrobe handle',(face_x+direction*.028,y-.11,z),(.02,.02,.32),'metal.chrome',.008))
         a.group(name,parts)
 
 
@@ -233,27 +249,28 @@ def _pleat(a,name,x,y,z,width,height,axis='y'):
 
 def build_softgoods(a):
     parts=[]
-    for x,y0,y1 in [(-1.125,.29,1.83),(1.70,.32,1.89)]:
+    # Lounge window curtains on the kerb wall, slide-out ones on the off flank's slide wall.
+    for x,y0,y1 in [(1.125,.29,1.83),(-1.70,.32,1.89)]:
         for y in (y0,y1):
             parts.append(_pleat(a,'gathered lounge curtain',x,y,1.17,.15,.55))
     for x in (-1.075,1.075):
         parts.append(_pleat(a,'alcove curtain',x,-.58,1.59,.31,.53))
     for y in (.38,1.80):
-        pillow=a.box('sofa scatter cushion',(1.49,y,.77),(.16,.34,.30),'textile.curtain',.07)
+        pillow=a.box('sofa scatter cushion',(-1.49,y,.77),(.16,.34,.30),'textile.curtain',.07)
         pillow.rotation_euler[1]=.18
         parts.append(pillow)
-    parts.append(a.box('alcove folded duvet',(.17,-.72,1.38),(1.55,1.17,.06),'textile.curtain',.035))
+    parts.append(a.box('alcove folded duvet',(-.17,-.72,1.38),(1.55,1.17,.06),'textile.curtain',.035))
     for y in (-1.05,-.39):
-        parts.append(a.box('alcove pillow',(-.76,y,1.42),(.44,.53,.13),'textile.curtain',.06))
+        parts.append(a.box('alcove pillow',(.76,y,1.42),(.44,.53,.13),'textile.curtain',.06))
     a.group('softgoods_fabric',parts)
     # Equipment the photographs show and the model lacked. All detail meshes: none of them is a
     # volume of its own, they are faces applied to walls and cabinetry. Every position here is
     # chosen for visibility -- the kerb wall the reference hangs these on is covered end to end
     # by the galley run and the wardrobe, so a panel on it renders inside a cupboard.
-    a.box('systems_panel',(.630,2.225,1.55),(.020,.20,.26),'graphic.screen',.004)
+    a.box('systems_panel',(-.630,2.225,1.55),(.020,.20,.26),'graphic.screen',.004)
     for name, x, y, z, wide, high in (
             # Wardrobe and fridge faces, both of which front the aisle.
-            ('decal_galley_wall', -.548, 2.30, 1.30, .22, .26),
+            ('decal_galley_wall', .548, 2.30, 1.30, .22, .26),
             # Alcove flanks, forward of the window openings cut into them.
             ('decal_alcove_off', -1.094, -1.27, 1.60, .22, .28),
             ('decal_alcove_kerb', 1.094, -1.27, 1.60, .22, .28)):
