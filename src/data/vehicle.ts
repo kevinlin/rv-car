@@ -100,17 +100,18 @@ export const PLACEMENTS: readonly Placement[] = [
   // Head-end lockers: the former -300 mm position blocked the sleeping-area entrance.
   { id: 'alcove_lockers', zone: 'alcove', origin: [e(-1100), e(1500), e(-1400)], size: [e(2200), e(400), e(300)],      movable: false },
 
-  // --- lounge: three automotive seats in a row against the kerb wall, table alongside ---
-  // Three, not four. S4 gives the 境 layout as 中部3人汽车座椅 + 长条沙发, and the published
-  // 5-seat occupancy pins it arithmetically: two in the cab leaves three back here. The
-  // face-to-face pair-of-pairs the grey-box carried was read off a photograph and was wrong.
-  { id: 'dinette_chair_fwd', zone: 'dinette', origin: [e(630), e(0), e(130)],  size: [e(520), e(1150), e(520)], movable: true },
-  { id: 'dinette_chair_mid', zone: 'dinette', origin: [e(630), e(0), e(700)],  size: [e(520), e(1150), e(520)], movable: true },
-  { id: 'dinette_chair_aft', zone: 'dinette', origin: [e(630), e(0), e(1270)], size: [e(520), e(1150), e(520)], movable: true },
-  // Deployed inboard of the seat row, where the middle and aft seats swivel to reach it and
-  // the sofa opposite can too. Its inboard edge holds the 520 mm aisle the old inboard chair
-  // column set, so the narrowest point of the walkway is unchanged.
-  { id: 'dinette_table',     zone: 'dinette', origin: [e(70), e(0), e(950)],   size: [e(550), e(720), e(700)],  movable: true },
+  // --- lounge: a 1 + 2 booth (卡座) against the kerb wall, table between the facing seats ---
+  // Still three seats — the published 5-seat occupancy leaves exactly three back here — but
+  // 对面摆, 前一后二: the single forward seat faces aft across the table at the pair behind
+  // it. The one row of three the previous pass read out of 中部3人汽车座椅 had the count
+  // right and the arrangement wrong. The forward seat is centred on the pair.
+  { id: 'dinette_chair_fwd',      zone: 'dinette', origin: [e(370), e(0), e(130)],  size: [e(520), e(1150), e(520)], movable: true },
+  { id: 'dinette_chair_aft_off',  zone: 'dinette', origin: [e(110), e(0), e(1410)], size: [e(520), e(1150), e(520)], movable: true },
+  { id: 'dinette_chair_aft_kerb', zone: 'dinette', origin: [e(630), e(0), e(1410)], size: [e(520), e(1150), e(520)], movable: true },
+  // 可收纳: the table stows. Modelled deployed only, on the same grounds as the slide-out.
+  // 80 mm of knee gap to each facing seat, and its inboard edge sits outboard of the pair's,
+  // so the seats rather than the table now set the aisle — which widens 520 → 560 mm.
+  { id: 'dinette_table',          zone: 'dinette', origin: [e(180), e(0), e(730)],  size: [e(900), e(720), e(600)],  movable: true },
   { id: 'lockers_kerb',          zone: 'dinette', origin: [e(700), e(1400), e(100)], size: [e(450), e(450), e(1900)], movable: false },
 
   // --- side slide-out: bench base plus the 1280 x 1900 bed (published) ---

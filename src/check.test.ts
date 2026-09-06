@@ -41,9 +41,9 @@ describe('minAisleWidth', () => {
     expect(minAisleWidth(PLACEMENTS)).toBeGreaterThanOrEqual(MIN_AISLE_MM);
   });
 
-  it('reports 520 mm for the deployed layout', () => {
-    // Slide-out bed inboard edge at -450, dinette chairs inboard edge at +70.
-    expect(minAisleWidth(PLACEMENTS)).toBe(520);
+  it('reports 560 mm for the deployed layout', () => {
+    // Slide-out bed inboard edge at -450, lounge seat pair's inboard edge at +110.
+    expect(minAisleWidth(PLACEMENTS)).toBe(560);
   });
 });
 
@@ -54,10 +54,10 @@ describe('checkAll', () => {
 
   it('reports an overlap when two pieces are pushed into each other', () => {
     const broken: Placement[] = PLACEMENTS.map((p) =>
-      // Outboard, into the seat column. Sliding it fore-aft no longer collides with anything:
-      // the seats are a single row against the kerb wall, and the table sits inboard of them.
+      // Aft, into the seat pair it sits in front of. Sliding it sideways no longer collides
+      // with anything: the booth is a fore-aft sandwich of seats, table, seats.
       p.id === 'dinette_table'
-        ? { ...p, origin: [{ v: 700, c: 'estimated' as const }, p.origin[1], p.origin[2]] as const }
+        ? { ...p, origin: [p.origin[0], p.origin[1], { v: 1400, c: 'estimated' as const }] as const }
         : p,
     );
     expect(checkAll(broken).some((v) => v.rule === 'overlap')).toBe(true);

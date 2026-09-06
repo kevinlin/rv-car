@@ -58,12 +58,21 @@ describe('placements', () => {
     expect(lounge.length + cab.length).toBe(5);
   });
 
-  it('lines the lounge seats up along the kerb wall rather than facing them off in pairs', () => {
-    const lounge = PLACEMENTS.filter((p) => p.id.startsWith('dinette_chair_'));
-    // One column, not two: every seat shares the same inboard edge.
-    expect(new Set(lounge.map((p) => p.origin[0].v)).size).toBe(1);
-    // And they step down the vehicle, so no two share a Z.
-    expect(new Set(lounge.map((p) => p.origin[2].v)).size).toBe(3);
+  it('faces the lounge seats off across the table, one forward and two aft', () => {
+    // 对面摆, 前一后二: a booth, not a row. The seats sandwich the table fore-aft.
+    const seats = PLACEMENTS.filter((p) => p.id.startsWith('dinette_chair_')).map(aabb);
+    const table = aabb(byId('dinette_table'));
+    const fwd = seats.filter((s) => s.max[2] <= table.min[2]);
+    const aft = seats.filter((s) => s.min[2] >= table.max[2]);
+    expect(fwd).toHaveLength(1);
+    expect(aft).toHaveLength(2);
+    // The pair sits abreast: one Z between them, two X positions, and no gap to fall down.
+    expect(new Set(aft.map((s) => s.min[2])).size).toBe(1);
+    expect(new Set(aft.map((s) => s.min[0])).size).toBe(2);
+    expect(Math.max(...aft.map((s) => s.min[0]))).toBe(Math.min(...aft.map((s) => s.max[0])));
+    // The table is reachable from both sides, not parked outboard of the seats.
+    expect(table.min[0]).toBeGreaterThanOrEqual(Math.min(...seats.map((s) => s.min[0])));
+    expect(table.max[0]).toBeLessThanOrEqual(Math.max(...seats.map((s) => s.max[0])));
   });
 
   it('divides the rear service room off with a full-width partition', () => {

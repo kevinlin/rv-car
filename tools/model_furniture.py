@@ -29,9 +29,10 @@ def _chair(a, name, direction=1, cab=False):
 
 
 def build_dinette(a):
-    # Three seats in one row against the kerb wall, all facing forward. They are travel seats
-    # with belts, not a dinette: direction -1 puts the backrest aft.
-    for name in ('dinette_chair_fwd', 'dinette_chair_mid', 'dinette_chair_aft'):
+    # A 1 + 2 booth: the forward seat faces aft across the table at the pair behind it.
+    # direction -1 puts the backrest aft (facing forward), +1 puts it forward (facing aft).
+    _chair(a, 'dinette_chair_fwd', 1)
+    for name in ('dinette_chair_aft_off', 'dinette_chair_aft_kerb'):
         _chair(a, name, -1)
     (x, y, z), (w, d, h) = a.placement('dinette_table')
     # Reference: a walnut edge band around a pale top, on a chrome column rather than brushed.

@@ -379,7 +379,7 @@
       "zone": "dinette",
       "material": "role.upholstery.seat",
       "location": [
-        0.89,
+        0.63,
         0.575,
         0.39
       ],
@@ -391,14 +391,14 @@
       "movable": true
     },
     {
-      "id": "dinette_chair_mid",
+      "id": "dinette_chair_aft_off",
       "collection": "dinette",
       "zone": "dinette",
       "material": "role.upholstery.seat",
       "location": [
-        0.89,
+        0.37,
         0.575,
-        0.96
+        1.67
       ],
       "dimensions": [
         0.52,
@@ -408,14 +408,14 @@
       "movable": true
     },
     {
-      "id": "dinette_chair_aft",
+      "id": "dinette_chair_aft_kerb",
       "collection": "dinette",
       "zone": "dinette",
       "material": "role.upholstery.seat",
       "location": [
         0.89,
         0.575,
-        1.53
+        1.67
       ],
       "dimensions": [
         0.52,
@@ -430,14 +430,14 @@
       "zone": "dinette",
       "material": "role.upholstery.seat",
       "location": [
-        0.345,
+        0.63,
         0.36,
-        1.3
+        1.03
       ],
       "dimensions": [
-        0.55,
+        0.9,
         0.72,
-        0.7
+        0.6
       ],
       "movable": true
     },

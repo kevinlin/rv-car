@@ -522,3 +522,26 @@ Neither walkaround still shows the rear-wall door; both show only the kerb-side 
 corner. It is modelled because the layout brief is explicit about a rear entry sequence and
 because that was the call taken during this pass, but it is the one piece of geometry here with
 no photograph behind it. Removing it is a two-line change to `build_shell`.
+
+---
+
+## Lounge seating correction (2026-09-06)
+
+三个卡座对面摆，前一后二，中间是可收纳的餐桌. The lounge is a 卡座 booth. The pass above modelled it as a row.
+
+| # | Was | Now |
+|---|---|---|
+| 1 | Three seats in one row along the kerb wall, all facing forward | One forward seat facing aft, two abreast facing forward |
+| 2 | Table alongside the row, inboard of it | Table between the facing seats, 80 mm knee gap each side |
+| 3 | `dinette_chair_fwd` / `_mid` / `_aft` | `dinette_chair_fwd` / `_aft_off` / `_aft_kerb` |
+
+Seat count is unchanged, so the 5-seat occupancy argument that fixed it at three still stands. That pass had the count right and the arrangement wrong.
+
+The table is 可收纳, and is modelled deployed only, on the same grounds as the slide-out. That supersedes the "table stays a chrome pedestal" note above in part: the pedestal shape stands, the fixed-in-place reading does not.
+
+Consequences:
+- Aisle 520 → 560 mm. The pinch moves from the table's inboard edge at X 70 to the seat pair's at X 110.
+- Table 550 × 700 → 900 × 600 mm, to seat three around a booth.
+- `check_blend.py`'s rear-entry ray is unaffected. The booth clears the centreline.
+
+Re-measured: 76,036 triangles, 9.57 MB, 116 tests, `tsc` clean. Placement bounds, the exterior envelope and texel density unchanged.
