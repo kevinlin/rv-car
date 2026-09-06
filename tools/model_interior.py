@@ -228,17 +228,19 @@ def build_shell():
               box('roof_front',(0,.525,2.015),(.5,1.05,.03),'panel.wall',0),
               box('roof_back',(0,2.9,2.015),(.5,2.3,.03),'panel.wall',0)]
     group('ceiling',panels)
-    # The kerb flank carries both of this side's windows: the lounge one over the booth and the
-    # galley one over the counter, which is the window the exterior walkaround looks through.
-    # The slide-out aperture is on the off flank, because that is the side the slide deploys to.
-    wall('wall_kerb',*placement('wall_kerb'),[(.32,.9,1.76,1.36),(2.9,.93,3.54,1.35)])
+    # The lounge and the service room are handed opposite ways, so neither flank carries a
+    # matched pair. The off flank takes the lounge window over the booth and the service window
+    # that lights the aisle beside the washroom pod; the kerb flank takes the slide-out aperture
+    # and, aft of it, the galley window over the counter — the one the exterior walkaround
+    # looks through.
+    wall('wall_off',*placement('wall_off'),[(.32,.9,1.76,1.36),(2.45,.93,3.0,1.35)])
     # The entry door is an opening in the wall, so it belongs to the shell alongside the
     # windows rather than to a zone. As a furniture placement it overlapped the wardrobe and
     # the galley at once, which is what the overlap check exists to forbid.
-    # The off flank has no door: the washroom pod takes its rear corner. Its one window lights
-    # the aisle between the wardrobe and the pod.
-    wall('wall_off',*placement('wall_off'),
-         [(.15,0,2.05,1.98),(2.45,.93,3.0,1.35)])
+    # Neither flank has a door: the washroom pod takes the off rear corner and the entry is
+    # 后上门, in the rear wall.
+    wall('wall_kerb',*placement('wall_kerb'),
+         [(.15,0,2.05,1.98),(2.9,.93,3.54,1.35)])
     # Full-width passage under the overcab mattress and a sleeping opening above it.
     wall('bulkhead',*placement('bulkhead'),[(-1.1,0,1.1,1.98)],axis='y')
     # 后上门: the boarding door is in the rear wall, opening onto the vestibule between the end
@@ -251,17 +253,17 @@ def build_shell():
     # is drawn back on its track over the wardrobe side, which is the parked daytime state the
     # rest of the model depicts — slide-out deployed, table up.
     wall('partition',*placement('partition'),[(-.38,0,.38,1.84)],axis='y')
-    box('partition_leaf',(-.78,2.46,.92),(.80,.04,1.84),'wood.cabinet',.008)
-    box('partition_track',(-.40,2.46,1.8625),(1.56,.045,.045),'metal.brushed',.006)
-    box('partition_pull',(-.42,2.435,1.00),(.02,.014,.28),'metal.chrome',.006)
-    parts = [wall('slide_back',(-1.745,1.1,1),(.03,1.9,2),[(.32,.86,1.88,1.37)]),
-             box('slide_front',(-1.47,.165,1),(.55,.03,2),'panel.wall',.002),
-             box('slide_rear',(-1.47,2.035,1),(.55,.03,2),'panel.wall',.002),
-             box('slide_floor',(-1.47,1.1,.015),(.55,1.84,.03),'floor',0),
-             box('slide_roof',(-1.47,1.1,1.985),(.55,1.84,.03),'panel.wall',0)]
+    box('partition_leaf',(.78,2.46,.92),(.80,.04,1.84),'wood.cabinet',.008)
+    box('partition_track',(.40,2.46,1.8625),(1.56,.045,.045),'metal.brushed',.006)
+    box('partition_pull',(.42,2.435,1.00),(.02,.014,.28),'metal.chrome',.006)
+    parts = [wall('slide_back',(1.745,1.1,1),(.03,1.9,2),[(.32,.86,1.88,1.37)]),
+             box('slide_front',(1.47,.165,1),(.55,.03,2),'panel.wall',.002),
+             box('slide_rear',(1.47,2.035,1),(.55,.03,2),'panel.wall',.002),
+             box('slide_floor',(1.47,1.1,.015),(.55,1.84,.03),'floor',0),
+             box('slide_roof',(1.47,1.1,1.985),(.55,1.84,.03),'panel.wall',0)]
     group('slideout_shell',parts)
-    window('dinette_window',1.165,1.04,1.13,1.44,.46)
-    window('slideout_window',-1.745,1.1,1.115,1.56,.51)
+    window('dinette_window',-1.165,1.04,1.13,1.44,.46)
+    window('slideout_window',1.745,1.1,1.115,1.56,.51)
     window('service_window',-1.165,2.725,1.14,.55,.42)
     # Over the counter, which is where the reference puts the galley window.
     window('galley_window',1.165,3.22,1.14,.64,.42)

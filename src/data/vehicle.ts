@@ -43,9 +43,9 @@ const SLIDE = ENVELOPE.slideTravel!.v;         // 580
 
 export const VOLUMES: Record<VolumeId, Box> = {
   habitation: { min: [-HAB_HALF_W, 0, 0], max: [HAB_HALF_W, HAB_H, HAB_L] },
-  // Spans from the kerb wall all the way out to the deployed slide wall: the slide-out bed
+  // Spans from the off wall all the way out to the deployed slide wall: the slide-out bed
   // crosses the nominal habitation boundary, so a narrower volume would reject it.
-  slideout: { min: [-HAB_HALF_W - SLIDE, 0, 150], max: [HAB_HALF_W, HAB_H, 2050] },
+  slideout: { min: [-HAB_HALF_W, 0, 150], max: [HAB_HALF_W + SLIDE, HAB_H, 2050] },
   alcove: { min: [-HAB_HALF_W, 1100, -1500], max: [HAB_HALF_W, HAB_H + 50, 100] },
   cab: { min: [-HAB_HALF_W, 0, -1950], max: [HAB_HALF_W, 1400, 100] },
 };
@@ -89,7 +89,7 @@ export const PLACEMENTS: readonly Placement[] = [
   // furniture, for the same reason the entry door is — it is a wall with a doorway in it, and
   // an enclosure cannot be held to the overlap and aisle rules it exists to divide.
   { id: 'partition', zone: 'shell', origin: [e(-1180), d(0), e(2500)], size: [d(2360), d(2000), e(50)], movable: false },
-  { id: 'slideout_shell', zone: 'shell', origin: [d(-1760), d(0), d(150)], size: [d(580), d(2000), d(1900)], movable: false },
+  { id: 'slideout_shell', zone: 'shell', origin: [d(1180), d(0), d(150)], size: [d(580), d(2000), d(1900)], movable: false },
 
   // --- cab ---
   { id: 'cab_seat_off',  zone: 'cab', origin: [e(-900), e(0), e(-1600)], size: [e(550), e(1100), e(550)], movable: false },
@@ -100,39 +100,42 @@ export const PLACEMENTS: readonly Placement[] = [
   // Head-end lockers: the former -300 mm position blocked the sleeping-area entrance.
   { id: 'alcove_lockers', zone: 'alcove', origin: [e(-1100), e(1500), e(-1400)], size: [e(2200), e(400), e(300)],      movable: false },
 
-  // --- lounge: a 1 + 2 booth (卡座) against the kerb wall, table between the facing seats ---
+  // --- lounge: a 1 + 2 booth (卡座) against the off wall, table between the facing seats ---
   // Still three seats — the published 5-seat occupancy leaves exactly three back here — but
   // 对面摆, 前一后二: the single forward seat faces aft across the table at the pair behind
   // it. The one row of three the previous pass read out of 中部3人汽车座椅 had the count
   // right and the arrangement wrong. The forward seat is centred on the pair.
-  // `_off` / `_kerb` name the pair's own two positions, off-most first, so the whole booth
-  // mirrors by exchanging the two rows rather than by renaming a Blender object.
-  { id: 'dinette_chair_fwd',      zone: 'dinette', origin: [e(370), e(0), e(130)],  size: [e(520), e(1150), e(520)], movable: true },
-  { id: 'dinette_chair_aft_off',  zone: 'dinette', origin: [e(110), e(0), e(1410)], size: [e(520), e(1150), e(520)], movable: true },
-  { id: 'dinette_chair_aft_kerb', zone: 'dinette', origin: [e(630), e(0), e(1410)], size: [e(520), e(1150), e(520)], movable: true },
+  // `_off` / `_kerb` name the pair's own two positions, off-most first.
+  { id: 'dinette_chair_fwd',      zone: 'dinette', origin: [e(-890), e(0), e(130)],  size: [e(520), e(1150), e(520)], movable: true },
+  { id: 'dinette_chair_aft_off',  zone: 'dinette', origin: [e(-1150), e(0), e(1410)], size: [e(520), e(1150), e(520)], movable: true },
+  { id: 'dinette_chair_aft_kerb', zone: 'dinette', origin: [e(-630), e(0), e(1410)], size: [e(520), e(1150), e(520)], movable: true },
   // 可收纳: the table stows. Modelled deployed only, on the same grounds as the slide-out.
   // 80 mm of knee gap to each facing seat, and its inboard edge sits outboard of the pair's,
   // so the seats rather than the table now set the aisle — which widens 520 → 560 mm.
-  { id: 'dinette_table',          zone: 'dinette', origin: [e(180), e(0), e(730)], size: [e(900), e(720), e(600)],  movable: true },
-  { id: 'lockers_kerb',          zone: 'dinette', origin: [e(700), e(1400), e(100)], size: [e(450), e(450), e(1900)], movable: false },
+  { id: 'dinette_table',          zone: 'dinette', origin: [e(-1080), e(0), e(730)], size: [e(900), e(720), e(600)],  movable: true },
+  { id: 'lockers_off',           zone: 'dinette', origin: [e(-1150), e(1400), e(100)], size: [e(450), e(450), e(1900)], movable: false },
 
   // --- side slide-out: bench base plus the 1280 x 1900 bed (published) ---
-  { id: 'slideout_base', zone: 'sofa', origin: [d(-1730), e(0), e(150)],   size: [d(1280), e(400), d(1900)], movable: false },
-  { id: 'slideout_bed',  zone: 'sofa', origin: [d(-1730), e(400), e(150)], size: [pub(1280), e(200), pub(1900)], movable: false },
-  { id: 'lockers_off',   zone: 'sofa', origin: [e(-1730), e(1400), e(150)],size: [e(450), e(450), e(1900)], movable: false },
+  { id: 'slideout_base', zone: 'sofa', origin: [d(450), e(0), e(150)],   size: [d(1280), e(400), d(1900)], movable: false },
+  { id: 'slideout_bed',  zone: 'sofa', origin: [d(450), e(400), e(150)], size: [pub(1280), e(200), pub(1900)], movable: false },
+  { id: 'lockers_kerb',  zone: 'sofa', origin: [e(1280), e(1400), e(150)],size: [e(450), e(450), e(1900)], movable: false },
 
   // --- storage band between lounge and wet zone ---
-  { id: 'fridge',   zone: 'storage', origin: [e(550), e(0), e(2100)], size: [e(600), e(1800), e(400)], movable: false },
+  { id: 'fridge',   zone: 'storage', origin: [e(-1150), e(0), e(2100)], size: [e(600), e(1800), e(400)], movable: false },
   // 250 mm deep, which is the storage band the design spec states (Z 2050-2300); at 400 it
   // also filled the floor in front of the entry door.
-  { id: 'wardrobe', zone: 'storage', origin: [e(-1150), e(0), e(2100)],   size: [e(550), e(1900), e(250)], movable: false },
+  { id: 'wardrobe', zone: 'storage', origin: [e(600), e(0), e(2100)],   size: [e(550), e(1900), e(250)], movable: false },
 
-  // --- rear wet zone. The galley is a 1200 mm run along the KERB flank, continuing the line the
-  // fridge starts, and the washroom is a corner pod in the REAR OFF corner. The boarding door is
-  // 后上门, in the rear wall, offset off the centreline to clear the pod. Enter, and the counter
-  // is on your right, the washroom door on your left. The aisle between them is 800 mm.
-  // Handedness comes from the manufacturer's walkthrough video and is pinned by a test in
-  // check.test.ts, because reading it off stills got it wrong four times.
+  // --- rear wet zone. The galley is a 1200 mm run along the KERB flank and the washroom a
+  // corner pod in the REAR OFF corner, so the service room's flanks are the opposite way round
+  // to the lounge's: the galley sits behind the wardrobe, not behind the fridge. The walkthrough
+  // video is explicit — from the lounge looking aft through the partition, the counter and its
+  // pegboard are on the left and the mirrored washroom door on the right — and the chain of
+  // inference that had the galley continue the fridge's line was simply wrong about this
+  // vehicle. The boarding door is 后上门, in the rear wall, offset off the centreline to clear
+  // the pod. Enter, and the counter is on your right, the washroom door on your left, with
+  // 800 mm of aisle between them. Pinned by a test in check.test.ts, because reading handedness
+  // off stills has now got it wrong four times.
   { id: 'galley_run',      zone: 'galley', origin: [e(550), e(0), e(2550)],    size: [e(600), e(900), e(1200)], movable: false },
   { id: 'galley_overhead', zone: 'galley', origin: [e(550), e(1350), e(2550)], size: [e(600), e(450), e(1200)], movable: false },
   { id: 'washroom_pod',    zone: 'washroom', origin: [e(-1150), e(0), e(3050)],  size: [e(900), e(1950), e(1000)], movable: false },
@@ -148,7 +151,7 @@ export const PLACEMENTS: readonly Placement[] = [
   { id: 'body_alcove',      zone: 'exterior', origin: [d(-1225), e(1350),  d(-1948)], size: [d(2450), d(800),  d(1948)], movable: false },
   { id: 'body_habitation',  zone: 'exterior', origin: [d(-1225), e(-400),  d(0)],     size: [d(2450), d(2550), d(4050)], movable: false },
   { id: 'skirt',            zone: 'exterior', origin: [d(-1225), e(-700),  d(0)],     size: [d(2450), d(300),  d(4050)], movable: false },
-  { id: 'slideout_box',     zone: 'exterior', origin: [d(-1805), e(0),     e(150)],   size: [d(580),  e(1300), e(1900)], movable: false },
+  { id: 'slideout_box',     zone: 'exterior', origin: [d(1225),  e(0),     e(150)],   size: [d(580),  e(1300), e(1900)], movable: false },
   { id: 'wheel_front_off',  zone: 'exterior', origin: [e(-988),  d(-1050), d(-1270)], size: [e(225),  e(744),  e(744)],  movable: false },
   { id: 'wheel_front_kerb', zone: 'exterior', origin: [e(763),   d(-1050), d(-1270)], size: [e(225),  e(744),  e(744)],  movable: false },
   { id: 'wheel_rear_off',   zone: 'exterior', origin: [e(-988),  d(-1050), d(2030)],  size: [e(225),  e(744),  e(744)],  movable: false },
@@ -200,7 +203,7 @@ export const HOTSPOTS: readonly Hotspot[] = [
     // Forward of the partition at Z 2500, in the gap between the fridge and the wardrobe.
     // The old Z 2.6 stop now stood in the service room looking through a doorway.
     label: 'Lounge',
-    camera: { position: [-0.15, 1.55, 2.3], target: [0.15, 0.95, 0.3] },
+    camera: { position: [0.15, 1.55, 2.3], target: [-0.15, 0.95, 0.3] },
     view: { kind: 'look', pitch: [-35 * D, 35 * D] },
   },
   {
@@ -212,7 +215,7 @@ export const HOTSPOTS: readonly Hotspot[] = [
   {
     id: 'sofa',
     label: 'Slide-out bed',
-    camera: { position: [0.35, 1.55, 2.02], target: [-1.0, 0.55, 0.9] },
+    camera: { position: [-0.35, 1.55, 2.02], target: [1.0, 0.55, 0.9] },
     view: { kind: 'look', pitch: [-45 * D, 30 * D] },
   },
   {
@@ -240,14 +243,15 @@ export const HOTSPOTS: readonly Hotspot[] = [
     view: { kind: 'look', pitch: [-30 * D, 30 * D] },
   },
   {
-    // Three-quarter front, kerb side — the flat flank, now that the slide-out deploys to the
-    // off side. It is also the flank the video details: awning, hatches, control panel.
-    // Full azimuth still swings round to the deployed box. Target sits at the body's
-    // mid-height so the vehicle fills the frame without tipping. The one stop where
-    // orbiting is the right verb: outside, there is room to swing around the subject.
+    // Three-quarter front, off side — the flat flank, because the slide-out deploys to the
+    // kerb. That does put the stop opposite the flank the video details (awning, hatches,
+    // control panel, galley window), which is the kerb one; full azimuth is unlimited, so the
+    // orbit reaches it. Target sits at the body's mid-height so the vehicle fills the frame
+    // without tipping. The one stop where orbiting is the right verb: outside, there is room
+    // to swing around the subject.
     id: 'exterior',
     label: 'Exterior',
-    camera: { position: [6.4, 1.6, -5.2], target: [0.0, 0.5, 1.0] },
+    camera: { position: [-6.4, 1.6, -5.2], target: [0.0, 0.5, 1.0] },
     view: {
       kind: 'orbit',
       azimuth: [-Math.PI, Math.PI],

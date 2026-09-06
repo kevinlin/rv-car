@@ -42,18 +42,26 @@ describe('minAisleWidth', () => {
   });
 
   it('reports 560 mm for the deployed layout', () => {
-    // Slide-out bed's inboard edge at -450, lounge seat pair's inboard edge at +110.
+    // Lounge seat pair's inboard edge at -110, slide-out bed's inboard edge at +450.
     expect(minAisleWidth(PLACEMENTS)).toBe(560);
   });
 });
 
 describe('handedness', () => {
   // This cabin has been flipped four times, each pass reading a flank off a still photograph
-  // and getting it wrong. The manufacturer's own walkthrough video settles it: the galley
-  // counter is on the vehicle's right with the washroom door opposite, and the exterior
-  // profile that carries the awning, the hatches and one large window — through which the
-  // galley overhead and counter are visible — is the kerb flank. Pinned here so a fifth flip
-  // fails loudly rather than silently.
+  // and getting it wrong. The manufacturer's walkthrough video settles both halves, and they
+  // do not point the same way — which is the trap every previous pass fell into, because each
+  // assumed one chain of inference ran the length of the vehicle.
+  //
+  // From the lounge looking aft through the partition (8:32-8:56, hi-res), the sofa bench is
+  // on the left and the booth's pair of seats on the right; looking aft, left is kerb. In the
+  // same frames, through the doorway, the galley's pegboard and counter are on the left and
+  // the mirrored washroom door on the right. The 3:50 frame through the open rear door, where
+  // the sense reverses, agrees on the service room.
+  //
+  // So the lounge and the service room are handed opposite ways: the galley sits behind the
+  // wardrobe rather than continuing the fridge's line. Pinned so a fifth flip fails loudly.
+  // Evidence in docs/research/walkthrough/.
   const box = (id: string) => aabb(PLACEMENTS.find((p) => p.id === id)!);
 
   it('keeps the galley on the kerb flank and the washroom pod on the off flank', () => {
@@ -62,14 +70,22 @@ describe('handedness', () => {
     expect(box('washroom_pod').max[0]).toBeLessThanOrEqual(0);
   });
 
-  it('keeps the booth kerb and the slide-out off, facing each other across the aisle', () => {
-    // The fridge starts the line the galley continues, and the video puts it immediately
-    // beside a booth seat — so the booth shares the galley's flank.
-    expect(box('fridge').min[0]).toBeGreaterThanOrEqual(0);
+  it('keeps the booth off and the slide-out kerb, facing each other across the aisle', () => {
+    // The fridge stands beside a booth seat, so it shares the booth's flank rather than the
+    // galley's — the link the whole-cabin mirror got wrong.
+    expect(box('fridge').max[0]).toBeLessThanOrEqual(0);
     for (const id of ['dinette_chair_fwd', 'dinette_chair_aft_off', 'dinette_chair_aft_kerb']) {
-      expect(box(id).min[0]).toBeGreaterThanOrEqual(0);
+      expect(box(id).max[0]).toBeLessThanOrEqual(0);
     }
-    expect(box('slideout_bed').max[0]).toBeLessThanOrEqual(0);
+    expect(box('slideout_bed').min[0]).toBeGreaterThanOrEqual(0);
+  });
+
+  it('puts the galley opposite the wardrobe, not behind the fridge', () => {
+    // The one assertion that distinguishes this layout from both of the ones it replaced.
+    expect(box('wardrobe').min[0]).toBeGreaterThanOrEqual(0);
+    expect(box('galley_run').min[0]).toBeGreaterThanOrEqual(0);
+    expect(box('fridge').max[0]).toBeLessThanOrEqual(0);
+    expect(box('washroom_pod').max[0]).toBeLessThanOrEqual(0);
   });
 });
 
@@ -99,11 +115,15 @@ describe('checkAll', () => {
   });
 
   it('reports an aisle violation when the bed is widened into the walkway', () => {
-    // The bed grows inboard from its outboard edge at X -1730, so the extra 520 mm comes out
+    // The bed grows inboard from its outboard edge at X 1730, so the extra 520 mm comes out
     // of the aisle rather than out of the slide-out box.
     const broken: Placement[] = PLACEMENTS.map((p) =>
       p.id === 'slideout_bed'
-        ? { ...p, size: [{ v: 1800, c: 'estimated' as const }, p.size[1], p.size[2]] as const }
+        ? {
+            ...p,
+            origin: [{ v: -70, c: 'estimated' as const }, p.origin[1], p.origin[2]] as const,
+            size: [{ v: 1800, c: 'estimated' as const }, p.size[1], p.size[2]] as const,
+          }
         : p,
     );
     expect(checkAll(broken).some((v) => v.rule === 'aisle')).toBe(true);

@@ -249,28 +249,28 @@ def _pleat(a,name,x,y,z,width,height,axis='y'):
 
 def build_softgoods(a):
     parts=[]
-    # Lounge window curtains on the kerb wall, slide-out ones on the off flank's slide wall.
-    for x,y0,y1 in [(1.125,.29,1.83),(-1.70,.32,1.89)]:
+    # Lounge window curtains on the off wall, slide-out ones on the kerb flank's slide wall.
+    for x,y0,y1 in [(-1.125,.29,1.83),(1.70,.32,1.89)]:
         for y in (y0,y1):
             parts.append(_pleat(a,'gathered lounge curtain',x,y,1.17,.15,.55))
     for x in (-1.075,1.075):
         parts.append(_pleat(a,'alcove curtain',x,-.58,1.59,.31,.53))
     for y in (.38,1.80):
-        pillow=a.box('sofa scatter cushion',(-1.49,y,.77),(.16,.34,.30),'textile.curtain',.07)
+        pillow=a.box('sofa scatter cushion',(1.49,y,.77),(.16,.34,.30),'textile.curtain',.07)
         pillow.rotation_euler[1]=.18
         parts.append(pillow)
-    parts.append(a.box('alcove folded duvet',(-.17,-.72,1.38),(1.55,1.17,.06),'textile.curtain',.035))
+    parts.append(a.box('alcove folded duvet',(.17,-.72,1.38),(1.55,1.17,.06),'textile.curtain',.035))
     for y in (-1.05,-.39):
-        parts.append(a.box('alcove pillow',(.76,y,1.42),(.44,.53,.13),'textile.curtain',.06))
+        parts.append(a.box('alcove pillow',(-.76,y,1.42),(.44,.53,.13),'textile.curtain',.06))
     a.group('softgoods_fabric',parts)
     # Equipment the photographs show and the model lacked. All detail meshes: none of them is a
     # volume of its own, they are faces applied to walls and cabinetry. Every position here is
     # chosen for visibility -- the kerb wall the reference hangs these on is covered end to end
     # by the galley run and the wardrobe, so a panel on it renders inside a cupboard.
-    a.box('systems_panel',(-.630,2.225,1.55),(.020,.20,.26),'graphic.screen',.004)
+    a.box('systems_panel',(.630,2.225,1.55),(.020,.20,.26),'graphic.screen',.004)
     for name, x, y, z, wide, high in (
             # Wardrobe and fridge faces, both of which front the aisle.
-            ('decal_galley_wall', .548, 2.30, 1.30, .22, .26),
+            ('decal_galley_wall', -.548, 2.30, 1.30, .22, .26),
             # Alcove flanks, forward of the window openings cut into them.
             ('decal_alcove_off', -1.094, -1.27, 1.60, .22, .28),
             ('decal_alcove_kerb', 1.094, -1.27, 1.60, .22, .28)):

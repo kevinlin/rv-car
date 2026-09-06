@@ -11,11 +11,11 @@ sampled at 119 frames plus targeted high-resolution stills.
 
 Two outcomes:
 
-1. **Handedness is wrong and the whole cabin mirrors.** The washroom pod belongs in the rear
-   **off** corner, not the rear kerb corner. Owner-adjudicated; I could not settle it from frames
-   (see *Dissent* below). Because the pod and the galley face each other across the aisle, and the
-   galley continues the line the fridge starts, and the video shows the fridge immediately beside a
-   booth seat, the correction propagates through every habitation placement.
+1. **Handedness is wrong, but only in the service room.** The washroom pod belongs in the rear
+   **off** corner, not the rear kerb corner, and the galley opposite it on the kerb flank. The
+   lounge was already right: booth off, slide-out kerb. This was written as a whole-cabin mirror
+   and implemented as one before verification caught it; see *Dissent* below for what the frames
+   actually show and why the propagation argument failed.
 2. **Everything above the layout is wrong too** — palette, fittings, lighting and the exterior.
 
 The mirror lands first. Props placed against the old handedness would be modelled twice, which is
@@ -55,7 +55,7 @@ be looking clear across the cabin — which never sat right.
 Leave 5998 alone: it cascades into `habLength` 4050 and the 1 mm envelope assertion in
 `check_models.mjs`. Record the 3 mm.
 
-## Dissent, recorded
+## Dissent, recorded — and upheld
 
 One observation I could not reconcile with the mirror. In the high-resolution lounge frames at
 8:32–9:00 the presenter stands **upright with headroom** in a full-height walnut-framed doorway,
@@ -63,9 +63,19 @@ which makes it the partition rather than the cab opening (the modelled alcove un
 1150 mm). Reading the camera as facing aft through the partition puts the sofa on the kerb flank
 and the booth on the off flank — the shipped layout, not the mirrored one.
 
-Proceeding with the mirror as directed. Making this cheap to settle is folded into verification:
-re-capture the lounge hotspot and put it beside that frame. If they disagree, the mirror is wrong
-and reverting is a sign flip on the same rows.
+**Verification upheld the dissent, and the mirror was corrected to a hybrid.** The frames were
+retrieved and read: the sofa is on the left and the booth on the right looking aft, so sofa kerb
+and booth off; but through the same doorway the galley's pegboard and counter are on the left and
+the mirrored washroom door on the right, so galley kerb and pod off. The 3:50 frame through the
+open rear door, where the sense reverses, agrees on the service room.
+
+So **the lounge and the service room are handed opposite ways**. The bad link in the reasoning
+above is "the galley continues the line the fridge starts": it does not. The fridge sits with the
+booth on the off flank and the galley sits behind the wardrobe on the kerb flank. That is why the
+exterior kerb-window crop and the lounge frame had looked irreconcilable — both were right.
+
+Evidence in `docs/research/walkthrough/`, renders in `docs/research/handedness/`, and the layout
+is pinned by the handedness guard in `src/check.test.ts`.
 
 ---
 

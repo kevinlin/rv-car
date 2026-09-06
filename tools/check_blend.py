@@ -30,11 +30,12 @@ bpy.context.view_layer.update()
 
 # Rays must reach glazing, rather than an uncut wall/ceiling behind the visible trim.
 depsgraph = bpy.context.evaluated_depsgraph_get()
-# Sides follow the layout: the lounge and galley windows are on the kerb flank (+x), the
-# slide-out and service ones on the off flank (-x).
+# Sides follow the layout, and the two halves of the cabin are handed opposite ways: the
+# lounge window and the service window are on the off flank (-x), the slide-out aperture and
+# the galley window on the kerb flank (+x).
 for origin, direction in [((0, 1.4, 1.8), (0, 0, 1)),
-                          ((0, 1.04, 1.13), (1, 0, 0)),
-                          ((-1.3, 1.1, 1.115), (-1, 0, 0)),
+                          ((0, 1.04, 1.13), (-1, 0, 0)),
+                          ((1.3, 1.1, 1.115), (1, 0, 0)),
                           ((0, 2.7, 1.14), (-1, 0, 0)),
                           ((.4, 3.22, 1.14), (1, 0, 0)),
                           ((0, 3.9, 1.3875), (0, 1, 0))]:

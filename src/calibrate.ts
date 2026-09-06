@@ -33,9 +33,9 @@ export interface Patch {
  * the self-shadow rather than the material.
  */
 export const PATCHES: readonly Patch[] = [
-  { label: 'aisle floor',   role: 'floor',            hotspot: 'dinette',  u: 0.45, v: 0.79 },
-  { label: 'chair panel',   role: 'upholstery.seat',  hotspot: 'dinette',  u: 0.62, v: 0.44 },
-  { label: 'washroom wall', role: 'washroom.shell',   hotspot: 'washroom', u: 0.40, v: 0.50 },
+  { label: 'aisle floor',   role: 'floor',            hotspot: 'dinette',  u: 0.51, v: 0.80 },
+  { label: 'chair panel',   role: 'upholstery.seat',  hotspot: 'dinette',  u: 0.39, v: 0.45 },
+  { label: 'washroom wall', role: 'washroom.shell',   hotspot: 'washroom', u: 0.43, v: 0.50 },
 ];
 
 /** Mean colour of a square of the drawing buffer. Call immediately after a render. */
