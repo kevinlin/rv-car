@@ -108,7 +108,9 @@ document.body.appendChild(
   }),
 );
 
-void goTo(HOTSPOTS[0]!, 0);
+// The overview page links each thumbnail as tour.html#<stop id>, so open on that stop rather
+// than always on the lounge. An unknown hash falls back instead of failing.
+void goTo(HOTSPOTS.find((h) => h.id === location.hash.slice(1)) ?? HOTSPOTS[0]!, 0);
 bundle.renderer.setAnimationLoop(() => {
   bundle.render();
   labels.render(bundle.scene, bundle.camera);

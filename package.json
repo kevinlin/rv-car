@@ -20,7 +20,8 @@
     "model": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/model_interior.py --",
     "bake": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/bake_ao.py",
     "check:blend": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/check_blend.py",
-    "textures": "node tools/rectify_textures.mjs"
+    "textures": "node tools/rectify_textures.mjs",
+    "thumbs": "node tools/make_render_thumbs.mjs"
   },
   "keywords": [],
   "author": "",

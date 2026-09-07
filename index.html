@@ -3,33 +3,734 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>无极境500 — Interior</title>
+    <title>Dachi Wuji Jing 500 MAX — a reconstructed motorhome</title>
+    <meta
+      name="description"
+      content="A 6-metre C-type motorhome rebuilt in the browser from published dimensions and the
+               manufacturer's own footage, with a side-by-side comparison against the Feishen
+               Darwin Z76."
+    />
     <style>
-      html, body { margin: 0; height: 100%; background: #111; overflow: hidden; }
-      canvas { display: block; }
-      .ui { position: fixed; left: 16px; bottom: 16px; display: flex; gap: 24px;
-            font: 13px system-ui, sans-serif; }
-      .ui-zones, .ui-finishes { display: flex; gap: 8px; }
-      .ui button { border: 0; border-radius: 6px; padding: 8px 12px; cursor: pointer;
-                   background: rgba(255,255,255,.85); color: #111; }
-      .ui-finishes button { width: 32px; height: 32px; padding: 0;
-                            border: 2px solid rgba(255,255,255,.7); }
-      /* The dimension overlay only has something to label from above, so its toggle only
-         exists at the plan stop. main.ts stamps the stop id onto <body>. */
-      .ui [data-labels] { display: none; }
-      body[data-stop="plan"] .ui [data-labels] { display: block; }
-      .ui [data-labels][aria-pressed="false"] { background: rgba(255,255,255,.4); }
-      .plan-label { pointer-events: none; text-align: center; white-space: nowrap;
-                    font: 12px/1.35 system-ui, sans-serif; color: #12181f;
-                    background: rgba(255,255,255,.82); border-radius: 5px;
-                    padding: 3px 8px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
-      .plan-label strong { display: block; font-weight: 600; }
-      /* The confidence tag is the point of the second line, so it stays readable rather than
-         decorative — but it must not compete with the name. */
-      .plan-label span { display: block; font-size: 11px; color: #4a5560; }
+      /* ---------------------------------------------------------------------------------------
+         One committed direction: an engineering brochure printed on warm paper. Ink on cream,
+         walnut for the one accent — the veneer the cabin is finished in — an editorial serif for
+         headings and a monospace for every number, because the numbers are the argument this
+         page is making. No webfonts: the serif stack resolves locally on every platform, and a
+         page whose point is measurements should not wait on a font request to show them.
+         --------------------------------------------------------------------------------------- */
+      :root {
+        color-scheme: light;
+
+        --paper: #f7f3ec;
+        --paper-raised: #fffdf9;
+        --ink: #1b1714;
+        --ink-soft: #5d564d;
+        --ink-faint: #8c8378;
+        --walnut: #7a4a1e;
+        --walnut-wash: #f0e6d8;
+        --rule: #ded5c6;
+        --rule-strong: #c6bba7;
+
+        --font-display: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Hoefler Text', Georgia,
+          serif;
+        --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        --font-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace;
+
+        --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+        --shadow-card: 0 1px 2px rgba(60, 44, 24, 0.05), 0 2px 6px rgba(60, 44, 24, 0.04),
+          0 8px 20px rgba(60, 44, 24, 0.04);
+        --shadow-lift: 0 2px 4px rgba(60, 44, 24, 0.06), 0 6px 14px rgba(60, 44, 24, 0.06),
+          0 16px 34px rgba(60, 44, 24, 0.06);
+      }
+
+      html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        scroll-behavior: smooth;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font: 16px/1.6 var(--font-body);
+      }
+
+      h1, h2, h3 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; }
+      h1 { font-size: clamp(38px, 6vw, 64px); line-height: 1.05; margin: 0 0 20px; letter-spacing: -0.01em; }
+      h2 { font-size: clamp(26px, 3.4vw, 34px); line-height: 1.15; margin: 0 0 8px; }
+      h3 { font-size: 18px; line-height: 1.25; margin: 0 0 8px; }
+      p, li { text-wrap: pretty; }
+
+      a { color: var(--walnut); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+      :focus-visible { outline: 2px solid var(--walnut); outline-offset: 3px; border-radius: 2px; }
+
+      img { max-width: 100%; height: auto; display: block; outline: 1px solid rgba(27, 23, 20, 0.07); outline-offset: -1px; }
+
+      /* Numbers are data: fixed-width digits so columns of them line up. */
+      .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+      .skip {
+        position: absolute; left: -9999px; top: 8px;
+        background: var(--ink); color: var(--paper);
+        padding: 10px 16px; border-radius: 8px; z-index: 30;
+      }
+      .skip:focus { left: 16px; }
+
+      .wrap { width: min(1120px, 100% - 48px); margin-inline: auto; }
+      @media (max-width: 640px) { .wrap { width: min(1120px, 100% - 32px); } }
+
+      section { padding: clamp(56px, 8vw, 104px) 0; border-top: 1px solid var(--rule); }
+
+      .lede { max-width: 64ch; color: var(--ink-soft); font-size: 17px; }
+
+      /* A small caps-tracked label above each section heading; the brochure's running head. */
+      .eyebrow {
+        font: 500 12px/1 var(--font-mono);
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--walnut);
+        margin: 0 0 14px;
+      }
+
+      /* --- masthead ------------------------------------------------------------------------ */
+
+      .masthead {
+        position: sticky; top: 0; z-index: 20;
+        background: color-mix(in srgb, var(--paper) 88%, transparent);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--rule);
+      }
+      .masthead > .wrap {
+        display: flex; align-items: center; gap: 24px;
+        min-height: 64px;
+      }
+      .wordmark {
+        font-family: var(--font-display); font-size: 19px; font-weight: 600;
+        color: var(--ink); text-decoration: none; margin-right: auto;
+      }
+      .wordmark span { color: var(--ink-faint); font-family: var(--font-body); font-size: 13px; font-weight: 400; }
+      .masthead nav { display: flex; gap: 22px; font-size: 14px; }
+      .masthead nav a { color: var(--ink-soft); text-decoration: none; padding: 8px 0; }
+      .masthead nav a:hover { color: var(--ink); text-decoration: underline; }
+      @media (max-width: 760px) { .masthead nav { display: none; } }
+
+      /* --- buttons ------------------------------------------------------------------------- */
+
+      .btn {
+        display: inline-flex; align-items: center; gap: 10px;
+        min-height: 44px; padding: 12px 22px;
+        border: 1px solid var(--ink); border-radius: 10px;
+        background: var(--ink); color: var(--paper);
+        font: 500 15px/1 var(--font-body); text-decoration: none;
+        transition: background-color 140ms var(--ease-out), color 140ms var(--ease-out),
+          transform 100ms var(--ease-out);
+      }
+      .btn:hover { background: var(--walnut); border-color: var(--walnut); }
+      .btn:active { transform: scale(0.98); }
+      .btn-ghost { background: transparent; color: var(--ink); border-color: var(--rule-strong); }
+      .btn-ghost:hover { background: var(--walnut-wash); color: var(--ink); border-color: var(--walnut); }
+      .btn .arrow { font-family: var(--font-mono); }
+
+      /* --- hero ---------------------------------------------------------------------------- */
+
+      .hero { padding-top: clamp(48px, 7vw, 88px); border-top: 0; }
+      .hero-grid { display: grid; gap: clamp(32px, 5vw, 56px); align-items: center; }
+      @media (min-width: 900px) { .hero-grid { grid-template-columns: 1fr 1.05fr; } }
+
+      .hero h1 span { display: block; font-size: 0.42em; letter-spacing: 0.02em; color: var(--ink-faint); font-weight: 400; margin-bottom: 12px; }
+      .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+
+      .hero-figure { margin: 0; }
+      .hero-figure img { border-radius: 14px; box-shadow: var(--shadow-card); background: var(--paper-raised); }
+      .hero-figure figcaption { margin-top: 12px; font-size: 13px; color: var(--ink-faint); }
+
+      /* --- figures strip ------------------------------------------------------------------- */
+
+      /* Six tiles, so the column count divides them evenly at every width: one big number per
+         tile with no orphan cells, and enough room that the envelope stays on one line. */
+      .figures {
+        display: grid; gap: 1px; margin-top: clamp(48px, 7vw, 72px);
+        grid-template-columns: 1fr;
+        background: var(--rule);
+        border: 1px solid var(--rule); border-radius: 14px; overflow: hidden;
+      }
+      @media (min-width: 560px) { .figures { grid-template-columns: repeat(2, 1fr); } }
+      @media (min-width: 880px) { .figures { grid-template-columns: repeat(3, 1fr); } }
+      .figures div { background: var(--paper-raised); padding: 20px 22px; }
+      .figures dt { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); }
+      .figures dd {
+        margin: 8px 0 0; font-family: var(--font-mono); font-variant-numeric: tabular-nums;
+        font-size: 20px; letter-spacing: -0.02em;
+      }
+      .figures dd small { display: block; font-family: var(--font-body); font-size: 12px; color: var(--ink-faint); letter-spacing: 0; margin-top: 6px; }
+
+      /* --- stops --------------------------------------------------------------------------- */
+
+      .stops {
+        display: grid; gap: 20px; margin-top: 40px;
+        grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+      }
+      .stop {
+        display: block; padding: 4px; /* concentric: 12px card, 4px pad, 8px image */
+        background: var(--paper-raised);
+        border: 1px solid var(--rule); border-radius: 12px;
+        text-decoration: none; color: inherit;
+        box-shadow: var(--shadow-card);
+        transition: box-shadow 160ms var(--ease-out), transform 160ms var(--ease-out),
+          border-color 160ms var(--ease-out);
+      }
+      @media (hover: hover) and (pointer: fine) {
+        .stop:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); border-color: var(--rule-strong); }
+        .stop:hover h3 { color: var(--walnut); }
+      }
+      .stop:active { transform: scale(0.995); }
+      .stop img { border-radius: 8px; aspect-ratio: 16 / 9; object-fit: cover; }
+      .stop-text { padding: 14px 14px 12px; }
+      .stop h3 { transition: color 160ms var(--ease-out); }
+      .stop p { margin: 0; font-size: 14px; color: var(--ink-soft); }
+
+      /* --- comparison ---------------------------------------------------------------------- */
+
+      /* A 3-column table cannot narrow past a point without becoming unreadable, so it scrolls
+         inside its own box rather than forcing the page body sideways. */
+      .table-scroll { margin-top: 40px; overflow-x: auto; border: 1px solid var(--rule); border-radius: 14px; background: var(--paper-raised); }
+
+      table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 14.5px; }
+      caption { text-align: left; padding: 18px 22px 0; font-size: 13px; color: var(--ink-faint); }
+
+      thead th {
+        position: sticky; top: 64px; /* clears the masthead */
+        background: var(--paper-raised);
+        text-align: left; vertical-align: bottom;
+        padding: 20px 22px 16px;
+        /* An inset shadow rather than a border: with border-collapse the border on a sticky
+           header cell scrolls away from the cell it belongs to. */
+        box-shadow: inset 0 -2px 0 var(--rule-strong);
+        font-weight: 600;
+      }
+      thead th:first-child { font: 500 12px/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); }
+      thead .veh { font-family: var(--font-display); font-size: 19px; }
+      thead .veh small { display: block; margin-top: 6px; font: 400 13px/1.4 var(--font-body); color: var(--ink-faint); }
+
+      tbody th[scope='colgroup'] {
+        text-align: left; padding: 30px 22px 10px;
+        font: 500 12px/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase;
+        color: var(--walnut); background: var(--paper-raised);
+      }
+      /* The first row under a group label belongs to it, so the hairline goes above the label. */
+      tbody + tbody th[scope='colgroup'] { border-top: 1px solid var(--rule-strong); }
+      tbody th[scope='row'] { text-align: left; font-weight: 400; color: var(--ink-soft); }
+      tbody th[scope='row'], tbody td { padding: 11px 22px; border-top: 1px solid var(--rule); vertical-align: top; }
+      tbody td { font-variant-numeric: tabular-nums; }
+      tbody tr:hover th[scope='row'], tbody tr:hover td { background: var(--walnut-wash); }
+      /* "not published" is a finding, not a gap to hide — but it should recede from the facts. */
+      .unknown { color: var(--ink-faint); font-style: italic; }
+
+      /* Below the width where three columns fit, the table scrolls sideways — so the row label
+         has to come with it, or the values arrive with nothing to name them. */
+      @media (max-width: 760px) {
+        table { min-width: 520px; font-size: 13.5px; }
+        thead th, tbody th[scope='row'], tbody td, tbody th[scope='colgroup'], caption {
+          padding-inline: 14px;
+        }
+        thead th:first-child, tbody th[scope='row'] {
+          position: sticky; left: 0; z-index: 1;
+          background: var(--paper-raised);
+          border-right: 1px solid var(--rule);
+        }
+        thead .veh { font-size: 17px; }
+      }
+
+      /* --- verdict cards ------------------------------------------------------------------- */
+
+      .verdict { display: grid; gap: 20px; margin-top: 40px; }
+      @media (min-width: 800px) { .verdict { grid-template-columns: 1fr 1fr; } }
+      .verdict article {
+        background: var(--paper-raised); border: 1px solid var(--rule);
+        border-radius: 14px; padding: 26px 28px;
+      }
+      .verdict article:first-child { border-left: 3px solid var(--walnut); }
+      .verdict ul { margin: 14px 0 0; padding-left: 20px; }
+      .verdict li { margin-bottom: 10px; font-size: 15px; color: var(--ink-soft); }
+      .verdict li strong { color: var(--ink); font-weight: 600; }
+
+      .asks { max-width: 68ch; margin: 32px 0 0; padding-left: 24px; }
+      .asks li { margin-bottom: 12px; color: var(--ink-soft); }
+      .asks li strong { color: var(--ink); font-weight: 600; }
+
+      /* --- closing call, footer ------------------------------------------------------------ */
+
+      .closer { text-align: center; }
+      .closer .hero-actions { justify-content: center; }
+
+      footer { border-top: 1px solid var(--rule); padding: 40px 0 64px; font-size: 13.5px; color: var(--ink-faint); }
+      footer p { max-width: 72ch; }
+      footer a { color: var(--ink-soft); }
+
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+      }
     </style>
   </head>
+
   <body>
-    <script type="module" src="/src/main.ts"></script>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="masthead">
+      <div class="wrap">
+        <a class="wordmark" href="#main">Wuji Jing 500 <span>MAX</span></a>
+        <nav aria-label="Sections">
+          <a href="#walkthrough">Walkthrough</a>
+          <a href="#comparison">Comparison</a>
+          <a href="#questions">Open questions</a>
+        </nav>
+        <a class="btn" href="./tour.html">Open the 3D view <span class="arrow" aria-hidden="true">&rarr;</span></a>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero wrap">
+        <div class="hero-grid">
+          <div>
+            <h1><span>Dachi</span>Wuji Jing 500 MAX</h1>
+            <p class="lede">
+              A six-metre C-type motorhome on the Iveco Daily, rebuilt as a real-time 3D model.
+              The manufacturer never published a floorplan, so this one is reconstructed from four
+              published dimensions, the two published bed sizes used as in-frame rulers, and the
+              walkthrough video. Every figure on this page carries how it was arrived at.
+            </p>
+            <div class="hero-actions">
+              <a class="btn" href="./tour.html">Walk through the interior <span class="arrow" aria-hidden="true">&rarr;</span></a>
+              <a class="btn btn-ghost" href="./tour.html#plan">See the floorplan</a>
+            </div>
+          </div>
+          <figure class="hero-figure">
+            <img
+              src="./renders/hero.webp" width="1600" height="944"
+              alt="The modelled motorhome from the rear kerb-side three-quarter, slide-out deployed."
+            />
+            <figcaption>
+              Rendered in the browser. The body measures the published 5998 &times; 2450 &times;
+              3200 mm to the millimetre &mdash; the envelope is verifiable geometry rather than a
+              number in a table.
+            </figcaption>
+          </figure>
+        </div>
+
+        <dl class="figures">
+          <div>
+            <dt>Envelope</dt>
+            <dd>5998 &times; 2450 &times; 3200<small>mm, published</small></dd>
+          </div>
+          <div>
+            <dt>Habitation floor</dt>
+            <dd>4050 &times; 2360<small>mm, derived</small></dd>
+          </div>
+          <div>
+            <dt>Alcove bed</dt>
+            <dd>2200 &times; 1400<small>mm, published</small></dd>
+          </div>
+          <div>
+            <dt>Slide-out bed</dt>
+            <dd>1280 &times; 1900<small>mm, published</small></dd>
+          </div>
+          <div>
+            <dt>Fresh water</dt>
+            <dd>270 L<small>PE, anti-surge</small></dd>
+          </div>
+          <div>
+            <dt>Battery</dt>
+            <dd>14.4 kWh<small>48 V, 300 Ah</small></dd>
+          </div>
+        </dl>
+      </section>
+
+      <section id="walkthrough" class="wrap">
+        <p class="eyebrow">The 3D view</p>
+        <h2>Eight stops, free look at each</h2>
+        <p class="lede">
+          Six interior stops rotate about a fixed eye &mdash; orbiting inside a 2.36 m cabin walks
+          the camera through a wall. The exterior stop circles the body, and the plan stop cuts the
+          cabin at 1400 mm and labels what it finds. Pick one to open it directly.
+        </p>
+        <div class="stops">
+          <a class="stop" href="./tour.html#dinette">
+            <img src="./renders/lounge.webp" width="800" height="406" alt="The lounge looking forward past the booth to the alcove bed." loading="lazy" />
+            <div class="stop-text">
+              <h3>Lounge</h3>
+              <p>A booth on the off flank: one seat facing aft at two abreast.</p>
+            </div>
+          </a>
+          <a class="stop" href="./tour.html#alcove">
+            <img src="./renders/alcove.webp" width="800" height="406" alt="The over-cab alcove bed with head-end lockers." loading="lazy" />
+            <div class="stop-text">
+              <h3>Alcove bed</h3>
+              <p>2200 mm across the vehicle, 1400 fore-aft. The long-term main berth.</p>
+            </div>
+          </a>
+          <a class="stop" href="./tour.html#sofa">
+            <img src="./renders/slideout.webp" width="800" height="406" alt="The slide-out bed in cream leather with its walnut drawer plinth." loading="lazy" />
+            <div class="stop-text">
+              <h3>Slide-out bed</h3>
+              <p>The bench infills outboard to 1280 mm. Modelled deployed only.</p>
+            </div>
+          </a>
+          <a class="stop" href="./tour.html#galley">
+            <img src="./renders/galley.webp" width="800" height="406" alt="The galley run with its sink under the window and overhead lockers." loading="lazy" />
+            <div class="stop-text">
+              <h3>Galley</h3>
+              <p>A 1200 mm run behind the sliding partition, window over the counter.</p>
+            </div>
+          </a>
+          <a class="stop" href="./tour.html#washroom">
+            <img src="./renders/washroom.webp" width="800" height="406" alt="Inside the moulded washroom pod: corner vanity, mirror cabinet, ribbed shell." loading="lazy" />
+            <div class="stop-text">
+              <h3>Washroom</h3>
+              <p>A 900 &times; 1000 moulded pod in the rear corner. Wet room, one piece.</p>
+            </div>
+          </a>
+          <a class="stop" href="./tour.html#cab">
+            <img src="./renders/cab.webp" width="800" height="406" alt="The cab from behind: two seats either side of the engine tunnel." loading="lazy" />
+            <div class="stop-text">
+              <h3>Cab</h3>
+              <p>Two swivel captain seats, engine tunnel between them.</p>
+            </div>
+          </a>
+          <a class="stop" href="./tour.html#exterior">
+            <img src="./renders/exterior.webp" width="800" height="404" alt="The whole body seen from the kerb-side three-quarter." loading="lazy" />
+            <div class="stop-text">
+              <h3>Exterior</h3>
+              <p>Orbit the body. Awning, storage bay, control panel, deployed slide.</p>
+            </div>
+          </a>
+          <a class="stop" href="./tour.html#plan">
+            <img src="./renders/plan.webp" width="800" height="415" alt="The cabin sectioned from above, each zone labelled with its size." loading="lazy" />
+            <div class="stop-text">
+              <h3>Floorplan</h3>
+              <p>The plan nobody published, shown rather than drawn &mdash; and labelled.</p>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section id="comparison" class="wrap">
+        <p class="eyebrow">Side by side</p>
+        <h2>Against the Feishen Darwin Z76</h2>
+        <p class="lede">
+          The closest thing on the market to the same brief: a six-metre C-type on the same
+          chassis, rear entry, rear galley and washroom behind a partition, one side slide-out.
+          Both cars are read from published material, so &ldquo;not published&rdquo; appears where
+          neither the manufacturer nor a named review states a figure. Those blanks are
+          themselves a finding.
+        </p>
+
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Specification comparison, scrollable">
+          <table>
+            <caption>Figures as published by each manufacturer or a named review, September 2026.</caption>
+            <thead>
+              <tr>
+                <th scope="col">Specification</th>
+                <th scope="col" class="veh">
+                  Dachi Wuji Jing 500 MAX
+                  <small>2026 &middot; from &yen;529,800</small>
+                </th>
+                <th scope="col" class="veh">
+                  Feishen Darwin Z76
+                  <small>2023&ndash;24 &middot; &yen;558,000 list</small>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr><th scope="colgroup" colspan="3">Chassis and drivetrain</th></tr>
+              <tr>
+                <th scope="row">Chassis</th>
+                <td>Nanjing Iveco Daily, 4.5 t</td>
+                <td>Nanjing Iveco Daily</td>
+              </tr>
+              <tr>
+                <th scope="row">Overall size</th>
+                <td class="unknown">not published</td>
+                <td>5995 &times; 2415 &times; 3150 mm</td>
+              </tr>
+              <tr>
+                <th scope="row">Engine</th>
+                <td>F1C 3.0 T diesel, 132 kW / 430 Nm</td>
+                <td>F1C 3.0 T diesel, 125 kW / 400 Nm</td>
+              </tr>
+              <tr>
+                <th scope="row">Transmission</th>
+                <td>ZF 8AT, rear drive</td>
+                <td>8AT, rear drive, twin rear wheels</td>
+              </tr>
+              <tr>
+                <th scope="row">Seats and licence</th>
+                <td>5&ndash;6, blue plate, C licence</td>
+                <td>6, blue plate, C licence</td>
+              </tr>
+            </tbody>
+
+            <tbody>
+              <tr><th scope="colgroup" colspan="3">Layout and pitch setup</th></tr>
+              <tr>
+                <th scope="row">Plan</th>
+                <td>Rear entry, rear galley and washroom, one side slide-out</td>
+                <td>Rear entry, rear galley and washroom, one side slide-out</td>
+              </tr>
+              <tr>
+                <th scope="row">Slide travel</th>
+                <td class="unknown">not published</td>
+                <td>~600 mm</td>
+              </tr>
+              <tr>
+                <th scope="row">Service-room door</th>
+                <td>Sliding partition, full width</td>
+                <td>Hinged partition door</td>
+              </tr>
+              <tr>
+                <th scope="row">Levelling jacks</th>
+                <td>Manual</td>
+                <td>Manual</td>
+              </tr>
+              <tr>
+                <th scope="row">Awning</th>
+                <td>Dometic, 3.5 m</td>
+                <td>Fitted; brand and length not published</td>
+              </tr>
+              <tr>
+                <th scope="row">Lounge seating</th>
+                <td>Three independently adjustable chairs</td>
+                <td>Four-seat facing dinette plus a long sofa</td>
+              </tr>
+              <tr>
+                <th scope="row">Table</th>
+                <td>Wall-mounted, folds away</td>
+                <td>Gas-strut lift, slides</td>
+              </tr>
+            </tbody>
+
+            <tbody>
+              <tr><th scope="colgroup" colspan="3">Sleeping</th></tr>
+              <tr>
+                <th scope="row">Alcove bed</th>
+                <td>2200 &times; 1400 mm</td>
+                <td class="unknown">not published</td>
+              </tr>
+              <tr>
+                <th scope="row">Second berth</th>
+                <td>2000 &times; 1350 mm, pull-out</td>
+                <td>2000 &times; 1200 mm, sofa bed</td>
+              </tr>
+              <tr>
+                <th scope="row">Third berth</th>
+                <td>&mdash;</td>
+                <td>1200 &times; 700 mm, made up across the dinette</td>
+              </tr>
+            </tbody>
+
+            <tbody>
+              <tr><th scope="colgroup" colspan="3">Galley</th></tr>
+              <tr>
+                <th scope="row">Hob</th>
+                <td class="unknown">type not published</td>
+                <td>Integrated gas</td>
+              </tr>
+              <tr>
+                <th scope="row">Extraction</th>
+                <td>Motorhome hood</td>
+                <td>High-output hood</td>
+              </tr>
+              <tr>
+                <th scope="row">Oven</th>
+                <td>Toshiba combi microwave, steam and bake</td>
+                <td>Steam and bake combi</td>
+              </tr>
+              <tr>
+                <th scope="row">Fridge</th>
+                <td>148 L</td>
+                <td>142 L, dual zone, independently controlled</td>
+              </tr>
+              <tr>
+                <th scope="row">Sink</th>
+                <td>Deepened custom bowl, swivel tap</td>
+                <td>Stainless bowl, push-out window above it</td>
+              </tr>
+            </tbody>
+
+            <tbody>
+              <tr><th scope="colgroup" colspan="3">Water</th></tr>
+              <tr>
+                <th scope="row">Fresh tank</th>
+                <td>270 L, PE, anti-surge baffles</td>
+                <td>270 L</td>
+              </tr>
+              <tr>
+                <th scope="row">Grey tank</th>
+                <td>75 L</td>
+                <td>110 L</td>
+              </tr>
+              <tr>
+                <th scope="row">Filling</th>
+                <td>Gravity and self-priming</td>
+                <td>External filler</td>
+              </tr>
+              <tr>
+                <th scope="row">Grey dump</th>
+                <td>Electric, with freeze drain</td>
+                <td class="unknown">not published</td>
+              </tr>
+              <tr>
+                <th scope="row">Toilet</th>
+                <td>Thetford cassette</td>
+                <td>Dometic cassette</td>
+              </tr>
+              <tr>
+                <th scope="row">Washroom size</th>
+                <td class="unknown">not published</td>
+                <td class="unknown">not published</td>
+              </tr>
+            </tbody>
+
+            <tbody>
+              <tr><th scope="colgroup" colspan="3">Electrics</th></tr>
+              <tr>
+                <th scope="row">Habitation bus</th>
+                <td>48 V</td>
+                <td>12 V</td>
+              </tr>
+              <tr>
+                <th scope="row">Battery</th>
+                <td>48 V 300 Ah, ~14.4 kWh</td>
+                <td>12 V 1200 Ah, ~14.4 kWh</td>
+              </tr>
+              <tr>
+                <th scope="row">Inverter</th>
+                <td>6000 W</td>
+                <td>3000 W plus a 300 W auxiliary</td>
+              </tr>
+              <tr>
+                <th scope="row">Solar</th>
+                <td>1200 W</td>
+                <td>800 W</td>
+              </tr>
+              <tr>
+                <th scope="row">Charging on the move</th>
+                <td>Twin alternators, starter-battery reverse charge</td>
+                <td>Twin 150 A alternators</td>
+              </tr>
+              <tr>
+                <th scope="row">Monitoring</th>
+                <td>Phone app, mechanical switches and touchscreen</td>
+                <td class="unknown">not published</td>
+              </tr>
+            </tbody>
+
+            <tbody>
+              <tr><th scope="colgroup" colspan="3">Climate and appliances</th></tr>
+              <tr>
+                <th scope="row">Air conditioning</th>
+                <td>Xiaomi inverter</td>
+                <td>Gree inverter, roof-mounted</td>
+              </tr>
+              <tr>
+                <th scope="row">Diesel heating</th>
+                <td>High-altitude diesel air heater, plus underfloor heating</td>
+                <td>Eberspächer 5 kW high-altitude, air and water combi</td>
+              </tr>
+              <tr>
+                <th scope="row">Domestic hot water</th>
+                <td class="unknown">source not published</td>
+                <td>The same 5 kW combi unit</td>
+              </tr>
+              <tr>
+                <th scope="row">Insulation</th>
+                <td>High-density XPS, PU and aluminium twin frame</td>
+                <td>Sandwich composite body</td>
+              </tr>
+              <tr>
+                <th scope="row">Laundry</th>
+                <td>5 kg washer-dryer</td>
+                <td>3 kg motorhome washer</td>
+              </tr>
+              <tr>
+                <th scope="row">Entertainment</th>
+                <td>Projector and drop-down screen, JBL</td>
+                <td>32-inch smart TV, JBL</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="verdict">
+          <article>
+            <h3>Why the 500 MAX, for two adults living aboard</h3>
+            <ul>
+              <li><strong>48 V at 6 kW.</strong> Same stored energy either way, but a modern voltage platform: 125 A through the inverter at full load where 12 V needs 250 A for half the output.</li>
+              <li><strong>A 5 kg washer-dryer.</strong> Two people’s clothes, jeans, a thin sheet. The 3 kg alternative does underwear and t-shirts.</li>
+              <li><strong>2200 &times; 1400 mm up front.</strong> Published, and enough. The Z76’s alcove size is nowhere on record.</li>
+              <li><strong>Three adjustable chairs</strong> rather than a booth held upright to seat six people you are not hosting.</li>
+            </ul>
+          </article>
+          <article>
+            <h3>Where the Z76 still wins</h3>
+            <ul>
+              <li><strong>110 L of grey against 75 L.</strong> Forty-seven per cent more, and off-grid it is usually grey that fills first, not fresh that runs out.</li>
+              <li><strong>A galley specified for actually cooking:</strong> gas hob, high-output extraction, a window over the sink, and a door that shuts on all of it.</li>
+              <li><strong>Eberspächer 5 kW, named and rated,</strong> doing hot water and cabin heat in one box. The 500 MAX’s hot-water source is not published at all.</li>
+              <li><strong>Published where it counts:</strong> overall size, slide travel, fridge zones. Fewer blanks to chase down.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="questions" class="wrap">
+        <p class="eyebrow">Before signing anything</p>
+        <h2>Six things the spec sheet does not answer</h2>
+        <p class="lede">
+          None of these are on any published page for the 500 MAX. Get them in writing rather than
+          off a show vehicle.
+        </p>
+        <ol class="asks">
+          <li><strong>Washroom internal clear size,</strong> length &times; width &times; height.</li>
+          <li><strong>The hot-water heater:</strong> brand, model, output.</li>
+          <li><strong>What the hob actually is:</strong> induction, diesel or gas, and its rating.</li>
+          <li><strong>Whether 75 L of grey can be built out to 100&ndash;120 L</strong> from the factory.</li>
+          <li><strong>Whether the manual jacks can be ordered as four-point electric or hydraulic auto-levelling.</strong></li>
+          <li>
+            <strong>Kerb weight as delivered, axle loads with the tanks full, and what payload is
+            left.</strong> 270 L of fresh water is 270 kg before the battery, the appliances, two
+            people and the luggage.
+          </li>
+        </ol>
+      </section>
+
+      <section class="wrap closer">
+        <h2>The model is the argument</h2>
+        <p class="lede" style="margin-inline: auto">
+          Layout, finishes and camera stops all live in data with a confidence tag attached, and a
+          dimensional check runs at startup: no furniture overlaps, everything inside its volume,
+          aisle at least 400 mm, both published bed sizes exact. Go and look.
+        </p>
+        <div class="hero-actions">
+          <a class="btn" href="./tour.html">Open the 3D view <span class="arrow" aria-hidden="true">&rarr;</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="wrap">
+      <p>
+        A portfolio piece, not a product, and not affiliated with either manufacturer. Every
+        dimension is tagged <em>published</em>, <em>derived</em> or <em>estimated</em>, because no
+        floorplan for this vehicle was ever released; the reconstruction and its evidence are
+        written up in the design spec alongside the source, and the comparison
+        draws on each manufacturer’s own material plus named reviews on Autohome, Sohu and Naveco.
+      </p>
+    </footer>
   </body>
 </html>

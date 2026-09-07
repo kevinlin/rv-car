@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Walkthrough — Dachi Wuji Jing 500 MAX</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #111; overflow: hidden; }
+      canvas { display: block; }
+      .ui { position: fixed; left: 16px; bottom: 16px; display: flex; gap: 24px;
+            font: 13px system-ui, sans-serif; }
+      .ui-zones, .ui-finishes { display: flex; gap: 8px; }
+      .ui button { border: 0; border-radius: 6px; padding: 8px 12px; cursor: pointer;
+                   background: rgba(255,255,255,.85); color: #111; }
+      .ui-finishes button { width: 32px; height: 32px; padding: 0;
+                            border: 2px solid rgba(255,255,255,.7); }
+      /* The dimension overlay only has something to label from above, so its toggle only
+         exists at the plan stop. main.ts stamps the stop id onto <body>. */
+      .ui [data-labels] { display: none; }
+      body[data-stop="plan"] .ui [data-labels] { display: block; }
+      .ui [data-labels][aria-pressed="false"] { background: rgba(255,255,255,.4); }
+      .plan-label { pointer-events: none; text-align: center; white-space: nowrap;
+                    font: 12px/1.35 system-ui, sans-serif; color: #12181f;
+                    background: rgba(255,255,255,.82); border-radius: 5px;
+                    padding: 3px 8px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+      .plan-label strong { display: block; font-weight: 600; }
+      /* The confidence tag is the point of the second line, so it stays readable rather than
+         decorative — but it must not compete with the name. */
+      .plan-label span { display: block; font-size: 11px; color: #4a5560; }
+      /* Way back to the home page. Top-left, clear of the .ui bar along the bottom. */
+      .ui-home { position: fixed; top: 16px; left: 16px; z-index: 1;
+                 font: 500 13px system-ui, sans-serif; text-decoration: none;
+                 padding: 8px 12px; border-radius: 6px;
+                 background: rgba(255,255,255,.85); color: #111; }
+      .ui-home:hover { background: #fff; }
+      .ui-home:focus-visible { outline: 2px solid #7a4a1e; outline-offset: 2px; }
+    </style>
+  </head>
+  <body>
+    <a class="ui-home" href="./index.html">&larr; Overview</a>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -8,6 +8,14 @@ A Three.js walkthrough of a 大驰 无极境500 C-type motorhome — six interio
 an exterior stop that orbits the body, and a plan stop that sections the cabin at 1400 mm and
 labels it. Portfolio piece, not a product.
 
+Two pages. [index.html](index.html) is a static overview: the reconstruction, a stop gallery, and
+a side-by-side comparison against the 飞神达尔文 Z76 drawn from
+[docs/research/comparison.md](docs/research/comparison.md). It carries no JavaScript at all, so
+three.js loads only when someone opens the walkthrough. [tour.html](tour.html) is the 3D view —
+what used to be `index.html` — and every gallery card links to it as `tour.html#<stop id>`, which
+`main.ts` resolves against `HOTSPOTS`. Both pages are named in `rollupOptions.input`; Vite finds
+only `index.html` on its own.
+
 [docs/specs/design_rv-interior-3d.md](docs/specs/design_rv-interior-3d.md) is the single design
 spec. Sections 1–14 state the design as built; the implementation record after them keeps the
 dated passes in order, including the layout readings each one replaced. Three plans built it:
@@ -47,7 +55,11 @@ pnpm exec npm run bake                    # AO into the packed UV2 atlas, ~10 s
 pnpm exec npm run check:blend             # geometry checks against the saved .blend
 pnpm exec npm run check:models            # placement bounds, roles, exterior envelope
 pnpm exec npm run textures                # rectify photographs into public/textures/*.webp
+pnpm thumbs                               # overview-page imagery from docs/research/final
 ```
+
+`pnpm thumbs` needs no Blender: it crops the burnt-in `.ui` bar off the committed final renders
+and writes `public/renders/*.webp`. Re-run it after recapturing that comparison set.
 
 `dist/` is gitignored. `public/models/` is **committed**, along with `public/textures/` and
 `model/rv.blend`. The `.glb`s do regenerate from the `.blend`, but only on a machine with
