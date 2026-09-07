@@ -446,7 +446,8 @@ def build_washroom(a):
     # Modelled open, flat against the pod's inboard face, and hinged at the AFT end. Two
     # constraints fix that: the hotspot sightline crosses this plane at y 3.32, so a leaf hung
     # from the forward jamb would stand between the camera and everything it exists to show; and
-    # a leaf swung out into the aisle would cross the centreline and break the rear-entry ray.
+    # a leaf swung out into the aisle would cross the centreline and break the ray fired in from
+    # the rear side door.
     leaf = inner+side*.018                 # just outboard of the opening, in the aisle
     face = inner+side*.036                 # its aisle-facing side, where the mirror goes
     door_y = y1-.35

@@ -26,7 +26,7 @@ def _door_reveal(a, name, centre, width, height, axis, role='metal.dark', t=.055
 
     The video's window frames are wide and black, and the tint the eye reads is the interior
     pane seen through the hole rather than a second pane out here — one would double the tint
-    and re-create that defect. `role` stays overridable because the rear door's outline is a
+    and re-create that defect. `role` stays overridable because the rear side door's outline is a
     panel gap in the paint, not a window frame.
     """
     x, y, z = centre

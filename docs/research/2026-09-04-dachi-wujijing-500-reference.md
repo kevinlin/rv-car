@@ -49,7 +49,7 @@ under a 3200 mm exterior roof. Derived from 5998 mm total minus cab and rear ove
 
 The 境 family layout, per S4: *前方额头床，中部3人汽车座椅+长条沙发，尾部独立厨卫区* — over-cab
 bed at the front, automotive seats plus a long bench sofa in the middle, independent kitchen and
-washroom at the rear, entered through a **rear-side door** (后上门).
+washroom at the rear, entered through a **rear side door** (后上门).
 
 Reading that against the S1 photos, 境500 resolves to five zones, front to rear:
 

@@ -146,8 +146,8 @@ forward facing aft, two abreast facing forward, stowable table between); the sli
 **kerb**; and a full-width sliding partition at Z 2500.
 
 Behind that partition the service room is arranged **across** the vehicle about its boarding
-door, not as two runs down opposite flanks. The door is 后上门 in the sense the brochure means it:
-in the **kerb flank** forward of the rear corner, not in the rear wall. The walkaround opens it
+door, not as two runs down opposite flanks. It is a rear side door in the sense the brochure's 后上门
+means it: in the **kerb flank** forward of the rear corner, not in the rear wall. The walkaround opens it
 there, with the grab rail, keypad and vent on the 390 mm of flank left aft of it. Standing in
 that door looking in, your left hand is aft: **left** is the worktop and basin, a run backing onto
 the rear wall and crossing the centreline with the fridge at its off end; **right** is a tall

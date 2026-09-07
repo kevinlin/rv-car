@@ -158,7 +158,7 @@ export const PLAN_LABELS: readonly PlanLabel[] = [
 A label cannot claim a dimension the geometry does not have. Section 2 of the parent spec applies
 that discipline to every number in `vehicle.ts`. This extends it to the one place those numbers
 become copy a viewer reads: ten labels or so, covering the two beds, the booth, the wardrobe, the
-fridge, the galley run, the washroom pod, the partition, the rear door and the two aisle widths.
+fridge, the galley run, the washroom pod, the partition, the rear side door and the two aisle widths.
 
 A test asserts every `placement` id in `PLAN_LABELS` resolves in `PLACEMENTS`. It runs in node,
 because `vehicle.ts` imports no Three.js.
@@ -499,8 +499,8 @@ What still differs:
    apertures read as recessed rather than painted on.
 3. Whether the plan stop should be the app's landing view. It is the most legible single frame the
    project can produce, and `main.ts` currently lands on `dinette`. Not decided here.
-4. Whether the label overlay needs a Chinese variant. Every label naming a fitting the video names
-   in Chinese (卡座, 后上门) already carries it; the rest are English.
+4. Whether the label overlay needs a Chinese variant. Every label is English, including the two
+   fittings the video names only in Chinese (卡座, 后上门).
 
 Carried forward from the parent spec, untouched by this pass: the mid-range phone frame rate has
 still never been measured on hardware, and the engine tunnel still reads as a black slab down the

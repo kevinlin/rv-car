@@ -126,7 +126,7 @@ behind it.
 | Galley | 3500 → 4050 | full width | Worktop and basin backing onto the rear wall, overheads above, window over the counter |
 | Oven shelf | 2550 → 2960 | kerb (`+X`) | Tall shelf carrying the 3-in-1 combi oven, forward of the door |
 | Washroom pod | 2550 → 3490 | off (`−X`), against the partition | 900 × 940 moulded GRP pod |
-| Boarding door | 2960 → 3660 | kerb (`+X`) | 后上门, in the flank forward of the rear corner |
+| Boarding door | 2960 → 3660 | kerb (`+X`) | The rear side door, in the flank forward of the rear corner |
 
 
 The service room is arranged across the vehicle about its door rather than as two flank runs.
@@ -625,7 +625,7 @@ a by-eye judgement: a pixel diff against another renderer's output would mean no
 | Hotspot safety | vitest | Every `look` eye sits inside its volume and outside every placement box; the `orbit` ring clears the exterior body at every point |
 | Orbit azimuth | vitest | A whole turn is written as no limit, not as `centre ± PI` |
 | Texel density | `check_blend.py` | UV1 density across objects sharing a role varies within tolerance |
-| Apertures | `check_blend.py` | Rays pass through the real window and hatch openings, the alcove entrance is unobstructed, and a ray aft along the lounge centreline reaches the rear door through the partition doorway |
+| Apertures | `check_blend.py` | Rays pass through the real window and hatch openings, the alcove entrance is unobstructed, a ray aft along the lounge centreline reaches the rear wall through the partition doorway, and a ray fired inboard from the rear side door crosses the centreline to the washroom pod |
 | Rear glazing | `check_blend.py` | `role.glass` exists in the rear wall |
 | Placement bounds | `check_models.mjs` | Every node lands on its placement's world bounds, raw and optimised, to 1 mm |
 | Exterior envelope | `check_models.mjs` | The modelled body measures 5998 × 2450 × 3200 mm to the millimetre, excluding the deployed slide-out box |
@@ -683,8 +683,9 @@ Closed:
 - **Which side is the galley on, and which the washroom?** Neither is a flank run. The worktop and
   basin back onto the rear wall across the full width; the pod is on the off flank against the
   partition, with the oven shelf opposite it on the kerb flank. Settled by the walkthrough video, after two wrong readings of the stills.
-- **Where is the entry door?** One door, 后上门, in the rear wall, offset 100 mm off the
-  centreline to clear the washroom pod.
+- **Where is the entry door?** One rear side door, in the kerb flank forward of the rear corner,
+  Z 2960 → 3660, with the grab rail, keypad and vent on the flank aft of it. The rear wall carries
+  no door, only the window over the galley run. See open item 4 below for how that was settled.
 - **Is the tall dark-gloss column the 148 L fridge?** Assumed yes.
 - **How does the slide-out deploy?** The bed infills inboard; the aisle does not widen.
 

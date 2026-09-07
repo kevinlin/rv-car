@@ -268,9 +268,9 @@ def window(name, x, y, z, width, height, axis='x'):
 def entry_door(x, y, z, width, height, axis='x'):
     """Leaf, frame and pleated flyscreen filling an opening in a wall.
 
-    `axis` names the wall's normal. 后上门 puts this vehicle's boarding door in the rear wall,
-    so 'y' is the variant in use; the door itself is the same either way, which is why this
-    takes an axis rather than growing a second copy. Both the kerb wall and the rear wall sit
+    `axis` names the wall's normal. This vehicle's rear side door is in the kerb flank, so 'x'
+    is the variant in use; the door itself is the same either way, which is why this takes an
+    axis rather than growing a second copy. Both the kerb wall and the rear wall sit
     at the positive end of their axis, so "into the cabin" is the negative direction on both,
     and `inset` is measured that way.
     """

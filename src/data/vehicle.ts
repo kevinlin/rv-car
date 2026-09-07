@@ -253,11 +253,11 @@ export const PLAN_LABELS: readonly PlanLabel[] = [
   { text: 'Galley',        placement: 'galley_run' },
   { text: 'Washroom',      placement: 'washroom_pod' },
   { text: 'Sliding partition', placement: 'partition' },
-  // Not placements: an aisle is the gap between two of them, and the door is an opening cut
-  // into wall_rear rather than a piece of furniture.
+  // Not placements: an aisle is the gap between two of them. The door is a placement, but an
+  // opening cut into wall_kerb rather than a piece of furniture, so it carries its own detail.
   { text: 'Aisle', at: [d(0), d(900), d(1000)], detail: '560 mm derived' },
   { text: 'Aisle', at: [d(0), d(900), d(3300)], detail: '800 mm derived' },
-  { text: 'Rear boarding door', at: [d(100), d(900), d(4050)], detail: '100 mm off centreline' },
+  { text: 'Rear side door', placement: 'entry_door', detail: '700 mm clear, kerb flank' },
 ];
 
 export const aabb = (p: Placement) => ({
