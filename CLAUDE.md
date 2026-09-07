@@ -143,12 +143,25 @@ Both plans are implemented. Ten Blender collections export to ten `.glb`s; the g
 The layout took three corrections after the first build, and the spec's implementation record is
 where each one is written down. Where it landed: a 卡座 booth on the **off** flank (one seat
 forward facing aft, two abreast facing forward, stowable table between); the slide-out and its bed
-**kerb**; a full-width sliding partition at Z 2500; a 1200 mm galley run along the **off** flank
-in the rear service room, continuing the line the fridge starts; a 900 × 1000 washroom pod in the
-**rear kerb corner**; and one entry, 后上门, in the rear wall, offset 100 mm off the centreline
-because the pod takes the corner the kerb door used to occupy. The exterior stop sits off flank,
-which is the flat one now. Do not re-derive any of this from the stills — two passes did, and both
-were wrong; the walkthrough video is what settled it.
+**kerb**; and a full-width sliding partition at Z 2500.
+
+Behind that partition the service room is arranged **across** the vehicle about its boarding
+door, not as two runs down opposite flanks. The door is 后上门 in the sense the brochure means it:
+in the **kerb flank** forward of the rear corner, not in the rear wall. The walkaround opens it
+there, with the grab rail, keypad and vent on the 390 mm of flank left aft of it. Standing in
+that door looking in, your left hand is aft: **left** is the worktop and basin, a run backing onto
+the rear wall and crossing the centreline with the fridge at its off end; **right** is a tall
+shelf carrying the 3-in-1 combi oven, against the kerb flank forward of the door; **ahead** is the
+900 × 940 washroom pod, on the off flank against the partition. Because that run crosses the
+centreline, `check.ts` stops sampling the aisle at the door. Aft of it there is no corridor to
+protect, only a dead-end galley.
+
+The lounge and the service room are handed independently, which is what every wrong reading got
+wrong by assuming one chain of inference ran the length of the vehicle. The exterior stop looks at
+the **kerb** flank, the one the slide-out box and the door are on. Do not re-derive any of this
+from the stills — four passes did, and all four were wrong; the walkthrough video settles the
+lounge, `docs/research/spatial-brief_大驰无极境500MAX.md` settles the service room, and
+`src/check.test.ts` pins both.
 
 Measured after the plan-view and exterior pass: 101,028 triangles of 350,000, 10.16 MB of 25 MB,
 45 draw calls at the worst interior stop against a stale ceiling of 40 (30 of them scene geometry,

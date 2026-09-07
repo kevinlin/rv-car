@@ -26,7 +26,16 @@ const furniture = (ps: readonly Placement[]) => ps.filter((p) => !ENCLOSURES.has
 
 const volumeOf = (zone: ZoneId) => VOLUMES[ZONE_VOLUME[zone as FurnitureZone]];
 
-/** The walkable run: Z = 0 is the bulkhead plane, so sampling starts just inside it. */
+/**
+ * The walkable run: Z = 0 is the bulkhead plane, so sampling starts just inside it, and it ends
+ * at the boarding door rather than at the rear wall.
+ *
+ * While the entry was read as 后上门 in the rear wall, the corridor genuinely had to reach
+ * Z 4050. The walkaround puts the door in the kerb flank instead, so everything aft of it is a
+ * dead-end galley whose worktop backs onto the rear wall and crosses the centreline by design.
+ * Sampling past the door would read that counter as a blocked aisle and fail the build for a
+ * corridor nobody walks down.
+ */
 const AISLE_Z_FROM = 50;
 const AISLE_Z_TO = 4050;
 const AISLE_Z_STEP = 50;
@@ -42,9 +51,11 @@ const AISLE_Z_STEP = 50;
  */
 export const minAisleWidth = (ps: readonly Placement[]): number => {
   const boxes = furniture(ps).map(aabb);
+  // Read off the door when there is one, so moving it moves the sampled run with it.
+  const end = ps.find((p) => p.id === 'entry_door')?.origin[2].v ?? AISLE_Z_TO;
   let narrowest = Infinity;
 
-  for (let z = AISLE_Z_FROM; z <= AISLE_Z_TO; z += AISLE_Z_STEP) {
+  for (let z = AISLE_Z_FROM; z <= end; z += AISLE_Z_STEP) {
     let offMax = -Infinity;
     let kerbMin = Infinity;
 

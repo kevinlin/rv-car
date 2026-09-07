@@ -96,6 +96,14 @@ export const PLACEMENTS: readonly Placement[] = [
   // an enclosure cannot be held to the overlap and aisle rules it exists to divide.
   { id: 'partition', zone: 'shell', origin: [e(-1180), d(0), e(2500)], size: [d(2360), d(2000), e(50)], movable: false },
   { id: 'slideout_shell', zone: 'shell', origin: [d(1180), d(0), d(150)], size: [d(580), d(2000), d(1900)], movable: false },
+  // The boarding door, in the KERB flank forward of the rear corner. Shell rather than
+  // furniture for the same reason the partition is: it is an opening in a wall, and as a
+  // furniture placement it overlapped whatever run passed it. Being data rather than a literal
+  // in build_shell is what lets check.ts end the aisle sampling here, and the 390 mm of flank
+  // left aft of it is where the walkaround puts the grab rail, the keypad and the vent.
+  // 90 mm deep rather than the wall's 45: the box has to hold the leaf, its frame and the
+  // gathered flyscreen behind it, and check_models.mjs holds every named node to its own box.
+  { id: 'entry_door', zone: 'shell', origin: [e(1105), d(0), e(2960)], size: [e(90), e(1850), e(700)], movable: false },
 
   // --- cab ---
   { id: 'cab_seat_off',  zone: 'cab', origin: [e(-900), e(0), e(-1600)], size: [e(550), e(1100), e(550)], movable: false },
@@ -126,29 +134,37 @@ export const PLACEMENTS: readonly Placement[] = [
   { id: 'slideout_bed',  zone: 'sofa', origin: [d(450), e(400), e(150)], size: [pub(1280), e(200), pub(1900)], movable: false },
   { id: 'lockers_kerb',  zone: 'sofa', origin: [e(1280), e(1400), e(150)],size: [e(450), e(450), e(1900)], movable: false },
 
-  // --- storage. The wardrobe is the only thing left in the band forward of the partition;
-  // the 148 L fridge column stands in the SERVICE room, aft of the sliding door and hard up
-  // against the washroom pod on the off flank. It is not part of the lounge and does not start
-  // a line the galley continues — the galley faces it from the opposite flank.
-  { id: 'fridge',   zone: 'storage', origin: [e(-1150), e(0), e(2550)], size: [e(600), e(1800), e(500)], movable: false },
+  // --- storage. The wardrobe is the only thing left in the band forward of the partition. The
+  // 148 L fridge column stands in the SERVICE room, at the off end of the rear run, beside the
+  // worktop rather than in the lounge.
+  { id: 'fridge',   zone: 'storage', origin: [e(-1180), e(0), e(3500)], size: [e(600), e(1800), e(550)], movable: false },
   // 250 mm deep, which is the storage band the design spec states (Z 2050-2300); at 400 it
   // also filled the floor in front of the entry door.
   { id: 'wardrobe', zone: 'storage', origin: [e(600), e(0), e(2100)],   size: [e(550), e(1900), e(250)], movable: false },
 
-  // --- rear wet zone. The galley is a 1200 mm run along the KERB flank and the washroom a
-  // corner pod in the REAR OFF corner, so the service room's flanks are the opposite way round
-  // to the lounge's: the galley faces the fridge and the washroom pod across the aisle rather
-  // than continuing their line. The walkthrough video is explicit — from the lounge looking aft
-  // through the partition, the counter and its pegboard are on the left and the mirrored
-  // washroom door on the right — and the chain of inference that had the galley continue the
-  // fridge's line was wrong twice over: wrong about the flank, and wrong about the fridge being
-  // in the lounge at all. The boarding door is 后上门, in the rear wall, offset off the centreline to clear
-  // the pod. Enter, and the counter is on your right, the washroom door on your left, with
-  // 800 mm of aisle between them. Pinned by a test in check.test.ts, because reading handedness
-  // off stills has now got it wrong four times.
-  { id: 'galley_run',      zone: 'galley', origin: [e(550), e(0), e(2550)],    size: [e(600), e(900), e(1200)], movable: false },
-  { id: 'galley_overhead', zone: 'galley', origin: [e(550), e(1350), e(2550)], size: [e(600), e(450), e(1200)], movable: false },
-  { id: 'washroom_pod',    zone: 'washroom', origin: [e(-1150), e(0), e(3050)],  size: [e(900), e(1950), e(1000)], movable: false },
+  // --- rear service room, arranged ACROSS the vehicle about the boarding door rather than as
+  // two runs down opposite flanks.
+  //
+  // 后上门 was read as a door in the rear wall. It is not: the walkaround opens it on the KERB
+  // flank, forward of the rear corner, with the grab rail, keypad and vent on the stretch of
+  // flank aft of it. So the entry faces inboard, and the room is organised about the path that
+  // leads in from it — which is what the updated spatial brief's plan draws.
+  //
+  // Standing in that door looking in, your left hand is aft and your right hand is forward. So:
+  //   left  — the worktop and basin, a run backing onto the REAR wall and crossing the
+  //           centreline, with the fridge at its off end and the overheads above it;
+  //   right — a tall shelf carrying the 3-in-1 combi oven, against the kerb flank forward of
+  //           the door;
+  //   ahead — the washroom pod, hard against the partition on the off flank.
+  // The clear path between the oven shelf's aft face and the worktop's front face is 540 mm,
+  // and the route on to the partition doorway passes between the pod and the shelf at 680 mm.
+  //
+  // The rear run crossing the centreline is why check.ts stops sampling the aisle at the door:
+  // aft of the boarding door there is no through-corridor to protect, only a dead-end galley.
+  { id: 'galley_run',      zone: 'galley', origin: [e(-580), e(0), e(3500)],    size: [e(1460), e(900), e(550)], movable: false },
+  { id: 'galley_overhead', zone: 'galley', origin: [e(-580), e(1350), e(3500)], size: [e(1460), e(450), e(550)], movable: false },
+  { id: 'galley_oven',     zone: 'galley', origin: [e(400), e(0), e(2550)],     size: [e(780), e(1900), e(410)], movable: false },
+  { id: 'washroom_pod',    zone: 'washroom', origin: [e(-1180), e(0), e(2550)], size: [e(900), e(1950), e(940)], movable: false },
 
   // --- exterior. Every value derives from ENVELOPE, so the published envelope becomes
   // verifiable geometry. Excluded from overlap and containment checks: the body encloses
@@ -157,14 +173,26 @@ export const PLACEMENTS: readonly Placement[] = [
   // 1350 mm cab roof line, and a 372 mm wheel radius from a 225/75R16 on the Daily 4.5 t.
   // Sizes computed from those are tagged derived, matching how habLength already derives
   // from an estimated cabDepth. Nothing here touches a published dimension.
+  // The three body masses OVERLAP their neighbours by 15 mm rather than butting flush.
+  //
+  // Flush, they met on two shared planes — all three at Z 0, and the cab's roof, the alcove's
+  // underside and the alcove mattress's top all at Y 1350 — and coplanar faces z-fight. That is
+  // what §14's "interior geometry shows through the cab/habitation step" has always been: not a
+  // hole in the bodywork, which is why nothing was ever found to plug. The overlap is on the
+  // junction faces only, so every envelope extreme is where it was: the nose stays at Z -1948,
+  // the rear at 4050, the flanks at +-1225 and the alcove roof at 2150.
   { id: 'body_cab',         zone: 'exterior', origin: [e(-1100), e(-400),  d(-1948)], size: [e(2200), d(1750), d(1948)], movable: false },
-  { id: 'body_alcove',      zone: 'exterior', origin: [d(-1225), e(1350),  d(-1948)], size: [d(2450), d(800),  d(1948)], movable: false },
-  { id: 'body_habitation',  zone: 'exterior', origin: [d(-1225), e(-400),  d(0)],     size: [d(2450), d(2550), d(4050)], movable: false },
+  { id: 'body_alcove',      zone: 'exterior', origin: [d(-1225), e(1335),  d(-1948)], size: [d(2450), d(815),  d(1948)], movable: false },
+  { id: 'body_habitation',  zone: 'exterior', origin: [d(-1225), e(-400),  d(-15)],   size: [d(2450), d(2550), d(4065)], movable: false },
   { id: 'skirt',            zone: 'exterior', origin: [d(-1225), e(-700),  d(0)],     size: [d(2450), d(300),  d(4050)], movable: false },
-  // 2000 mm tall, matching slideout_shell exactly. At the old estimated 1300 the exterior box
-  // stopped 700 mm short of the interior shell it is supposed to enclose, and the kerb
-  // three-quarter looked straight through the gap into the cabin.
-  { id: 'slideout_box',     zone: 'exterior', origin: [d(1225),  e(0),     e(150)],   size: [d(580),  d(2000), e(1900)], movable: false },
+  // Encloses slideout_shell with 15 mm to spare on the roof and both ends, rather than matching
+  // it exactly. At the old estimated 1300 the exterior box stopped 700 mm short of the shell it
+  // is supposed to enclose and the kerb three-quarter looked straight into the cabin; the fix
+  // for that made every one of those faces exactly coplanar with the shell's instead, which
+  // z-fights. The committed exterior.webp shows it as a strip of cabinetry and a curtain down
+  // the box's forward face. The clearance is on the three faces the exterior stop can see; the
+  // underside stays on the floor plane, where the floor is what covers it.
+  { id: 'slideout_box',     zone: 'exterior', origin: [d(1225),  e(0),     e(135)],   size: [d(580),  d(2015), e(1930)], movable: false },
   { id: 'wheel_front_off',  zone: 'exterior', origin: [e(-988),  d(-1050), d(-1270)], size: [e(225),  e(744),  e(744)],  movable: false },
   { id: 'wheel_front_kerb', zone: 'exterior', origin: [e(763),   d(-1050), d(-1270)], size: [e(225),  e(744),  e(744)],  movable: false },
   { id: 'wheel_rear_off',   zone: 'exterior', origin: [e(-988),  d(-1050), d(2030)],  size: [e(225),  e(744),  e(744)],  movable: false },
@@ -294,19 +322,19 @@ export const HOTSPOTS: readonly Hotspot[] = [
   },
   {
     id: 'galley',
-    // Just aft of the partition, in the aisle at the forward end of the run, looking down its
-    // length. The counter is on the kerb flank, so this is the classic galley shot: worktop
-    // receding on one side, overheads above it, window over the counter.
+    // In the entry path, looking aft at the rear run: worktop and basin across the frame with
+    // the overheads above it, the fridge closing the off end and the rear window behind. The
+    // old stop looked along a flank run that no longer exists.
     label: 'Galley',
-    camera: { position: [-0.45, 1.6, 2.65], target: [0.85, 1.2, 3.3] },
+    camera: { position: [0.05, 1.6, 2.72], target: [0.05, 1.05, 4.0] },
     view: { kind: 'look', pitch: [-40 * D, 30 * D] },
   },
   {
     id: 'washroom',
-    // In the aisle inboard of the pod, looking into its opening. The pod sits in the rear off
-    // corner, so this stop crossed the cabin with it.
+    // In the entry path, looking forward-and-off into the pod's opening. The pod moved forward
+    // to the partition when the rear strip became the galley run, and this stop moved with it.
     label: 'Washroom',
-    camera: { position: [0.3, 1.6, 2.95], target: [-0.7, 1.1, 3.65] },
+    camera: { position: [0.35, 1.6, 3.15], target: [-0.85, 1.05, 3.0] },
     view: { kind: 'look', pitch: [-40 * D, 30 * D] },
   },
   {

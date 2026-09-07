@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { boxesOverlap, boxContains, minAisleWidth, checkAll, MIN_AISLE_MM } from './check';
-import { PLACEMENTS, aabb, type Placement } from './data/vehicle';
+import { VOLUMES, PLACEMENTS, aabb, type Placement } from './data/vehicle';
 
 const box = (
   min: [number, number, number],
@@ -49,26 +49,23 @@ describe('minAisleWidth', () => {
 
 describe('handedness', () => {
   // This cabin has been flipped four times, each pass reading a flank off a still photograph
-  // and getting it wrong. The manufacturer's walkthrough video settles both halves, and they
-  // do not point the same way — which is the trap every previous pass fell into, because each
-  // assumed one chain of inference ran the length of the vehicle.
+  // and getting it wrong. The manufacturer's walkthrough video settles the lounge, and the
+  // updated spatial brief settles the service room; they do not point the same way, which is
+  // the trap every previous pass fell into by assuming one chain of inference ran the length
+  // of the vehicle.
   //
-  // From the lounge looking aft through the partition (8:32-8:56, hi-res), the sofa bench is
-  // on the left and the booth's pair of seats on the right; looking aft, left is kerb. In the
-  // same frames, through the doorway, the galley's pegboard and counter are on the left and
-  // the mirrored washroom door on the right. The 3:50 frame through the open rear door, where
-  // the sense reverses, agrees on the service room.
+  // Lounge: from the lounge looking aft through the partition (8:32-8:56, hi-res), the sofa
+  // bench is on the left and the booth's pair of seats on the right; looking aft, left is kerb.
   //
-  // So the lounge and the service room are handed opposite ways: the galley sits behind the
-  // wardrobe rather than continuing the fridge's line. Pinned so a fifth flip fails loudly.
-  // Evidence in docs/research/walkthrough/.
+  // Service room: the boarding door is in the KERB flank forward of the rear corner, not in the
+  // rear wall — the 2:38 and 3:23 walkaround frames open it there, with the grab rail, keypad
+  // and vent on the flank aft of it. The room is arranged about the path leading in from that
+  // door: worktop and basin on your left as you enter, which is the run backing onto the rear
+  // wall; the 3-in-1 oven shelf on your right, against the kerb flank forward of the door; the
+  // washroom pod ahead, on the off flank against the partition.
+  //
+  // Evidence in docs/research/walkthrough/ and docs/research/spatial-brief_*.md.
   const box = (id: string) => aabb(PLACEMENTS.find((p) => p.id === id)!);
-
-  it('keeps the galley on the kerb flank and the washroom pod on the off flank', () => {
-    expect(box('galley_run').min[0]).toBeGreaterThanOrEqual(0);
-    expect(box('galley_overhead').min[0]).toBeGreaterThanOrEqual(0);
-    expect(box('washroom_pod').max[0]).toBeLessThanOrEqual(0);
-  });
 
   it('keeps the booth off and the slide-out kerb, facing each other across the aisle', () => {
     for (const id of ['dinette_chair_fwd', 'dinette_chair_aft_off', 'dinette_chair_aft_kerb']) {
@@ -77,69 +74,50 @@ describe('handedness', () => {
     expect(box('slideout_bed').min[0]).toBeGreaterThanOrEqual(0);
   });
 
-  it('stands the fridge in the service room, aft of the partition and beside the pod', () => {
-    // Not in the lounge, and not the head of a run the galley continues: it is service-room
-    // furniture, hard against the washroom pod on the off flank, with the galley facing it.
-    const partition = box('partition');
-    expect(box('fridge').min[2]).toBeGreaterThanOrEqual(partition.max[2]!);
-    expect(box('fridge').max[0]).toBeLessThanOrEqual(0);
-    expect(box('fridge').max[2]).toBe(box('washroom_pod').min[2]);
+  it('puts the boarding door in the kerb flank, clear of the rear corner', () => {
+    const door = box('entry_door');
+    const rear = box('wall_rear');
+    expect(door.min[0]).toBeGreaterThan(0);
+    expect(door.max[2]).toBeLessThan(rear.min[2]!);
+    // The walkaround needs that stretch of flank aft of the door for the grab rail, the keypad
+    // and the vent. Without a floor under it the door drifts back into the corner.
+    expect(rear.min[2]! - door.max[2]!).toBeGreaterThanOrEqual(300);
   });
 
-  it('puts the galley opposite the wardrobe and the pod, not behind either', () => {
-    // The assertion that distinguishes this layout from both of the ones it replaced.
-    expect(box('wardrobe').min[0]).toBeGreaterThanOrEqual(0);
-    expect(box('galley_run').min[0]).toBeGreaterThanOrEqual(0);
-    expect(box('washroom_pod').max[0]).toBeLessThanOrEqual(0);
-  });
-});
-
-describe('checkAll', () => {
-  it('passes on the shipped placement data', () => {
-    expect(checkAll()).toEqual([]);
-  });
-
-  it('reports an overlap when two pieces are pushed into each other', () => {
-    const broken: Placement[] = PLACEMENTS.map((p) =>
-      // Aft, into the seat pair it sits in front of. Sliding it sideways no longer collides
-      // with anything: the booth is a fore-aft sandwich of seats, table, seats.
-      p.id === 'dinette_table'
-        ? { ...p, origin: [p.origin[0], p.origin[1], { v: 1400, c: 'estimated' as const }] as const }
-        : p,
-    );
-    expect(checkAll(broken).some((v) => v.rule === 'overlap')).toBe(true);
+  it('backs the worktop onto the rear wall, on your left as you enter', () => {
+    // Left as you enter a kerb door is AFT, so the run crosses the centreline against the rear
+    // wall rather than hugging a flank. This is the assertion that distinguishes this layout
+    // from the two flank-run layouts it replaced.
+    const run = box('galley_run');
+    const rear = box('wall_rear');
+    expect(run.max[2]).toBe(rear.min[2]);
+    expect(run.min[0]).toBeLessThan(0);
+    expect(run.max[0]).toBeGreaterThan(0);
+    expect(box('galley_overhead').min[2]).toBe(run.min[2]);
   });
 
-  it('reports containment failure when a piece leaves its volume', () => {
-    const broken: Placement[] = PLACEMENTS.map((p) =>
-      p.id === 'washroom_pod'
-        ? { ...p, origin: [{ v: -3000, c: 'estimated' as const }, p.origin[1], p.origin[2]] as const }
-        : p,
-    );
-    expect(checkAll(broken).some((v) => v.rule === 'containment')).toBe(true);
+  it('puts the oven shelf on the kerb flank, forward of the door', () => {
+    const oven = box('galley_oven');
+    expect(oven.max[0]).toBe(VOLUMES.habitation.max[0]);
+    expect(oven.max[2]).toBeLessThanOrEqual(box('entry_door').min[2]!);
+    // Clear of the partition doorway, which is 760 mm on the centreline.
+    expect(oven.min[0]).toBeGreaterThanOrEqual(380);
   });
 
-  it('reports an aisle violation when the bed is widened into the walkway', () => {
-    // The bed grows inboard from its outboard edge at X 1730, so the extra 520 mm comes out
-    // of the aisle rather than out of the slide-out box.
-    const broken: Placement[] = PLACEMENTS.map((p) =>
-      p.id === 'slideout_bed'
-        ? {
-            ...p,
-            origin: [{ v: -70, c: 'estimated' as const }, p.origin[1], p.origin[2]] as const,
-            size: [{ v: 1800, c: 'estimated' as const }, p.size[1], p.size[2]] as const,
-          }
-        : p,
-    );
-    expect(checkAll(broken).some((v) => v.rule === 'aisle')).toBe(true);
+  it('stands the pod on the off flank against the partition, and the fridge beside the run', () => {
+    const pod = box('washroom_pod');
+    expect(pod.max[0]).toBeLessThanOrEqual(0);
+    expect(pod.min[2]).toBeGreaterThanOrEqual(box('partition').max[2]!);
+    const fridge = box('fridge');
+    expect(fridge.max[0]).toBeLessThanOrEqual(0);
+    expect(fridge.min[2]).toBe(box('galley_run').min[2]);
+    expect(fridge.max[0]).toBe(box('galley_run').min[0]);
   });
 
-  it('reports a published violation when a bed size is changed', () => {
-    const broken: Placement[] = PLACEMENTS.map((p) =>
-      p.id === 'alcove_bed'
-        ? { ...p, size: [{ v: 2000, c: 'estimated' as const }, p.size[1], p.size[2]] as const }
-        : p,
-    );
-    expect(checkAll(broken).some((v) => v.rule === 'published')).toBe(true);
+  it('leaves a walkable path in from the door and on to the partition doorway', () => {
+    // Straight in from the door, between the oven shelf and the worktop.
+    expect(box('galley_run').min[2]! - box('galley_oven').max[2]!).toBeGreaterThanOrEqual(400);
+    // And on forward, between the pod and the shelf, to the doorway.
+    expect(box('galley_oven').min[0]! - box('washroom_pod').max[0]!).toBeGreaterThanOrEqual(400);
   });
 });

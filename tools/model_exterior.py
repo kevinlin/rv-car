@@ -100,8 +100,59 @@ def build_exterior(a):
         a.box('cab_mirror', (side * (cw / 2 + .15), cy - .18, cz + ch / 2 - .40),
               (.05, .10, .24), 'metal.dark', bevel=.02)
 
-    centre, size = a.placement('skirt')
-    a.box('skirt', centre, size, 'metal.dark', bevel=.02)
+    # The skirt is interrupted at the rear wheels, rather than running as one unbroken slab.
+    #
+    # As a slab it buried the rear tyres from z -0.700 upward and left 350 mm of a 744 mm wheel
+    # showing, so the vehicle sat on castors where the walkaround shows both wheels standing
+    # clear in arches. The front pair never had the problem and needs no opening: the skirt
+    # starts at y 0 and they sit at y -0.898, under body_cab.
+    #
+    # Built as pieces around the openings rather than cut with a boolean, which is how
+    # model_interior.wall already makes a window. The joined group keeps the name `skirt` and
+    # its fore and aft flank pieces still reach y 0 and y 4.05 at x +-1.225 over the full
+    # z -0.700 to -0.400, so the bounds check_models.mjs holds `skirt` to are unmoved.
+    (sx, sy, sz), (sw, sd, sh) = a.placement('skirt')
+    arch_half, notch = .430, .275           # opening half-length; how far in from each flank
+    rear_axle = a.placement('wheel_rear_kerb')[0][1]
+    y0, y1 = sy - sd / 2, sy + sd / 2
+    edges = [y0, rear_axle - arch_half, rear_axle + arch_half, y1]
+    pieces = [a.box('skirt_centre', (sx, sy, sz), (sw - 2 * notch, sd, sh), 'metal.dark', .02)]
+    for side in (-1, 1):
+        for lo, hi in list(zip(edges, edges[1:]))[::2]:
+            pieces.append(a.box('skirt_flank', (side * (sw / 2 - notch / 2), (lo + hi) / 2, sz),
+                                (notch, hi - lo, sh), 'metal.dark', .02))
+    a.group('skirt', pieces)
+
+    # Arch flares. The plan asked for "an arch cut for the wheel openings" and the sculpting
+    # pass never built one, which left every wheel meeting a flat flank on a straight line.
+    #
+    # A tube along a semicircle rather than a boolean: no named body changes, so the 1 mm
+    # envelope assertion cannot move. Each flare follows its own body's flank — the front pair
+    # the cab's at half of body_cab's width, the rear pair the habitation's — so nothing here
+    # introduces a measured number. Standing 28 mm proud of the flank is the same latitude the
+    # awning cassette takes at 55 mm and the mirrors at 20 mm.
+    #
+    # `tyre` rather than metal.dark, and not only because the walkaround's flares are black
+    # rubber: tyre is in EXTERIOR_ROLES, so the arches are hidden at the six interior stops with
+    # the rest of the body and stay out of refreshProbe's capture. metal.dark is in neither, and
+    # the roof AC already paid for that mistake.
+    # Each arc STOPS where it meets the lower edge of the bodywork it is scribed onto, rather
+    # than running a fixed half turn. A fixed half turn left the legs hanging in open air below
+    # the skirt and the flare read as a hoop bolted to the flank. The cab's edge sits 278 mm
+    # above the axle, so the front pair come out as the shallow caps the walkaround shows, and
+    # the skirt's sits 22 mm below it, so the rear pair are almost the full half turn.
+    (_, _, cab_z), (cab_w, _, cab_h) = a.placement('body_cab')
+    (_, _, skirt_z), (hab_w, _, skirt_h) = a.placement('skirt')
+    for name in ('wheel_front_off', 'wheel_front_kerb', 'wheel_rear_off', 'wheel_rear_kerb'):
+        (wx, wy, wz), (_, _, height) = a.placement(name)
+        front = 'front' in name
+        flare = (cab_w if front else hab_w) / 2
+        radius = height / 2 * 1.22          # the opening clears a 372 mm tyre by ~80 mm
+        edge = cab_z - cab_h / 2 if front else skirt_z - skirt_h / 2
+        start = math.asin(max(-1.0, min(1.0, (edge - wz) / radius)))
+        arc = [(math.copysign(flare, wx), wy + radius * math.cos(t), wz + radius * math.sin(t))
+               for t in (start + i * (math.pi - 2 * start) / 18 for i in range(19))]
+        a.tube('wheel_arch', arc, .028, 'tyre')
 
     centre, size = a.placement('slideout_box')
     a.box('slideout_box', centre, size, 'body.paint', bevel=.04)
@@ -118,13 +169,6 @@ def build_exterior(a):
         a.cylinder(name + '_face', (cx + outboard, cy, cz), radius * .60, width * .44,
                    'wheel', rotation=(0, 1.5708, 0))
 
-    # The one boarding door, matching the opening cut into wall_rear: 后上门, offset off the
-    # centreline because the washroom pod takes the off corner of that wall. Scribed just proud
-    # of the rear face: at the old 4.043 the strips sat a millimetre INSIDE a solid mass and
-    # rendered not at all. The published envelope is unaffected either way — check_models.mjs
-    # measures the named bodies, and this is a detail mesh.
-    _door_reveal(a, 'body_door_rear', (.10, 4.056, .925), .76, 1.89, 'y',
-                 role='body.paint', t=.03)
 
     # Livery, both flanks. The kerb flank carries the deployed slide-out box from y 0.15 to
     # 2.05, so its decal sits aft of the box where the artwork is seen face-on rather than at
@@ -160,36 +204,61 @@ def build_exterior(a):
 
     # Window apertures, scribed the same way as the door: the body is one solid mass, so a filled
     # rectangle here turns the interior glazing black from inside.
-    _door_reveal(a, 'body_window_galley', (kerb, 3.22, 1.14), .70, .48, 'x')
+    # The one boarding door, matching the opening cut into wall_kerb. It is in the KERB flank
+    # forward of the rear corner, not in the rear wall: the 2:38 and 3:23 walkaround frames open
+    # it there, hinged on its forward edge, with the grab rail, the keypad and the vent on the
+    # stretch of flank left aft of it. Read off the entry_door placement, so the reveal cannot
+    # drift from the opening it outlines. Scribed just proud of the flank: a millimetre inside a
+    # solid mass and it renders not at all, which is what the rear reveal it replaces had to
+    # learn. The envelope is unaffected either way — check_models.mjs measures the named bodies.
+    (dx, dy, dz), (_, dd, dh) = a.placement('entry_door')
+    _door_reveal(a, 'body_door_side', (kerb, dy, dz), dd + .06, dh + .04, 'x',
+                 role='body.paint', t=.03)
+    # The galley window moved to the REAR wall with the counter it lights; the stretch of kerb
+    # flank it used to occupy is the boarding door now.
+    _door_reveal(a, 'body_window_rear', (.09, rear, 1.25), .90, .48, 'y')
     _door_reveal(a, 'body_window_slideout', (1.806, 1.10, 1.115), 1.62, .57, 'x')
     for x in (-1.226, 1.226):
         _door_reveal(a, 'body_window_cab', (x, -1.30, .84), .84, .52, 'x')
         _door_reveal(a, 'body_window_alcove', (x, -.775, 1.625), .81, .45, 'x')
     _door_reveal(a, 'body_window_lounge', (-1.226, 1.04, 1.13), 1.50, .52, 'x')
     _door_reveal(a, 'body_window_service', (-1.226, 2.25, 1.14), .61, .48, 'x')
-    _door_reveal(a, 'body_window_washroom', (-1.226, 3.65, 1.45), .56, .40, 'x')
+    _door_reveal(a, 'body_window_washroom', (-1.226, 3.245, 1.45), .56, .40, 'x')
 
-    # Lower storage bay, the round-porthole washer hatch and the external control panel — the
-    # three things the walkaround stops at, in the order it stops at them.
-    a.box('hatch_storage', (kerb+.006, 3.30, -.22), (.03, .92, .46), 'metal.dark', bevel=.02)
-    a.box('hatch_storage_trim', (kerb+.014, 3.30, -.22), (.014, .96, .50), 'body.paint', bevel=.02)
+    # Lower storage bay, the washer hatch and the external control panel — the three things the
+    # walkaround stops at, in the order it stops at them.
+    #
+    # All three sat in one low row at z -0.18 to -0.22, and the 2m38s frame shows them stepped up
+    # the flank instead: the storage hatch low, the washer about a third of the way up and the
+    # control panel higher again, at roughly the height of a standing adult's hand. The flat row
+    # also put the washer straight through the rear wheel arch — invisible only for as long as
+    # the skirt ran unbroken past the wheel, which is the defect the arches above fix. Heights
+    # read off that frame against the two rulers in it, the body's bottom edge at z -0.400 and
+    # the slide-out window's sill at z 0.83.
+    a.box('hatch_storage', (kerb+.006, 3.30, -.10), (.03, .92, .46), 'metal.dark', bevel=.02)
+    a.box('hatch_storage_trim', (kerb+.014, 3.30, -.10), (.014, .96, .50), 'body.paint', bevel=.02)
     # The washing machine, which the walkaround stops at and calls out by capacity. A full
     # front-loader door with a chrome ring, replacing the 210 mm porthole the first pass gave
     # it. `glass` for the window, so it reads as a drum behind a pane rather than a disc.
-    a.box('washer_surround', (kerb+.010, 2.58, -.20), (.02, .62, .62), 'metal.dark', bevel=.03)
-    a.cylinder('washer_door', (kerb+.026, 2.58, -.20), .24, .04, 'metal.chrome',
+    # At y 2.50 it clears the storage hatch's forward edge and still starts aft of the deployed
+    # slide-out box, which ends at y 2.05 and would otherwise cover it.
+    a.box('washer_surround', (kerb+.010, 2.50, .33), (.02, .62, .62), 'metal.dark', bevel=.03)
+    a.cylinder('washer_door', (kerb+.026, 2.50, .33), .24, .04, 'metal.chrome',
                rotation=(0, 1.5708, 0))
-    a.cylinder('washer_glass', (kerb+.046, 2.58, -.20), .18, .02, 'glass',
+    a.cylinder('washer_glass', (kerb+.046, 2.50, .33), .18, .02, 'glass',
                rotation=(0, 1.5708, 0))
-    a.box('panel_control', (kerb+.008, 2.24, -.18), (.02, .26, .20), 'graphic.screen', bevel=.01)
+    a.box('panel_control', (kerb+.008, 2.24, .63), (.02, .26, .20), 'graphic.screen', bevel=.01)
 
-    # Rear face: keypad, chrome grab handle, vent grille and the spare-wheel carrier, all of
-    # which the video lingers on while explaining 后上门.
-    a.box('rear_keypad', (.34, rear+.012, 1.10), (.10, .022, .14), 'graphic.screen', bevel=.008)
-    a.box('rear_grab', (.36, rear+.036, .70), (.035, .07, .34), 'metal.chrome', bevel=.014)
-    a.box('rear_vent', (-.62, rear+.011, .38), (.34, .020, .16), 'metal.dark', bevel=.006)
+    # Keypad, chrome grab handle and vent grille: on the KERB flank aft of the door, not on the
+    # rear face. The walkaround stops at all three in one shot with the door open, and their
+    # order aft of it is grab rail, keypad, vent. Positioned off the door's own aft edge, so
+    # they follow it rather than sitting at absolute stations.
+    aft = dy + dd / 2
+    a.box('door_grab', (kerb+.036, aft+.10, 1.16), (.07, .035, .46), 'metal.chrome', bevel=.014)
+    a.box('door_keypad', (kerb+.012, aft+.10, .84), (.022, .10, .14), 'graphic.screen', bevel=.008)
+    a.box('door_vent', (kerb+.011, aft+.21, .42), (.020, .28, .16), 'metal.dark', bevel=.006)
     for i in range(5):
-        a.box('rear_vent_blade', (-.62, rear+.024, .32+i*.032), (.30, .010, .012),
+        a.box('door_vent_blade', (kerb+.024, aft+.21, .36+i*.032), (.010, .24, .012),
               'metal.brushed', bevel=.003)
     # Mounted flat against the rear face rather than on a projecting carrier. A real carrier
     # stands 300 mm or more off the back, and this vehicle's published 5998 mm is pinned to the
@@ -230,4 +299,5 @@ def build_exterior(a):
     # Mudflaps behind each axle, and the chrome rail beside the boarding door.
     for side in (-1, 1):
         a.box('mudflap', (side * 1.10, 2.98, -.86), (.22, .014, .24), 'metal.dark', bevel=.006)
-    a.box('rear_rail', (.52, rear + .040, 1.20), (.030, .07, .52), 'metal.chrome', bevel=.012)
+    # Chrome rail beside the door, on the flank it now opens from.
+    a.box('door_rail', (kerb + .040, dy - dd / 2 - .09, 1.20), (.07, .030, .52), 'metal.chrome', bevel=.012)

@@ -247,13 +247,21 @@ def wall(name, center, size, holes, axis='x'):
     return group(name, pieces)
 
 
-def window(name, x, y, z, width, height):
+def window(name, x, y, z, width, height, axis='x'):
+    """Jambs, sills and a pane filling an opening. `axis` names the wall's normal, as in
+    entry_door: 'x' for a flank window, 'y' for the rear wall's, which is the one over the
+    galley run now that the run backs onto that wall."""
+    def part(nm, across, up, thick, wide, tall, role, bevel=.01):
+        centre = ((x, y+across, z+up) if axis == 'x' else (x+across, y, z+up))
+        size = ((thick, wide, tall) if axis == 'x' else (wide, thick, tall))
+        return box(nm, centre, size, role, bevel)
+
     parts = []
-    for yy in [y-width/2, y+width/2]:
-        parts.append(box(name+'_jamb', (x, yy, z), (.055,.04,height+.08), 'panel.wall'))
-    for zz in [z-height/2, z+height/2]:
-        parts.append(box(name+'_sill', (x,y,zz), (.055,width,.04), 'panel.wall'))
-    parts.append(box(name+'_pane',(x,y,z),(.006,width-.035,height-.035),'glass',0))
+    for across in [-width/2, width/2]:
+        parts.append(part(name+'_jamb', across, 0, .055, .04, height+.08, 'panel.wall'))
+    for up in [-height/2, height/2]:
+        parts.append(part(name+'_sill', 0, up, .055, width, .04, 'panel.wall'))
+    parts.append(part(name+'_pane', 0, 0, .006, width-.035, height-.035, 'glass', 0))
     return group(name, parts)
 
 
@@ -309,21 +317,28 @@ def build_shell():
     # and, aft of it, the galley window over the counter — the one the exterior walkaround
     # looks through.
     wall('wall_off',*placement('wall_off'),
-         [(.32,.9,1.76,1.36),(1.975,.93,2.525,1.35),(3.40,1.28,3.90,1.62)])
+         [(.32,.9,1.76,1.36),(1.975,.93,2.525,1.35),(3.12,1.28,3.37,1.62)])
     # The entry door is an opening in the wall, so it belongs to the shell alongside the
     # windows rather than to a zone. As a furniture placement it overlapped the wardrobe and
     # the galley at once, which is what the overlap check exists to forbid.
-    # Neither flank has a door: the washroom pod takes the off rear corner and the entry is
-    # 后上门, in the rear wall.
+    #
+    # The KERB flank carries it, forward of the rear corner, where the walkaround opens it —
+    # taking the stretch the old galley window occupied, because that window looked over a
+    # flank run the galley no longer is. Its span comes off the entry_door placement so the
+    # opening cannot drift from the leaf that fills it or from check.ts's aisle bound.
+    (dx, dy, dz), (dw, dd, dh) = placement('entry_door')
     wall('wall_kerb',*placement('wall_kerb'),
-         [(.15,0,2.05,1.98),(2.9,.93,3.54,1.35)])
+         [(.15,0,2.05,1.98),(dy-dd/2,0,dy+dd/2,dh)])
     # Full-width passage under the overcab mattress and a sleeping opening above it.
     wall('bulkhead',*placement('bulkhead'),[(-1.1,0,1.1,1.98)],axis='y')
-    # 后上门: the boarding door is in the rear wall, opening onto the vestibule between the end
-    # of the galley run and the washroom pod. Offset off the centreline, because the pod takes
-    # the off corner of that wall.
-    wall('wall_rear',*placement('wall_rear'),[(-.25,0,.45,1.85)],axis='y')
-    entry_door(.10,4.065,.925,.70,1.85,axis='y')
+    # The rear wall carries a window over the galley run rather than the boarding door. It is
+    # the window the 3:56 and 4:26 frames show above the basin, and it keeps check_blend.py's
+    # rear-glazing assertion honest now that the glazed door has moved to the kerb flank.
+    wall('wall_rear',*placement('wall_rear'),[(-.36,.98,.54,1.30)],axis='y')
+    window('rear_window',.09,4.0525,1.14,.86,.32,axis='y')
+    # The leaf hangs on the kerb wall's inner face and is built a little under the opening, so
+    # its jambs, head and flyscreen land inside the entry_door box rather than through it.
+    entry_door(dx+dw/2-.030,dy,dz,dd-.04,dh-.05,axis='x')
     # The sliding partition. A wall with a doorway in it, not a curtain and not a half-height
     # unit, because the brief is explicit that it has to read as a real room divider. The leaf
     # is drawn back on its track over the wardrobe side, which is the parked daytime state the
@@ -343,7 +358,7 @@ def build_shell():
     window('service_window',-1.165,2.25,1.14,.55,.42)
     # High and small, between two of the pod's ribs, matching the aperture cut through the
     # moulding in build_washroom. The video gives it a roller blind.
-    window('washroom_window',-1.165,3.65,1.45,.50,.34)
+    window('washroom_window',-1.165,3.245,1.45,.50,.34)
     # Over the counter, which is where the reference puts the galley window.
     window('galley_window',1.165,3.22,1.14,.64,.42)
     for x in [-1.125,1.125]:

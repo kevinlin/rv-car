@@ -9,9 +9,11 @@ modules = ['shell', 'dinette', 'sofa_slideout', 'alcove_bed', 'lockers', 'cab', 
 assert all(scene.get('modelled_' + name) for name in modules)
 
 # The inside bottoms of all three bowls must face up, including the regenerated binaries.
-for name, x, y, z in [('galley_run', .85, 2.814, .746),
-                      ('washroom_pod', -.85, 3.24, .72),
-                      ('washroom_pod', -.48, 3.70, .34)]:
+# Stations track the placements: the galley run backs onto the rear wall now and the pod moved
+# forward to the partition, so all three moved when the boarding door moved to the kerb flank.
+for name, x, y, z in [('galley_run', .09, 3.775, .746),
+                      ('washroom_pod', -.88, 2.71, .72),
+                      ('washroom_pod', -.51, 3.14, .34)]:
     obj = bpy.data.objects[name]
     faces = [p for p in obj.data.polygons
              if abs((obj.matrix_world @ p.center).z - z) < .001
@@ -30,16 +32,18 @@ bpy.context.view_layer.update()
 
 # Rays must reach glazing, rather than an uncut wall/ceiling behind the visible trim.
 depsgraph = bpy.context.evaluated_depsgraph_get()
-# Sides follow the layout, and the two halves of the cabin are handed opposite ways: the
-# lounge window and the service window are on the off flank (-x), the slide-out aperture and
-# the galley window on the kerb flank (+x).
+# Sides follow the layout, and the two halves of the cabin are handed opposite ways: the lounge
+# window, the service window and the pod's roller-blind window are on the off flank (-x); the
+# slide-out aperture and the boarding door's own glazing are on the kerb flank (+x); and the
+# galley's window is in the rear wall, over the counter that backs onto it. The door ray is
+# fired at z 1.3875 because that is where entry_door puts its pane — RV door glass sits high.
 for origin, direction in [((0, 1.4, 1.8), (0, 0, 1)),
                           ((0, 1.04, 1.13), (-1, 0, 0)),
                           ((1.3, 1.1, 1.115), (1, 0, 0)),
                           ((0, 2.25, 1.14), (-1, 0, 0)),
-                          ((.4, 3.22, 1.14), (1, 0, 0)),
-                          ((0, 3.9, 1.3875), (0, 1, 0)),
-                          ((-.70, 3.65, 1.45), (-1, 0, 0))]:
+                          ((.4, 3.31, 1.3875), (1, 0, 0)),
+                          ((0, 3.9, 1.14), (0, 1, 0)),
+                          ((-.70, 3.245, 1.45), (-1, 0, 0))]:
     hit, loc, normal, index, obj, matrix = scene.ray_cast(depsgraph, Vector(origin), Vector(direction))
     assert hit
     role = obj.data.materials[obj.data.polygons[index].material_index].name
@@ -49,19 +53,35 @@ for origin, direction in [((0, 1.4, 1.8), (0, 0, 1)),
 hit, loc, *_ = scene.ray_cast(depsgraph, Vector((0, .1, 1.65)), Vector((0, -1, 0)))
 assert hit and loc.y < -1, 'alcove entrance blocked by head-end lockers'
 
-# Rear entry (后上门) plus an open partition doorway, in one ray: from the lounge centreline
-# the first thing aft must be the rear wall itself. A sealed partition stops this at y 2.5, and
-# a galley run or a washroom pod grown across the centreline stops it sooner.
+# An open partition doorway and a clear service room, in one ray: from the lounge centreline,
+# above the counter, the first thing aft must be the rear wall itself. A sealed partition stops
+# this at y 2.5, and a pod or an oven shelf grown across the centreline stops it sooner.
 hit, loc, *_ = scene.ray_cast(depsgraph, Vector((0, 2.0, 1.0)), Vector((0, 1, 0)))
 assert hit and loc.y > 4.0, ('aisle from the lounge must run through the partition doorway '
-                             'and the vestibule to the rear boarding door', loc.y if hit else None)
-print('REAR_ENTRY aisle clear to y=%.3f' % loc.y)
+                             'and over the galley run to the rear wall', loc.y if hit else None)
+print('SERVICE_ROOM centreline clear to y=%.3f' % loc.y)
 
-# And that door is glazed, in the rear wall, rather than a blank panel.
+# The boarding door is in the KERB flank, and the path leads straight in from it. Fired inboard
+# from just inside the opening, the ray has to cross the centreline before it meets the washroom
+# pod: an oven shelf or a counter grown into that path blocks it sooner, and that path is the
+# whole organising idea of the room.
+door_y = (bpy.data.objects['entry_door'].matrix_world.translation.y
+          if 'entry_door' in bpy.data.objects else 3.31)
+hit, loc, *_ = scene.ray_cast(depsgraph, Vector((1.10, door_y, 1.0)), Vector((-1, 0, 0)))
+assert hit and loc.x < -.2, ('the path in from the boarding door must reach the pod across the '
+                             'centreline', loc.x if hit else None)
+print('SIDE_ENTRY path clear to x=%.3f' % loc.x)
+
+# And that door is glazed, in the kerb flank, rather than a blank panel.
 details = bpy.data.objects['shell_details']
 glass = [i for i, m in enumerate(details.data.materials) if m and m.name == 'role.glass']
+assert any(p.material_index in glass and (details.matrix_world @ p.center).x > 1.1
+           and (details.matrix_world @ p.center).y > 2.5
+           for p in details.data.polygons), 'no glazing in the kerb flank aft of the partition'
+
+# The rear wall keeps glazing of its own: the window over the galley run.
 assert any(p.material_index in glass and (details.matrix_world @ p.center).y > 4.0
-           for p in details.data.polygons), 'no glazing in the rear wall: entry is not 后上门'
+           for p in details.data.polygons), 'no glazing in the rear wall'
 
 for obj in exterior:
     obj.hide_viewport = False

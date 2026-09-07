@@ -121,14 +121,21 @@ behind it.
 | Alcove bed | −1400 → 0, above cab | full width | Transverse 2200 × 1400, head-end lockers |
 | Lounge — 卡座 booth | 100 → 2000 | off (`−X`) | One seat forward facing aft, two abreast facing forward, stowable table between; overhead lockers run the length |
 | Slide-out / sofa bed | 150 → 2050 | kerb (`+X`) | Bench base plus the 1280 × 1900 bed; deploys 580 mm outboard |
-| Storage band | 2100 → 2500 | fridge off, wardrobe kerb | The 148 L fridge column starts the line the galley continues |
+| Storage band | 2100 → 2350 | wardrobe kerb | The fridge is service-room furniture, at the off end of the rear run |
 | Sliding partition | 2500 | full width | Floor to ceiling, 760 mm doorway, leaf parks over the wardrobe side |
-| Galley | 2550 → 3750 | off (`−X`) | 1200 mm run, overheads above it, window over the counter |
-| Washroom pod | 3050 → 4050 | kerb (`+X`), rear corner | 900 × 1000 moulded GRP corner pod |
-| Rear boarding door | in the rear wall at 4050 | 100 mm off the centreline | 后上门; the only entry, since the pod takes the kerb rear corner |
+| Galley | 3500 → 4050 | full width | Worktop and basin backing onto the rear wall, overheads above, window over the counter |
+| Oven shelf | 2550 → 2960 | kerb (`+X`) | Tall shelf carrying the 3-in-1 combi oven, forward of the door |
+| Washroom pod | 2550 → 3490 | off (`−X`), against the partition | 900 × 940 moulded GRP pod |
+| Boarding door | 2960 → 3660 | kerb (`+X`) | 后上门, in the flank forward of the rear corner |
 
-Enter through the rear door and the counter is on your left, the washroom door on your right, and
-the partition doorway ahead. The aisle between the counter and the pod is 800 mm.
+
+The service room is arranged across the vehicle about its door rather than as two flank runs.
+Enter through the kerb-flank door and your left hand is aft: the worktop and basin are on your
+left, backing onto the rear wall; the oven shelf is on your right, against the kerb flank forward
+of the door; and the washroom pod is ahead, on the off flank against the partition. The path
+straight in is 540 mm clear, and the route on to the partition doorway passes between the pod and
+the shelf at 680 mm. Pinned by `check.test.ts`, because reading this off stills has got it wrong
+four times.
 
 ### Sleeping surfaces
 
@@ -673,8 +680,9 @@ Closed:
 
 - **Which side is the slide-out on?** Kerb (`+X`). The walkthrough video settles it; the first two
   passes had it off side.
-- **Which side is the galley on, and which the washroom?** Galley off flank, washroom in the rear
-  kerb corner. Settled by the walkthrough video, after two wrong readings of the stills.
+- **Which side is the galley on, and which the washroom?** Neither is a flank run. The worktop and
+  basin back onto the rear wall across the full width; the pod is on the off flank against the
+  partition, with the oven shelf opposite it on the kerb flank. Settled by the walkthrough video, after two wrong readings of the stills.
 - **Where is the entry door?** One door, 后上门, in the rear wall, offset 100 mm off the
   centreline to clear the washroom pod.
 - **Is the tall dark-gloss column the 148 L fridge?** Assumed yes.
@@ -689,9 +697,10 @@ Open:
    the walkthrough's kerb-flank frame as the full teal/black/orange livery with its `DACHIRV 大驰`
    wordmark, on both flanks. Colours sampled from the frame and white-balanced against the body
    panels; still `estimated`.
-4. The rear-wall door has no photograph behind it. Both walkaround stills show only a kerb-corner
-   door, which the washroom pod has since displaced. It is modelled because the layout brief is
-   explicit about a rear entry sequence. Removing it is a two-line change to `build_shell`.
+4. ~~The rear-wall door has no photograph behind it.~~ Closed: there is no rear-wall door. The
+   2:38 and 3:23 walkaround frames open the boarding door in the KERB flank forward of the rear
+   corner, and the updated spatial brief draws it there as 后部侧入门. The rear wall carries a
+   window over the galley run instead.
 
 Known gaps, carried deliberately:
 
@@ -1331,3 +1340,179 @@ outside the cabin that is not an `EXTERIOR_ROLE` is inside the probe.
 
 Everything in the previous entry's list, plus §14's four new gaps: the unraked windscreen, the
 white apertures, the off-flank-only livery, and the pre-existing cab/habitation step.
+
+## Video review pass — 2026-09-07
+
+A review of the built model against the walkthrough stills, in Blender over `blender-mcp`, with
+the frame set sampled in `docs/research/walkthrough/` and the fuller set behind it. No new
+features; everything below is the model disagreeing with the footage.
+
+**Read Blender's viewport mirrored.** `export_modules.py` reflects each module in Y on the way
+out, so the `.blend` and the runtime are mirror images: a flank that looks kerb in the viewport
+ships as off. Two of this pass's early readings were wrong for that reason before the captures
+were flipped horizontally on the way out. Anyone comparing the viewport against a photograph has
+to flip one of them first.
+
+### The documentation had the service room on the wrong flanks
+
+`vehicle.ts`, `check.test.ts` and the video all agree — galley kerb, washroom pod in the rear off
+corner, fridge off facing the galley across the aisle. §2's zone table, its "enter through the
+rear door" paragraph, §14's closed question and `CLAUDE.md`'s layout summary all still described
+the reading that preceded the walkthrough correction: galley off, pod in the kerb corner, fridge
+starting a line the galley continues. Nothing in the model was wrong; the four documents that a
+future pass reads first were, and they pointed at the layout that four passes have now got wrong.
+Corrected in place, with the opposite-handedness of the two halves stated rather than implied.
+
+### Wheel arches, which the sculpting pass planned and never built
+
+Both wheels met a flat flank on a straight line, and the skirt ran unbroken past the rear pair and
+buried them from `Y = -700` up — 350 mm of a 744 mm wheel showing, so the vehicle sat on castors
+against a walkaround that shows both wheels standing clear in arches.
+
+The skirt is now built as pieces around two openings, the way `wall()` already makes a window, so
+its joined bounds are still the placement box. Each arch is a `tube` along an arc that **stops
+where it meets the lower edge of the body it is scribed onto**. The cab's sits 278 mm above the
+axle, which gives the front pair the shallow caps the footage shows; the skirt's sits 22 mm below
+it, which gives the rear pair almost a half turn. A fixed half turn left the legs hanging in open air and
+read as a hoop bolted to the flank. `tyre` rather than `metal.dark`, because it is in
+`EXTERIOR_ROLES` and so stays out of both the interior stops and `refreshProbe`'s capture.
+
+### The kerb fittings sat in one low row, across the wheel
+
+Opening the arch exposed it: `washer_surround` spanned `Z` 2270-2890 straight through a rear arch
+at 1972-2832. The 2m38s frame has the three stepped up the flank instead: storage hatch low,
+washer about a third of the way up, control panel higher again. Heights read off the two rulers in
+that frame, the body's bottom edge at `Y = -400` and the slide-out window's sill at `Y = 830`.
+They are at `Y` -100, 330 and 630 now, and the washer moved 80 mm forward to clear the hatch.
+
+### Coplanar faces, not holes in the bodywork
+
+§14 has carried "interior geometry shows through the cab/habitation step" as a defect nobody could
+find the hole for. There is no hole. `body_cab`, `body_alcove` and `body_habitation` butted flush
+on two shared planes: all three at `Z = 0`, and the cab roof, the alcove underside and the alcove
+mattress top all at `Y = 1350`. Coplanar faces z-fight. `slideout_box` had the same problem
+and worse: the pass that stopped it falling 700 mm short of `slideout_shell` made it match that
+shell *exactly*, so its roof and both end faces were coplanar too. The committed
+`public/renders/exterior.webp` shows that one as a strip of cabinetry and a curtain down the box's
+forward face.
+
+All four masses now overlap their neighbours by 15 mm on the junction faces only. Every envelope
+extreme is untouched: nose at `Z = -1948`, rear at 4050, flanks at ±1225, alcove roof at
+`Y = 2150`. `check:models` still reports `width 2.450, length 5.998, height 3.200`.
+
+### The extractor hood was the wrong tone
+
+`metal.dark` and flat, where the galley footage shows a bright stainless canopy stepping down
+toward the aisle over a run of dark intake slots, and it is the largest object in frame at the
+galley stop. Now `metal.brushed`, stepped, with the slots on the underside. Stepped rather than
+raked because `wedge()` only ever displaces its `-axis` end, so a shear would taper the aisle edge
+on the kerb flank and the wall edge on the off flank; two boxes measured from the wall face have
+no such preference. Both roles already existed, so it cost no draw call.
+
+### Measured after
+
+`check:models` PASS, envelope unchanged. `check:blend` `SAVED_MODEL_CHECK_PASS`. 104,060 triangles
+of 350,000 (up 3,032), 10.31 MB of 25 MB, role-batched draw estimate unchanged at 40. `pnpm check`
+green.
+
+### Found and not fixed
+
+- **The alcove ceiling is a flat 30 mm panel.** The footage shows a sculpted FRP moulding with a
+  swept cove channel and shoulders falling to both flanks. It fills the frame at its own camera
+  stop, so this is the largest remaining interior gap. A compound curve, and a modelling pass
+  rather than a review fix.
+- **Soft goods and locker details cross the kerb flank plane.** `lockers_details` reaches
+  `X = 1359` and `softgoods_details` `X = 1717`, against a flank at 1225. Inside the slide-out box
+  for most of their length, and outside it at the ends, which is the thin horizontal band still
+  shimmering along the upper flank at the exterior stop. Bounding boxes only; which child parts
+  actually protrude has not been isolated.
+- **The angular chevron LED bars** on the lounge locker runs, and the ceiling projector, both of
+  which the lounge frames show plainly and neither of which is modelled.
+- **The washroom basin is rectangular** where the footage shows a round bowl under a tall chrome
+  tap. §13's risk 3 already accepts this zone as the weakest.
+- The unraked windscreen, the white apertures and the off-flank-only livery all stand as §14 has
+  them; nothing this pass found changes those arguments.
+
+## Rear service room, re-planned about a side door — 2026-09-07
+
+The updated [spatial brief](../research/spatial-brief_大驰无极境500MAX.md) draws the entry as
+**后部侧入门**, a door in the kerb flank near the rear, and the walkaround frames agree: 2:38 and
+3:23 both show it there, forward of the rear corner, with the chrome grab rail, the keypad and
+the louvred vent on the stretch of flank aft of it. The model had it as a leaf in the rear wall.
+
+That correction is not local. 后上门 was read as "rear door" and the whole service room was built
+around it as two runs down opposite flanks with a vestibule between them. A side door makes the
+room face inboard, and it is organised about the path that leads in from it.
+
+### What the room is now
+
+Standing in the door looking in, your left hand is aft and your right hand is forward:
+
+| | |
+|---|---|
+| Left | Worktop and basin, `Z` 3500-4050, backing onto the rear wall and crossing the centreline, with the 148 L fridge at its off end and the overheads above |
+| Right | A tall shelf carrying the 3-in-1 combi oven, `Z` 2550-2960, against the kerb flank forward of the door |
+| Ahead | The 900 × 940 washroom pod, on the off flank hard against the partition |
+
+The door spans `Z` 2960-3660, leaving 390 mm of flank aft of it for the three fittings the
+walkaround stops at. The path straight in from it is 540 mm clear between the oven shelf's aft
+face and the worktop's front face; the route on to the partition doorway passes between the pod
+and the shelf at 680 mm.
+
+### Three things that moved because the run turned
+
+**The aisle check no longer samples to the rear wall.** `minAisleWidth` returns 0 for any box
+straddling the centreline, and the worktop now does, by design. While the entry was in the rear
+wall the corridor genuinely had to reach `Z` 4050; with a side door everything aft of it is a
+dead-end galley. `check.ts` reads the sampling end off the `entry_door` placement, so moving the
+door moves the checked run with it.
+
+**`entry_door` became a placement.** It was a literal in `build_shell`, which is how the opening
+and the leaf that fills it stayed in step — until `check.ts` needed the same number. It is
+`zone: 'shell'`, so `ENCLOSURES` keeps it out of the overlap, containment and aisle rules exactly
+as it keeps the partition out. Its box is 90 mm deep rather than the wall's 45, because
+`check_models.mjs` holds every named node to its own bounds and the leaf carries a 55 mm frame
+and a gathered flyscreen behind it.
+
+**The galley window moved to the rear wall.** It lit a flank run that no longer exists, and the
+stretch of kerb flank it occupied is the door now. It sits at `Y` 980-1300, between the worktop at
+900 and the overhead's underside at 1350 — the first attempt put it at 1020-1480 and the overhead
+run stood in front of it, which the aperture ray caught. The rear wall keeps glazing either way,
+which is what `check_blend.py` asserts; it is a window rather than a door light now.
+
+### `build_galley` is a rewrite, not a retune
+
+The old builder measured everything from a flank: `w` was the counter depth across the run and `d`
+its length fore-aft, and which flank it hugged came from the sign of `x`. A rear-wall run swaps
+those two axes. The discipline is unchanged — everything across the run is measured from the wall
+face or the aisle face, everything along it from the run's own two ends — but in the axes this
+orientation actually uses. The 3-in-1 oven came out of the overhead run, which no longer passes
+anywhere near the entry, and into its own shelf.
+
+### Verification
+
+`pnpm check` green. `check:models` PASS, envelope unchanged. 106,140 triangles of 350,000,
+10.95 MB of 25 MB, role-batched draw estimate still 40.
+
+`check:blend` `SAVED_MODEL_CHECK_PASS`, after re-aiming the bowl stations, the washroom window and
+two of the seven aperture rays at the geometry they now name. It also gained a `SIDE_ENTRY` ray,
+fired inboard from the door, which has to cross the centreline before it meets the pod. That path
+being clear is the organising idea of the room, so it earns an assertion of its own.
+
+The layout guard in `check.test.ts` was rewritten rather than deleted: it now pins the door to the
+kerb flank with floor aft of it, the worktop to the rear wall across the centreline, the shelf to
+the kerb flank forward of the door, the pod to the off flank against the partition, and both legs
+of the walking path at 400 mm.
+
+### Left over
+
+- **The kerb livery is now largely covered.** The decal runs `Z` 300-3700 and the deployed
+  slide-out box already hid 150-2050; the door takes 2960-3660, so about 900 mm of a 3.4 m
+  artwork is visible on that flank. The artwork is one texture at a fixed span, so trimming it
+  means a second `body.graphic` variant. §14 already carries the livery as legible on the off
+  flank only; this makes that worse rather than new.
+- **`calibrate.ts`'s patches were not re-verified.** Two of the three sample surfaces that have
+  now moved again. §14 has carried this since the service-room correction and it still needs a
+  marked screenshot rather than a guess.
+- The alcove moulding, the chevron LED bars and the projector are all still as the previous
+  entry's "found and not fixed" list leaves them.

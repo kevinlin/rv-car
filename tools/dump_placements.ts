@@ -26,6 +26,7 @@ const ROLE_BY_ZONE: Record<string, string> = {
 const COLLECTION_BY_ID: Record<string, string> = {
   floor: 'shell', ceiling: 'shell', wall_off: 'shell', wall_kerb: 'shell',
   bulkhead: 'shell', wall_rear: 'shell', slideout_shell: 'shell', partition: 'shell',
+  entry_door: 'shell',
   cab_seat_off: 'cab', cab_seat_kerb: 'cab',
   alcove_bed: 'alcove_bed', alcove_lockers: 'alcove_bed',
   dinette_chair_fwd: 'dinette',
@@ -34,7 +35,7 @@ const COLLECTION_BY_ID: Record<string, string> = {
   lockers_kerb: 'lockers', lockers_off: 'lockers',
   slideout_base: 'sofa_slideout', slideout_bed: 'sofa_slideout',
   fridge: 'galley', wardrobe: 'galley',
-  galley_run: 'galley', galley_overhead: 'galley',
+  galley_run: 'galley', galley_overhead: 'galley', galley_oven: 'galley',
   washroom_pod: 'washroom',
   body_cab: 'exterior', body_alcove: 'exterior', body_habitation: 'exterior',
   skirt: 'exterior', slideout_box: 'exterior',

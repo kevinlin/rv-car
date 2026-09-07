@@ -125,45 +125,28 @@ Conceptually, the plan should look like this.
 NOT TO EXACT SCALE:
 
 ```
-              FRONT / WINDSCREEN
-    ┌─────────────────────────────────┐
-    │         IVECO DRIVER CAB        │
-    │                                 │
-    │    DRIVER          PASSENGER    │
-    ├──────────── OPEN ───────────────┤
-    │                                 │
-    │        MAIN LOUNGE ZONE         │
-    │                                 │
-    │  ┌─────────────┐  ┌──────────┐  │
-    │  │ 3 ADJUSTABLE│  │ LONG     │  │
-    │  │   SEATS     │  │ SOFA /   │  │
-    │  │             │  │ BED      │  │
-    │  │ fold-away / │  │          │  │
-    │  │ wall table  │  │ 2000 mm │  │
-    │  └─────────────┘  │ long     │  │
-    │                   └──────────┘  │
-    │                                 │
-    │     SIDE-SLIDE EXPANSION        │
-    │     occurs in this zone         │
-    ├════════ SLIDING DOOR ═══════════┤
-    │                                 │
-    │     REAR SERVICE / WET ZONE     │
-    │                                 │
-    │ ┌──────────────┐ ┌────────────┐ │
-    │ │              │ │            │ │
-    │ │   KITCHEN    │ │ BATHROOM   │ │
-    │ │              │ │            │ │
-    │ │ counter      │ │ toilet     │ │
-    │ │ sink         │ │ basin      │ │
-    │ │ appliances   │ │ shower     │ │
-    │ │ fridge       │ │            │ │
-    │ └──────────────┘ └────────────┘ │
-    │                                 │
-    │       SMALL ENTRY / VESTIBULE   │
-    │             ┌─────┐             │
-    └─────────────┤DOOR ├─────────────┘
-                  └─────┘
-                     REAR
+                     车头
+          ┌──────────────────────┐
+          │      驾驶室           │
+          │   ┌──────────────┐   │
+          │   │  C型额头床    │   │
+          │   │ 2200×1400    │   │
+          ├───┴──────────────┴───┤
+          │                      │
+          │  会客区       侧拓展区 │
+          │  多向座椅     抽拉床   │
+          │              2000×1350│
+          │                      │
+          ├────── 推拉隔断门 ──────┤
+          │                      │
+          │    后置厨卫生活区       │
+          │                      │
+          │  厨房          卫生间  │
+          │                      ├───┐
+          │                      │门 │ ← 后部侧入门
+          │                      ├───┘   curb side
+          └──────────────────────┘
+                     车尾
 ```
 
 ````

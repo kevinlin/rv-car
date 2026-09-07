@@ -157,87 +157,113 @@ def build_cab(a):
 
 
 def build_galley(a):
-    (x,y,z), (w,d,h) = a.placement('galley_run')
-    # A run along one flank: `d` is its length fore-aft and `w` its counter depth. Which flank
-    # follows from the sign of x, so `inward` walks a distance from the wall face toward the
-    # aisle and `outward` the other way. Everything across the run is measured from those two
-    # faces and everything along it from the run's own two ends, so neither a resize nor a move
-    # to the other flank can strand a constant — which is what happened the last two times this
-    # moved, and what the walkthrough correction moved it again.
-    side = 1 if x > 0 else -1                # +1: the run hugs the kerb wall
-    back, front = x+side*w/2, x-side*w/2     # wall face, aisle face
-    inward = lambda face, dist: face - side*dist   # from the wall, toward the aisle
-    outward = lambda face, dist: face + side*dist  # from the aisle, toward the wall
-    y0, y1 = y-d/2, y+d/2                    # forward end, rear end
-    parts = [a.box('galley base floor', (x,y,.045), (w,d,.09), 'wood.cabinet', .016),
-             a.box('galley back panel', (inward(back,.015),y,.45), (.03,d,.80), 'wood.cabinet', .008)]
-    # Four strips make an actual countertop opening around the recessed bowl.
-    # Reference: square stainless bowl at the forward end under the window, induction hob aft,
-    # so the cook stands clear of the boarding door.
-    lip = .058                               # half-width of the counter's front and back rails
-    bowl_r = min(.21, (w-4*lip)/2-.01)       # square bowl, inside the rails
-    sink_y = y0+.09+bowl_r
-    split = sink_y+bowl_r                    # where the bowl opening ends and the run resumes
-    hob_len = min(.42, (y1-split)-.20)
-    hob_y = y1-.10-hob_len/2
+    (x, y, z), (run_len, depth, height) = a.placement('galley_run')
+    # The run backs onto the REAR wall and faces forward, so its length is X, across the vehicle,
+    # and its depth is Y. The flank-run builder this replaces had those two axes the other way
+    # round, which is why it is a rewrite rather than a retune: 后上门 turned out to be a door in
+    # the kerb flank, and the room is arranged about the path leading in from it.
+    #
+    # The discipline is unchanged. Everything across the run is measured from the wall face or
+    # the aisle face and everything along it from the run's own two ends, so a resize cannot
+    # strand a constant — which is what stranded four of them the last time this moved.
+    back, front = y + depth / 2, y - depth / 2      # rear wall face, aisle face
+    to_aisle = lambda face, dist: face - dist
+    to_wall = lambda face, dist: face + dist
+    x0, x1 = x - run_len / 2, x + run_len / 2       # off end, beside the fridge; kerb end
+    parts = [a.box('galley base floor', (x, y, .045), (run_len, depth, .09), 'wood.cabinet', .016),
+             a.box('galley back panel', (x, to_aisle(back, .015), .45), (run_len, .03, .80),
+                   'wood.cabinet', .008)]
+    # Four strips make an actual countertop opening around the recessed bowl. The basin sits
+    # under the rear window, which is where the 3:56 and 4:26 frames put it, and the hob toward
+    # the kerb end so the cook stands clear of the boarding door.
+    lip = .058                                      # half-width of the counter's front and back rails
+    bowl_r = min(.21, (depth - 4 * lip) / 2 - .01)
+    sink_x = .09                                    # the rear window's own centre
+    split = sink_x + bowl_r
+    hob_len = min(.42, (x1 - split) - .18)
+    hob_x = x1 - .12 - hob_len / 2
     parts.extend([
-        a.box('counter front length', (outward(front,lip),y,.879), (2*lip,d,.042), 'worktop', .01),
-        a.box('counter rear length', (inward(back,lip),y,.879), (2*lip,d,.042), 'worktop', .01),
-        a.box('counter hob field', (x,(split+y1)/2,.879), (w-4*lip,y1-split,.042), 'worktop', .01),
-        a.box('counter forward end', (x,(y0+sink_y-bowl_r)/2,.879), (w-4*lip,sink_y-bowl_r-y0,.042), 'worktop', .01),
-        a.bowl('composite sink', (x,sink_y,.886), (bowl_r,bowl_r), .14, 'metal.dark', corner=.3)])
+        a.box('counter front length', (x, to_wall(front, lip), .879), (run_len, 2 * lip, .042), 'worktop', .01),
+        a.box('counter rear length', (x, to_aisle(back, lip), .879), (run_len, 2 * lip, .042), 'worktop', .01),
+        a.box('counter hob field', ((split + x1) / 2, y, .879), (x1 - split, depth - 4 * lip, .042), 'worktop', .01),
+        a.box('counter off end', ((x0 + sink_x - bowl_r) / 2, y, .879),
+              (sink_x - bowl_r - x0, depth - 4 * lip, .042), 'worktop', .01),
+        a.bowl('composite sink', (sink_x, y, .886), (bowl_r, bowl_r), .14, 'metal.dark', corner=.3)])
     # Fittings are sized off the bay, not off a fixed constant.
-    bay = d/3
-    for j in range(3):
-        cy = y0+(j+.5)*bay
-        if j == 2:
-            # Last year's 3 kg washer bay now holds the electrical gear: the 5 kg machine moved
-            # outside, into a hatch on the kerb flank. So the rear bay is a service cabinet with
-            # a systems panel on its door, not an appliance fascia.
-            parts.append(a.box('electrical_cabinet',(outward(front,.036),cy,.43),(.028,bay-.02,.77),'wood.cabinet',.012))
-            parts.append(a.box('electrical_panel',(outward(front,.018),cy,.66),(.026,min(.22,bay-.18),.10),'graphic.screen',.006))
-            parts.append(a.box('electrical_vent',(outward(front,.016),cy,.28),(.022,min(.26,bay-.14),.12),'metal.brushed',.006))
+    bay = run_len / 4
+    for j in range(4):
+        cx = x0 + (j + .5) * bay
+        if j == 0:
+            # The bay beside the fridge holds the electrical gear: the 5 kg washer is outside,
+            # in its hatch on the kerb flank, so this is a service cabinet with a systems panel
+            # on its door rather than an appliance fascia.
+            parts.append(a.box('electrical_cabinet', (cx, to_wall(front, .036), .43), (bay - .02, .028, .77), 'wood.cabinet', .012))
+            parts.append(a.box('electrical_panel', (cx, to_wall(front, .018), .66), (min(.22, bay - .18), .026, .10), 'graphic.screen', .006))
+            parts.append(a.box('electrical_vent', (cx, to_wall(front, .016), .28), (min(.26, bay - .14), .022, .12), 'metal.brushed', .006))
             continue
-        parts.append(a.box('galley cabinet door',(outward(front,.036),cy,.43),(.028,bay-.02,.77),'wood.cabinet',.012))
-        parts.append(a.box('long cabinet pull',(outward(front,.011),cy,.74),(.022,min(.34,bay-.06),.023),'metal.chrome',.007))
-    a.group('galley_run',parts)
-    parts=[]
-    parts.append(a.box('induction glass',(x,hob_y,.906),(w-.18,hob_len,.017),'metal.dark',.022))
-    for cy,radius in [(hob_y+hob_len/4,hob_len*.21),(hob_y-hob_len/4,hob_len*.16)]:
-        circle = [(x+radius*math.cos(t*math.tau/32),cy+radius*math.sin(t*math.tau/32),.917) for t in range(33)]
-        parts.append(a.tube('induction ring',circle,.003,'metal.chrome'))
-    parts.append(a.tube('black gooseneck',[(inward(back,r),sink_y,zz) for r,zz in
-                                           [(.11,.90),(.11,1.11),(.12,1.17),(.17,1.20),
-                                            (.25,1.20),(.30,1.17),(.30,1.12)]],.012,'metal.dark'))
-    # Black pegboard accessory wall, on the stretch of backsplash forward of the window. The
-    # window covers y 2.90 to 3.54, so this is the only clear run on the wall side of the counter.
-    board_y0, board_y1 = y0+.03, y0+.33
-    parts.append(a.box('galley_pegboard',(inward(back,.014),(board_y0+board_y1)/2,1.125),
-                       (.022,board_y1-board_y0,.42),'metal.dark',.004))
-    for level in (.98,1.05,1.12,1.19,1.26):
-        parts.append(a.box('pegboard slat',(inward(back,.030),(board_y0+board_y1)/2,level),
-                           (.012,board_y1-board_y0-.03,.012),'metal.brushed',.003))
-    a.group('galley_appliances',parts)
-    (x,y,z),(w,d,h)=a.placement('galley_overhead')
-    back, front = x+side*w/2, x-side*w/2
-    y0, y1 = y-d/2, y+d/2
-    parts=[a.box('overhead walnut carcass',(outward(x,.022),y,z),(w-.044,d,h),'wood.cabinet',.016)]
-    bay = d/3
-    for i in range(3):
-        cy=y0+(i+.5)*bay
-        parts.append(a.box('overhead walnut door',(outward(front,.032),cy,z),(.023,bay-.015,h-.024),'wood.cabinet',.016))
-        parts.append(a.box('overhead handle',(outward(front,.008),cy,z-.12),(.016,.12,.023),'metal.chrome',.006))
-    a.box('extractor_hood',(inward(x,.02),hob_y,z-h/2-.045),(w-.04,min(.48,hob_len+.08),.09),'metal.dark',.02)
-    a.group('galley_overhead',parts)
-    # Microwave/steam oven, set into the overhead run at its forward end.
-    oven_len = min(.42, d*.35)
-    oven_y = y0+.05+oven_len/2
-    a.box('oven',(inward(x,.06),oven_y,z),(w-.12,oven_len,h-.06),'metal.dark',.015)
+        parts.append(a.box('galley cabinet door', (cx, to_wall(front, .036), .43), (bay - .02, .028, .77), 'wood.cabinet', .012))
+        parts.append(a.box('long cabinet pull', (cx, to_wall(front, .011), .74), (min(.34, bay - .06), .022, .023), 'metal.chrome', .007))
+    a.group('galley_run', parts)
+    parts = []
+    parts.append(a.box('induction glass', (hob_x, y, .906), (hob_len, depth - .18, .017), 'metal.dark', .022))
+    for cx, radius in [(hob_x - hob_len / 4, hob_len * .21), (hob_x + hob_len / 4, hob_len * .16)]:
+        circle = [(cx + radius * math.cos(t * math.tau / 32), y + radius * math.sin(t * math.tau / 32), .917)
+                  for t in range(33)]
+        parts.append(a.tube('induction ring', circle, .003, 'metal.chrome'))
+    parts.append(a.tube('black gooseneck', [(sink_x, to_aisle(back, r), zz) for r, zz in
+                                            [(.11, .90), (.11, 1.11), (.12, 1.17), (.17, 1.20),
+                                             (.25, 1.20), (.30, 1.17), (.30, 1.12)]], .012, 'metal.dark'))
+    # Black pegboard accessory wall, on the stretch of backsplash beside the fridge. The rear
+    # window covers x -0.34 to 0.52, so this is the only clear run above the counter.
+    board_x0, board_x1 = x0 + .03, x0 + .33
+    parts.append(a.box('galley_pegboard', ((board_x0 + board_x1) / 2, to_aisle(back, .014), 1.125),
+                       (board_x1 - board_x0, .022, .42), 'metal.dark', .004))
+    for level in (.98, 1.05, 1.12, 1.19, 1.26):
+        parts.append(a.box('pegboard slat', ((board_x0 + board_x1) / 2, to_aisle(back, .030), level),
+                           (board_x1 - board_x0 - .03, .012, .012), 'metal.brushed', .003))
+    a.group('galley_appliances', parts)
+    (x, y, z), (run_len, depth, height) = a.placement('galley_overhead')
+    back, front = y + depth / 2, y - depth / 2
+    x0, x1 = x - run_len / 2, x + run_len / 2
+    parts = [a.box('overhead walnut carcass', (x, to_aisle(y, .022), z), (run_len, depth - .044, height), 'wood.cabinet', .016)]
+    bay = run_len / 4
+    for i in range(4):
+        cx = x0 + (i + .5) * bay
+        parts.append(a.box('overhead walnut door', (cx, to_wall(front, .032), z), (bay - .015, .023, height - .024), 'wood.cabinet', .016))
+        parts.append(a.box('overhead handle', (cx, to_wall(front, .008), z - .12), (.12, .016, .023), 'metal.chrome', .006))
+    # Extractor hood: brushed stainless, stepped, and louvred. The walkaround shows a bright
+    # stainless canopy stepping down toward the aisle over a run of dark intake slots, and it is
+    # the largest object in frame at the galley stop.
+    hood_w = min(.48, hob_len + .08)
+    a.box('extractor_hood', (hob_x, to_aisle(y, .02), z - height / 2 - .040), (hood_w, depth - .04, .07), 'metal.brushed', .014)
+    a.box('extractor_lip', (hob_x, to_aisle(y, .10), z - height / 2 - .092), (hood_w - .06, depth - .20, .045), 'metal.brushed', .012)
+    # Slots across the underside, on the same pattern as the rear vent's blades and for the same
+    # reason: fine dark lines over a bright face read as a grille where a texture cannot.
+    for i in range(5):
+        a.box('hood_slot', (hob_x + (i - 2) * .048, to_aisle(y, .10), z - height / 2 - .114),
+              (.014, depth - .26, .008), 'metal.dark', .003)
+    a.group('galley_overhead', parts)
+    # The 3-in-1 combi oven, in its own tall shelf against the kerb flank forward of the door —
+    # on your right as you come in, where the updated brief puts it. It used to be set into the
+    # overhead run, which no longer passes anywhere near the entry.
+    (x, y, z), (w, d, h) = a.placement('galley_oven')
+    faces = y + d / 2                                # the shelf fronts the entry path, aft
+    parts = [a.box('oven shelf carcass', (x + .022, y - .022, z), (w - .044, d - .044, h), 'wood.cabinet', .018)]
+    oven_h = .46
+    oven_z = z - h / 2 + .95                         # worktop-plus, the usual built-in height
+    parts.append(a.box('oven', (x, y - .06, oven_z), (w - .12, d - .12, oven_h), 'metal.dark', .015))
     # Dark glass door with a control strip above it, not a lit panel the size of the door. At
     # full size the graphic.screen emissive read as a glowing blue rectangle where the video
-    # shows black glass. Both proud of the oven's own front face, or they render inside it.
-    a.box('oven_door',(inward(front,.004),oven_y,z-.03),(.014,oven_len-.07,h-.20),'glass',.006)
-    a.box('oven_fascia',(inward(front,.006),oven_y,z+h/2-.075),(.016,oven_len-.10,.055),'graphic.screen',.004)
+    # shows black glass. Both proud of the shelf's own front face, or they render inside it.
+    parts.append(a.box('oven_door', (x, faces - .026, oven_z - .03), (w - .19, .014, oven_h - .14), 'glass', .006))
+    parts.append(a.box('oven_fascia', (x, faces - .024, oven_z + oven_h / 2 - .055), (w - .22, .016, .055), 'graphic.screen', .004))
+    # Open shelves above it and a drawer below, which is what makes it read as a shelf column
+    # rather than a cabinet with an oven buried in it.
+    for level in (oven_z + oven_h / 2 + .20, oven_z + oven_h / 2 + .48):
+        parts.append(a.box('oven shelf board', (x, y - .03, level), (w - .07, d - .09, .022), 'wood.cabinet', .008))
+    parts.append(a.box('oven drawer', (x, faces - .040, z - h / 2 + .22), (w - .09, .028, .34), 'wood.cabinet', .012))
+    parts.append(a.box('oven drawer pull', (x, faces - .016, z - h / 2 + .32), (min(.34, w - .16), .022, .023), 'metal.chrome', .007))
+    a.group('galley_oven', parts)
     # The fridge and the wardrobe front the aisle from opposite flanks; their door direction is
     # the inboard one, so it derives from which side of the centreline each sits on.
     for name in ('fridge','wardrobe'):
