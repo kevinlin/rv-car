@@ -114,11 +114,14 @@ export const DEFAULT_REGISTRY: Registry = {
   'metal.dark':        one('black', 'Matt black', { color: 0x1e1e1e, roughness: 0.4, metalness: 0.8 }),
   'textile.curtain':   one('sand', 'Sand', { color: 0xd9cfbe, roughness: 0.95, metalness: 0,
     map: { url: '/textures/damask.webp', repeat: [6, 6] } }),
+  // 3.5, not the 14 the first pass used: at 14 the cove strips and downlights clipped to
+  // white and streaked across the wall. The strips still read as lit; the RectAreaLights
+  // in lighting.ts do the illuminating either way.
   'led.cove': {
     active: 'warm',
     variants: [
-      { id: 'warm',    label: 'Warm white',    params: { color: 0x000000, roughness: 1, metalness: 0, emissive: 0xffd9a0, emissiveIntensity: 14 } },
-      { id: 'neutral', label: 'Neutral white', params: { color: 0x000000, roughness: 1, metalness: 0, emissive: 0xfff3e0, emissiveIntensity: 14 } },
+      { id: 'warm',    label: 'Warm white',    params: { color: 0x000000, roughness: 1, metalness: 0, emissive: 0xffd9a0, emissiveIntensity: 3.5 } },
+      { id: 'neutral', label: 'Neutral white', params: { color: 0x000000, roughness: 1, metalness: 0, emissive: 0xfff3e0, emissiveIntensity: 3.5 } },
     ],
   },
   // Flat graphics: framed art and the photo wall carry their image, the systems panel and TV
