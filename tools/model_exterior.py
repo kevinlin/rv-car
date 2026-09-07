@@ -9,20 +9,24 @@ passed in by its dispatch, matching how model_furniture's builders are called.
 """
 
 
-def _door_reveal(a, name, centre, width, height, axis):
-    """A door outline scribed into the body: four strips, nothing across the opening.
+def _door_reveal(a, name, centre, width, height, axis, role='metal.dark', t=.055):
+    """A frame scribed into the body: four strips, nothing across the opening.
 
     Open on purpose. The body is one solid mass, so anything filling this rectangle sits
-    between the interior door's glazing and the sky and renders that glazing as a black
-    panel from indoors. `axis` is the wall's normal, as in model_interior.entry_door.
+    between the interior door's glazing and the sky and renders that glazing as a black panel
+    from indoors. `axis` is the wall's normal, as in model_interior.entry_door.
+
+    The video's window frames are wide and black, and the tint the eye reads is the interior
+    pane seen through the hole rather than a second pane out here — one would double the tint
+    and re-create that defect. `role` stays overridable because the rear door's outline is a
+    panel gap in the paint, not a window frame.
     """
     x, y, z = centre
-    t = .03
     for across, up, wide, tall in ((0, (height-t)/2, width, t), (0, -(height-t)/2, width, t),
                                    (-(width-t)/2, 0, t, height), ((width-t)/2, 0, t, height)):
         c = (x, y+across, z+up) if axis == 'x' else (x+across, y, z+up)
-        s = (.012, wide, tall) if axis == 'x' else (wide, .012, tall)
-        a.box(name, c, s, 'body.paint', bevel=.004)
+        s = (.016, wide, tall) if axis == 'x' else (wide, .016, tall)
+        a.box(name, c, s, role, bevel=.006)
 
 
 def build_exterior(a):
@@ -55,7 +59,8 @@ def build_exterior(a):
     # of the rear face: at the old 4.043 the strips sat a millimetre INSIDE a solid mass and
     # rendered not at all. The published envelope is unaffected either way — check_models.mjs
     # measures the named bodies, and this is a detail mesh.
-    _door_reveal(a, 'body_door_rear', (.10, 4.056, .925), .76, 1.89, 'y')
+    _door_reveal(a, 'body_door_rear', (.10, 4.056, .925), .76, 1.89, 'y',
+                 role='body.paint', t=.03)
 
     # Livery, both flanks. The kerb flank carries the deployed slide-out box from y 0.15 to
     # 2.05, so its decal sits aft of the box where the artwork is seen face-on rather than at
