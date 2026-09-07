@@ -343,9 +343,16 @@ export const HOTSPOTS: readonly Hotspot[] = [
     // rather than 0 because OrbitControls degenerates at the pole; the 55 deg ceiling lets the
     // viewer tip toward a three-quarter dollhouse without dropping to eye level, where the
     // sectioned walls stop reading as a cut and start reading as broken geometry.
+    //
+    // The arrival pose sits ON that 0.05 polar floor rather than straight overhead, and for the
+    // same reason. Directly above the target the view direction is parallel to the camera's up
+    // vector, so which way the plan reads is decided by whatever pose the tween came from —
+    // arriving from the galley put the nose at the bottom of the frame and arriving from the
+    // lounge put it at the top. Leaning 0.42 m AFT of the target pins it, and pins it nose-up,
+    // which is the way §2 of the spatial brief draws every floor plan.
     id: 'plan',
     label: 'Floorplan',
-    camera: { position: [0.0, 8.8, 1.05], target: [0.0, 0.4, 1.05] },
+    camera: { position: [0.0, 8.79, 1.47], target: [0.0, 0.4, 1.05] },
     view: {
       kind: 'orbit',
       azimuth: [-Math.PI, Math.PI],

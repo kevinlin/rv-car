@@ -14,6 +14,19 @@
                    background: rgba(255,255,255,.85); color: #111; }
       .ui-finishes button { width: 32px; height: 32px; padding: 0;
                             border: 2px solid rgba(255,255,255,.7); }
+      /* The dimension overlay only has something to label from above, so its toggle only
+         exists at the plan stop. main.ts stamps the stop id onto <body>. */
+      .ui [data-labels] { display: none; }
+      body[data-stop="plan"] .ui [data-labels] { display: block; }
+      .ui [data-labels][aria-pressed="false"] { background: rgba(255,255,255,.4); }
+      .plan-label { pointer-events: none; text-align: center; white-space: nowrap;
+                    font: 12px/1.35 system-ui, sans-serif; color: #12181f;
+                    background: rgba(255,255,255,.82); border-radius: 5px;
+                    padding: 3px 8px; box-shadow: 0 1px 4px rgba(0,0,0,.25); }
+      .plan-label strong { display: block; font-weight: 600; }
+      /* The confidence tag is the point of the second line, so it stays readable rather than
+         decorative — but it must not compete with the name. */
+      .plan-label span { display: block; font-size: 11px; color: #4a5560; }
     </style>
   </head>
   <body>

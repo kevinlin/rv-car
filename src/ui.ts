@@ -11,6 +11,7 @@ export const WOOD_ROLES: Role[] = ['wood.cabinet', 'wood.trim', 'panel.locker'];
 export interface UiOptions {
   onHotspot: (id: StopId) => void;
   onWood: (variantId: string) => void;
+  onLabels: (on: boolean) => void;
 }
 
 export const buildUi = (opts: UiOptions): HTMLElement => {
@@ -38,6 +39,18 @@ export const buildUi = (opts: UiOptions): HTMLElement => {
     finishes.appendChild(b);
   }
 
-  root.append(zones, finishes);
+  // Shown only at the plan stop; the page's stylesheet hides it off body[data-stop="plan"],
+  // because a dimension overlay has nothing to label from inside the cabin.
+  const toggle = document.createElement('button');
+  toggle.dataset.labels = 'toggle';
+  toggle.textContent = 'Labels';
+  toggle.setAttribute('aria-pressed', 'true');
+  toggle.addEventListener('click', () => {
+    const on = toggle.getAttribute('aria-pressed') !== 'true';
+    toggle.setAttribute('aria-pressed', String(on));
+    opts.onLabels(on);
+  });
+
+  root.append(zones, finishes, toggle);
   return root;
 };
