@@ -290,7 +290,9 @@ and the numbers are in the spec's Verification section; what follows is what cha
 
 ## Changelog
 
-- 2026-09-06 — **Re-pointed at the merged design spec.** `design_rv-photoref-360-exterior.md` was
-  folded into [design_rv-interior-3d.md](design_rv-interior-3d.md); this plan's section
-  references and anchors now target the merged document.
 - 2026-09-05 — **Compacted post-implementation.** Removed step-by-step tasks, file-by-file diffs, code snippets, and verification commands now that the feature has shipped. Preserved Goal, Global Constraints, Design Decisions, File Structure, execution log, and follow-ups. Original plan recoverable via git history.
+- 2026-09-06 — **Follow-on plan implemented.**
+  [plan_rv-photoref-360-exterior.md](plan_rv-photoref-360-exterior.md) corrected the interior
+  against the manufacturer's photography, drove surfaces from photo-derived textures, replaced
+  per-hotspot orbit with free look in place, and modelled the exterior — the work §4, §8, §9 and
+  §10 deferred.
