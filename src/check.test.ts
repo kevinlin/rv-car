@@ -71,20 +71,25 @@ describe('handedness', () => {
   });
 
   it('keeps the booth off and the slide-out kerb, facing each other across the aisle', () => {
-    // The fridge stands beside a booth seat, so it shares the booth's flank rather than the
-    // galley's — the link the whole-cabin mirror got wrong.
-    expect(box('fridge').max[0]).toBeLessThanOrEqual(0);
     for (const id of ['dinette_chair_fwd', 'dinette_chair_aft_off', 'dinette_chair_aft_kerb']) {
       expect(box(id).max[0]).toBeLessThanOrEqual(0);
     }
     expect(box('slideout_bed').min[0]).toBeGreaterThanOrEqual(0);
   });
 
-  it('puts the galley opposite the wardrobe, not behind the fridge', () => {
-    // The one assertion that distinguishes this layout from both of the ones it replaced.
+  it('stands the fridge in the service room, aft of the partition and beside the pod', () => {
+    // Not in the lounge, and not the head of a run the galley continues: it is service-room
+    // furniture, hard against the washroom pod on the off flank, with the galley facing it.
+    const partition = box('partition');
+    expect(box('fridge').min[2]).toBeGreaterThanOrEqual(partition.max[2]!);
+    expect(box('fridge').max[0]).toBeLessThanOrEqual(0);
+    expect(box('fridge').max[2]).toBe(box('washroom_pod').min[2]);
+  });
+
+  it('puts the galley opposite the wardrobe and the pod, not behind either', () => {
+    // The assertion that distinguishes this layout from both of the ones it replaced.
     expect(box('wardrobe').min[0]).toBeGreaterThanOrEqual(0);
     expect(box('galley_run').min[0]).toBeGreaterThanOrEqual(0);
-    expect(box('fridge').max[0]).toBeLessThanOrEqual(0);
     expect(box('washroom_pod').max[0]).toBeLessThanOrEqual(0);
   });
 });

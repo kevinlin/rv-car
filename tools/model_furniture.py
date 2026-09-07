@@ -14,12 +14,22 @@ def _chair(a, name, direction=1, cab=False):
     box('drawer plinth', (0, -.012, .13), (w, d-.024, .26), 'wood.cabinet')
     box('drawer face', (0, d/2-.026, .13), (w-.04, .022, .19), 'wood.cabinet', .009)
     box('drawer pull', (0, d/2-.007, .16), (.13, .014, .022), 'metal.brushed', .005)
+    if not cab:
+        # Plinth strip washing the floor under each seat base — one of the details that makes
+        # the video's cabin read as lit rather than merely bright.
+        box('plinth strip', (0, .012, .012), (w-.09, d-.09, .012), 'led.cove', 0)
     parts.append(a.cylinder('swivel pedestal', (x, y, bottom+.30), .09, .1, 'metal.brushed'))
-    box('seat bolster', (0, .012, .415), (w-.025, d-.025, .17), 'upholstery.bolster', .065)
+    # Grey leather everywhere the body touches. The video's seats are light grey top to bottom;
+    # camel survives only as a wedge low on each outer flank of the backrest and as a small badge
+    # on its face. The first pass had the cushion and the whole backrest surround in camel, which
+    # is why the render read as orange furniture against photographs of grey ones.
+    box('seat bolster', (0, .012, .415), (w-.025, d-.025, .17), 'upholstery.seat', .065)
     box('seat inset', (0, .025, .497), (w-.15, d-.12, .034), 'upholstery.seat', .045)
-    box('back bolster', (0, -.187, .755), (w-.025, .145, .43), 'upholstery.bolster', .055)
+    box('back bolster', (0, -.187, .755), (w-.025, .145, .43), 'upholstery.seat', .055)
     for level in (.65, .80, .92):
         box('back padded panel', (0, -.102, level), (w-.17, .04, .115), 'upholstery.seat', .026)
+    box('camel back base', (0, -.118, .575), (w-.05, .07, .09), 'upholstery.bolster', .03)
+    box('camel badge', (0, -.124, .84), (.16, .015, .035), 'upholstery.bolster', .008)
     for side in (-1, 1):
         box('arm support', (side*(w/2-.046), -.09, .54), (.027, .055, .18), 'metal.brushed', .01)
         box('padded armrest', (side*(w/2-.052), .025, .645), (.10, .38, .085), 'upholstery.seat', .038)
@@ -41,7 +51,12 @@ def build_dinette(a):
     parts = [a.box('dinette_table_edge', (x,y,h-.042), (w,d,.076), 'wood.trim', .065),
              a.box('rounded tabletop', (x,y,h-.015), (w-.06,d-.06,.030), 'worktop', .012),
              a.cylinder('dinette_table_pedestal', (x,y,.36), .038, .72, 'metal.chrome'),
-             a.box('pedestal foot', (x,y,.022), (.36,.32,.04), 'metal.chrome', .055)]
+             a.box('pedestal foot', (x,y,.022), (.36,.32,.04), 'metal.chrome', .055),
+             # 中间是可收纳的餐桌, with a drawer in it — visible under the walnut edge band in the
+             # 9:41 frame. Hung under the top rather than let down to the floor, so the pedestal
+             # and the knee gaps either side survive.
+             a.box('table_drawer', (x,y,h-.128), (w-.10,d-.09,.09), 'wood.cabinet', .012),
+             a.box('table_drawer_pull', (x,y-d/2+.048,h-.128), (.15,.016,.020), 'metal.chrome', .006)]
     a.group('dinette_table', parts)
 
 
@@ -58,6 +73,9 @@ def build_sofa_slideout(a):
         parts.append(a.box('sofa drawer', (x-side*(w/2-.029),cy,z), (.022,d/3-.025,h-.055), 'wood.cabinet', .009))
         parts.append(a.box('sofa drawer pull', (x-side*(w/2-.009),cy,z+.07), (.018,.14,.025), 'metal.brushed', .007))
     a.group('slideout_base', parts)
+    # Plinth strip under the sofa, matching the booth seats. Outside the group: it sits below
+    # the placement box, which the bounds check holds every named node to.
+    a.box('sofa_plinth_strip', (x-side*(w/2-.10), y, z-h/2+.012), (.16, d-.10, .012), 'led.cove', 0)
     (x,y,z), (w,d,h) = a.placement('slideout_bed')
     # The perimeter foundation retains the published 1280 x 1900 mm outline.
     parts = [a.box('bed mattress foundation', (x,y,z-h/2+.025), (w,d,.05), 'upholstery.sofa', .018)]
@@ -86,6 +104,13 @@ def build_alcove_bed(a):
         parts.append(a.box('alcove cream door', (cx,y+d/2-.030,z), (w/3-.018,.024,h-.038), 'panel.locker', .035))
         parts.append(a.box('alcove pull', (cx,y+d/2-.009,z-.1), (.12,.018,.02), 'metal.brushed', .006))
     a.group('alcove_lockers', parts)
+    # Reading lights either side of the head wall and a small screen at the kerb end, both of
+    # which the video shows. Detail meshes: they hang off the locker run rather than filling a
+    # volume of their own.
+    for sx in (-.62, .62):
+        a.cylinder('alcove_reading_light', (sx, y+d/2-.004, z-.20), .028, .014, 'led.cove',
+                   rotation=(1.5708, 0, 0))
+    a.box('alcove_screen', (.80, y+d/2-.010, z-.21), (.34, .020, .20), 'graphic.screen', .006)
 
 
 def build_lockers(a):
@@ -160,17 +185,18 @@ def build_galley(a):
         a.box('counter rear length', (inward(back,lip),y,.879), (2*lip,d,.042), 'worktop', .01),
         a.box('counter hob field', (x,(split+y1)/2,.879), (w-4*lip,y1-split,.042), 'worktop', .01),
         a.box('counter forward end', (x,(y0+sink_y-bowl_r)/2,.879), (w-4*lip,sink_y-bowl_r-y0,.042), 'worktop', .01),
-        a.bowl('stainless sink', (x,sink_y,.886), (bowl_r,bowl_r), .14, 'metal.chrome', corner=.3)])
+        a.bowl('composite sink', (x,sink_y,.886), (bowl_r,bowl_r), .14, 'metal.dark', corner=.3)])
     # Fittings are sized off the bay, not off a fixed constant.
     bay = d/3
     for j in range(3):
         cy = y0+(j+.5)*bay
         if j == 2:
-            # The 5 kg washer-dryer takes the rear bay, nearest the boarding door. Given a wooden
-            # door in front of it, it would be a box nobody can see, so the appliance is the door.
-            parts.append(a.box('washer',(outward(front,.036),cy,.43),(.028,bay-.02,.77),'metal.brushed',.012))
-            parts.append(a.box('washer_door',(outward(front,.018),cy,.40),(.026,min(.34,bay-.06),.34),'metal.dark',.15))
-            parts.append(a.box('washer_fascia',(outward(front,.018),cy,.70),(.026,min(.30,bay-.10),.09),'graphic.screen',.008))
+            # Last year's 3 kg washer bay now holds the electrical gear: the 5 kg machine moved
+            # outside, into a hatch on the kerb flank. So the rear bay is a service cabinet with
+            # a systems panel on its door, not an appliance fascia.
+            parts.append(a.box('electrical_cabinet',(outward(front,.036),cy,.43),(.028,bay-.02,.77),'wood.cabinet',.012))
+            parts.append(a.box('electrical_panel',(outward(front,.018),cy,.66),(.026,min(.22,bay-.18),.10),'graphic.screen',.006))
+            parts.append(a.box('electrical_vent',(outward(front,.016),cy,.28),(.022,min(.26,bay-.14),.12),'metal.brushed',.006))
             continue
         parts.append(a.box('galley cabinet door',(outward(front,.036),cy,.43),(.028,bay-.02,.77),'wood.cabinet',.012))
         parts.append(a.box('long cabinet pull',(outward(front,.011),cy,.74),(.022,min(.34,bay-.06),.023),'metal.chrome',.007))
@@ -183,6 +209,14 @@ def build_galley(a):
     parts.append(a.tube('black gooseneck',[(inward(back,r),sink_y,zz) for r,zz in
                                            [(.11,.90),(.11,1.11),(.12,1.17),(.17,1.20),
                                             (.25,1.20),(.30,1.17),(.30,1.12)]],.012,'metal.dark'))
+    # Black pegboard accessory wall, on the stretch of backsplash forward of the window. The
+    # window covers y 2.90 to 3.54, so this is the only clear run on the wall side of the counter.
+    board_y0, board_y1 = y0+.03, y0+.33
+    parts.append(a.box('galley_pegboard',(inward(back,.014),(board_y0+board_y1)/2,1.125),
+                       (.022,board_y1-board_y0,.42),'metal.dark',.004))
+    for level in (.98,1.05,1.12,1.19,1.26):
+        parts.append(a.box('pegboard slat',(inward(back,.030),(board_y0+board_y1)/2,level),
+                           (.012,board_y1-board_y0-.03,.012),'metal.brushed',.003))
     a.group('galley_appliances',parts)
     (x,y,z),(w,d,h)=a.placement('galley_overhead')
     back, front = x+side*w/2, x-side*w/2
@@ -199,8 +233,11 @@ def build_galley(a):
     oven_len = min(.42, d*.35)
     oven_y = y0+.05+oven_len/2
     a.box('oven',(inward(x,.06),oven_y,z),(w-.12,oven_len,h-.06),'metal.dark',.015)
-    # Proud of the oven's own front face, or it renders inside the box it labels.
-    a.box('oven_fascia',(inward(front,.004),oven_y,z),(.016,oven_len-.08,h-.16),'graphic.screen',.006)
+    # Dark glass door with a control strip above it, not a lit panel the size of the door. At
+    # full size the graphic.screen emissive read as a glowing blue rectangle where the video
+    # shows black glass. Both proud of the oven's own front face, or they render inside it.
+    a.box('oven_door',(inward(front,.004),oven_y,z-.03),(.014,oven_len-.07,h-.20),'glass',.006)
+    a.box('oven_fascia',(inward(front,.006),oven_y,z+h/2-.075),(.016,oven_len-.10,.055),'graphic.screen',.004)
     # The fridge and the wardrobe front the aisle from opposite flanks; their door direction is
     # the inboard one, so it derives from which side of the centreline each sits on.
     for name in ('fridge','wardrobe'):
@@ -268,9 +305,15 @@ def build_softgoods(a):
     # chosen for visibility -- the kerb wall the reference hangs these on is covered end to end
     # by the galley run and the wardrobe, so a panel on it renders inside a cupboard.
     a.box('systems_panel',(.630,2.225,1.55),(.020,.20,.26),'graphic.screen',.004)
+    # Framed calligraphy plaque and the small exterior-camera monitor. The video hangs both on
+    # the lounge side walls; here those walls are window below 1.40 and locker run above it, so
+    # both go on the partition's lounge face, flanking the doorway, where they read from the
+    # lounge stop. Recorded as a deliberate relocation rather than a missing prop.
+    a.box('decal_plaque',(-.72,2.494,1.34),(.26,.012,.34),'graphic.print',0)
+    a.box('lounge_monitor',(.66,2.492,1.36),(.30,.016,.19),'graphic.screen',.006)
     for name, x, y, z, wide, high in (
             # Wardrobe and fridge faces, both of which front the aisle.
-            ('decal_galley_wall', -.548, 2.30, 1.30, .22, .26),
+            ('decal_galley_wall', -.575, 2.80, 1.30, .22, .26),
             # Alcove flanks, forward of the window openings cut into them.
             ('decal_alcove_off', -1.094, -1.27, 1.60, .22, .28),
             ('decal_alcove_kerb', 1.094, -1.27, 1.60, .22, .28)):
@@ -290,9 +333,18 @@ def build_washroom(a):
     side = 1 if x > 0 else -1              # +1: outer wall on the kerb flank
     outer, inner = x+side*w/2, x-side*w/2  # solid flank, aisle opening
     y0, y1 = y-d/2, y+d/2                  # forward opening, rear wall
+    # The outer wall is pierced for the roller-blind window, which lines up with an opening cut
+    # through the vehicle's own off wall behind it. Four pieces around the aperture rather than
+    # one slab, on the same principle as model_interior.wall(): anything spanning the opening
+    # renders the glazing behind it black from inside the pod.
+    win_a, win_b, win_lo, win_hi = y+.10, y+.35, 1.28, 1.62
+    ow = outer-side*.025
     parts = [a.box('wetroom tray',(x,y,.047),(w,d,.09),'washroom.shell',.04),
-             a.box('moulded outer wall',(outer-side*.025,y,z),(.05,d,h),'washroom.shell',.022),
              a.box('moulded rear wall',(x,y1-.025,z),(w,.05,h),'washroom.shell',.024)]
+    for cy, cd in ((( y0+win_a)/2, win_a-y0), ((win_b+y1)/2, y1-win_b)):
+        parts.append(a.box('moulded outer wall',(ow,cy,z),(.05,cd,h),'washroom.shell',.022))
+    for cz, ch in (((z-h/2+win_lo)/2, win_lo-(z-h/2)), ((win_hi+z+h/2)/2, z+h/2-win_hi)):
+        parts.append(a.box('moulded outer wall',(ow,(win_a+win_b)/2,cz),(.05,win_b-win_a,ch),'washroom.shell',.022))
     # Rounded junction of two real walls; the aisle opening remains accessible.
     radius=.14
     cx=outer-side*(radius+.022)
@@ -323,6 +375,15 @@ def build_washroom(a):
     # and what the washroom.shell map alone is too subtle to suggest.
     for level in (.45,.85,1.25,1.65):
         parts.append(a.box('washroom_ribs',(outer-side*.058,y,level),(.02,d-.10,.05),'washroom.shell',.008))
+    # Ceiling vent fan flanked by two downlights, per the video.
+    parts.append(a.box('washroom_vent',(x,y,h-.03),(.20,.20,.03),'metal.brushed',.006))
+    for i in range(4):
+        parts.append(a.box('vent blade',(x,y-.07+i*.045,h-.045),(.17,.018,.014),'metal.dark',.003))
+    for dy in (-.24,.24):
+        parts.append(a.cylinder('washroom_downlight',(x,y+dy,h-.045),.032,.008,'led.cove'))
+    # Retractable clothesline across the shower end, at head height.
+    parts.append(a.tube('washroom_clothesline',[(outer-side*.06,y1-.30,1.72),(inner+side*.10,y1-.30,1.72)],.004,'metal.chrome'))
+    parts.append(a.box('clothesline reel',(outer-side*.06,y1-.30,1.72),(.05,.05,.05),'washroom.shell',.012))
 
     # Recessed, not projecting: the GRP pod is a single moulding, so shelves are formed into it.
     for i, level in enumerate((1.02,1.30)):
@@ -349,3 +410,20 @@ def build_washroom(a):
     # Grab handle on the rear wall, clear of the cistern below and the niches outboard.
     parts.append(a.tube('washroom_grab',[(outer-side*.05,y1-.09,1.10),(outer-side*.45,y1-.09,1.10)],.012,'metal.chrome'))
     a.group('washroom_pod',parts)
+
+    # Hinged walnut door, chrome lever, full-length mirror on the outer face — the panel the
+    # walkthrough shows from the lounge, through the partition doorway. A detail mesh rather than
+    # a placement: a leaf swung into the aisle would overlap washroom_pod, which is exactly what
+    # the overlap check exists to forbid, and the spec already records that appliances and doors
+    # built into other volumes cannot be placements.
+    #
+    # Modelled open, flat against the pod's inboard face, and hinged at the AFT end. Two
+    # constraints fix that: the hotspot sightline crosses this plane at y 3.32, so a leaf hung
+    # from the forward jamb would stand between the camera and everything it exists to show; and
+    # a leaf swung out into the aisle would cross the centreline and break the rear-entry ray.
+    leaf = inner+side*.018                 # just outboard of the opening, in the aisle
+    face = inner+side*.036                 # its aisle-facing side, where the mirror goes
+    door_y = y1-.35
+    a.box('washroom_door',(leaf,door_y,.925),(.035,.70,1.85),'wood.cabinet',.010)
+    a.box('washroom_door_mirror',(face,door_y,1.02),(.012,.58,1.30),'metal.chrome',.006)
+    a.box('washroom_door_lever',(face,door_y-.29,.95),(.022,.12,.026),'metal.chrome',.008)

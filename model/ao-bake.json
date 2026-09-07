@@ -3,9 +3,9 @@
   "isolatedObjects": true,
   "uv": "UV2",
   "resolution": 2048,
-  "objects": 41,
+  "objects": 43,
   "minimum": 0.0,
   "maximum": 1.0,
-  "nonwhitePixels": 756467,
+  "nonwhitePixels": 784606,
   "atlas": "ao.png"
 }

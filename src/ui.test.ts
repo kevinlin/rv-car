@@ -5,8 +5,14 @@ import { HOTSPOTS } from './data/vehicle';
 import { DEFAULT_REGISTRY } from './data/finishes';
 
 describe('WOOD_ROLES', () => {
-  it('covers both wood roles, so a swap restyles cabinets and trim together', () => {
-    expect(WOOD_ROLES).toEqual(['wood.cabinet', 'wood.trim']);
+  it('covers every timber role, so a swap restyles cabinets, trim and lockers together', () => {
+    expect(WOOD_ROLES).toEqual(['wood.cabinet', 'wood.trim', 'panel.locker']);
+  });
+
+  it('gives every timber role the same variant ids, or a swap would half-apply', () => {
+    const ids = (r: (typeof WOOD_ROLES)[number]) =>
+      DEFAULT_REGISTRY[r].variants.map((v) => v.id);
+    for (const role of WOOD_ROLES) expect(ids(role)).toEqual(ids('wood.cabinet'));
   });
 });
 

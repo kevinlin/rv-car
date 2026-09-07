@@ -36,9 +36,10 @@ depsgraph = bpy.context.evaluated_depsgraph_get()
 for origin, direction in [((0, 1.4, 1.8), (0, 0, 1)),
                           ((0, 1.04, 1.13), (-1, 0, 0)),
                           ((1.3, 1.1, 1.115), (1, 0, 0)),
-                          ((0, 2.7, 1.14), (-1, 0, 0)),
+                          ((0, 2.25, 1.14), (-1, 0, 0)),
                           ((.4, 3.22, 1.14), (1, 0, 0)),
-                          ((0, 3.9, 1.3875), (0, 1, 0))]:
+                          ((0, 3.9, 1.3875), (0, 1, 0)),
+                          ((-.70, 3.65, 1.45), (-1, 0, 0))]:
     hit, loc, normal, index, obj, matrix = scene.ray_cast(depsgraph, Vector(origin), Vector(direction))
     assert hit
     role = obj.data.materials[obj.data.polygons[index].material_index].name

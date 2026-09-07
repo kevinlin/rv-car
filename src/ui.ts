@@ -1,8 +1,12 @@
 import { HOTSPOTS, type ZoneId } from './data/vehicle';
 import { DEFAULT_REGISTRY, type Role } from './data/finishes';
 
-/** Both wood roles swap together — cabinets and trim are the same timber in a real vehicle. */
-export const WOOD_ROLES: Role[] = ['wood.cabinet', 'wood.trim'];
+/**
+ * Every timber role swaps together — cabinets, trim and the gloss locker fronts are one veneer
+ * in a real vehicle, and the walkthrough video shows the lockers are timber rather than the
+ * cream the first palette pass read off the stills.
+ */
+export const WOOD_ROLES: Role[] = ['wood.cabinet', 'wood.trim', 'panel.locker'];
 
 export interface UiOptions {
   onHotspot: (id: ZoneId) => void;

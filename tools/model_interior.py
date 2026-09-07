@@ -233,7 +233,8 @@ def build_shell():
     # that lights the aisle beside the washroom pod; the kerb flank takes the slide-out aperture
     # and, aft of it, the galley window over the counter — the one the exterior walkaround
     # looks through.
-    wall('wall_off',*placement('wall_off'),[(.32,.9,1.76,1.36),(2.45,.93,3.0,1.35)])
+    wall('wall_off',*placement('wall_off'),
+         [(.32,.9,1.76,1.36),(1.975,.93,2.525,1.35),(3.40,1.28,3.90,1.62)])
     # The entry door is an opening in the wall, so it belongs to the shell alongside the
     # windows rather than to a zone. As a furniture placement it overlapped the wardrobe and
     # the galley at once, which is what the overlap check exists to forbid.
@@ -264,7 +265,10 @@ def build_shell():
     group('slideout_shell',parts)
     window('dinette_window',-1.165,1.04,1.13,1.44,.46)
     window('slideout_window',1.745,1.1,1.115,1.56,.51)
-    window('service_window',-1.165,2.725,1.14,.55,.42)
+    window('service_window',-1.165,2.25,1.14,.55,.42)
+    # High and small, between two of the pod's ribs, matching the aperture cut through the
+    # moulding in build_washroom. The video gives it a roller blind.
+    window('washroom_window',-1.165,3.65,1.45,.50,.34)
     # Over the counter, which is where the reference puts the galley window.
     window('galley_window',1.165,3.22,1.14,.64,.42)
     for x in [-1.125,1.125]:
@@ -294,6 +298,21 @@ def build_shell():
     box('ceiling_band_aft', (0, 2.90, 1.985), (1.0, 2.30, .03), 'wood.trim', bevel=.004)
     for side, x in (('off', -.375), ('kerb', .375)):
         box(f'ceiling_band_{side}', (x, 1.40, 1.985), (.25, .70, .03), 'wood.trim', bevel=.004)
+
+    # The dark charcoal fascia each locker run sits in, which is what separates the gloss walnut
+    # locker fronts from the cream ceiling in every wide shot of the video. One per run, over its
+    # own placement, between the locker top at 1.85 and the cove shelf at 1.911.
+    #
+    # There is deliberately no walnut wall band in here. The video's cabin is walnut-dominant,
+    # but in the lounge that walnut is the locker fronts and this fascia: the side walls are
+    # window from 0.90 to 1.40 and locker run from 1.40 up, so no wall is left showing to clad.
+    # A band added at 1.42 to 1.90 rendered inside the locker carcasses.
+    for name, x in (('off', -.925), ('kerb', 1.505)):
+        box(f'locker_fascia_{name}', (x, 1.05, 1.883), (.45, 1.90, .046), 'metal.dark', .006)
+
+    # Roof-hatch projector, hanging just forward of the hatch and throwing aft down the cabin.
+    box('projector_body', (0, 1.09, 1.938), (.20, .17, .085), 'metal.dark', .012)
+    cylinder('projector_lens', (0, 1.005, 1.938), .028, .012, 'glass', rotation=(1.5708, 0, 0))
 
     # Stepped cove recesses at both cream-to-wall junctions, each carrying its LED strip.
     for side, x in (('off', -.86), ('kerb', .86)):

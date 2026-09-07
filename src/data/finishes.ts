@@ -76,7 +76,23 @@ export const DEFAULT_REGISTRY: Registry = {
     ],
   },
   'panel.wall':        one('bone', 'Bone', { color: 0xefe7da, roughness: 0.8, metalness: 0 }),
-  'panel.locker':      one('bone-gloss', 'Bone gloss', { color: 0xefe7da, roughness: 0.25, metalness: 0 }),
+  // Gloss walnut, not bone. The walkthrough video shows the locker fronts as the same timber as
+  // the cabinets, lacquered: strong specular highlights over visible grain, in a dark charcoal
+  // surround. The first palette pass read them as cream doors in a walnut frame, which is what
+  // the stills suggest at brochure resolution. Because they are timber they take the wood
+  // variants too, and `WOOD_ROLES` swaps them with the cabinetry — a locker run left walnut
+  // beside oak cabinets would be a worse lie than the one this fixes.
+  'panel.locker': {
+    active: 'walnut',
+    variants: [
+      { id: 'walnut', label: 'Walnut',    params: { color: 0x6b4a2f, roughness: 0.12, metalness: 0,
+        map: { url: '/textures/walnut.webp', repeat: [2, 2] } } },
+      { id: 'oak',    label: 'Oak',       params: { color: 0xb98d5a, roughness: 0.16, metalness: 0,
+        map: { url: '/textures/walnut.webp', repeat: [2, 2] } } },
+      { id: 'ash',    label: 'Light ash', params: { color: 0xe2cfae, roughness: 0.20, metalness: 0,
+        map: { url: '/textures/walnut.webp', repeat: [2.6, 2.6] } } },
+    ],
+  },
   // Photographs sample #808182 in shadow; the albedo is lighter than the pixel.
   'upholstery.seat':   one('grey', 'Grey leather', { color: 0xc9cac9, roughness: 0.7, metalness: 0,
     map: { url: '/textures/leather-grey.webp', repeat: [4, 4] } }),

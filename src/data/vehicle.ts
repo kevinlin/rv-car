@@ -120,19 +120,23 @@ export const PLACEMENTS: readonly Placement[] = [
   { id: 'slideout_bed',  zone: 'sofa', origin: [d(450), e(400), e(150)], size: [pub(1280), e(200), pub(1900)], movable: false },
   { id: 'lockers_kerb',  zone: 'sofa', origin: [e(1280), e(1400), e(150)],size: [e(450), e(450), e(1900)], movable: false },
 
-  // --- storage band between lounge and wet zone ---
-  { id: 'fridge',   zone: 'storage', origin: [e(-1150), e(0), e(2100)], size: [e(600), e(1800), e(400)], movable: false },
+  // --- storage. The wardrobe is the only thing left in the band forward of the partition;
+  // the 148 L fridge column stands in the SERVICE room, aft of the sliding door and hard up
+  // against the washroom pod on the off flank. It is not part of the lounge and does not start
+  // a line the galley continues — the galley faces it from the opposite flank.
+  { id: 'fridge',   zone: 'storage', origin: [e(-1150), e(0), e(2550)], size: [e(600), e(1800), e(500)], movable: false },
   // 250 mm deep, which is the storage band the design spec states (Z 2050-2300); at 400 it
   // also filled the floor in front of the entry door.
   { id: 'wardrobe', zone: 'storage', origin: [e(600), e(0), e(2100)],   size: [e(550), e(1900), e(250)], movable: false },
 
   // --- rear wet zone. The galley is a 1200 mm run along the KERB flank and the washroom a
   // corner pod in the REAR OFF corner, so the service room's flanks are the opposite way round
-  // to the lounge's: the galley sits behind the wardrobe, not behind the fridge. The walkthrough
-  // video is explicit — from the lounge looking aft through the partition, the counter and its
-  // pegboard are on the left and the mirrored washroom door on the right — and the chain of
-  // inference that had the galley continue the fridge's line was simply wrong about this
-  // vehicle. The boarding door is 后上门, in the rear wall, offset off the centreline to clear
+  // to the lounge's: the galley faces the fridge and the washroom pod across the aisle rather
+  // than continuing their line. The walkthrough video is explicit — from the lounge looking aft
+  // through the partition, the counter and its pegboard are on the left and the mirrored
+  // washroom door on the right — and the chain of inference that had the galley continue the
+  // fridge's line was wrong twice over: wrong about the flank, and wrong about the fridge being
+  // in the lounge at all. The boarding door is 后上门, in the rear wall, offset off the centreline to clear
   // the pod. Enter, and the counter is on your right, the washroom door on your left, with
   // 800 mm of aisle between them. Pinned by a test in check.test.ts, because reading handedness
   // off stills has now got it wrong four times.
@@ -151,7 +155,10 @@ export const PLACEMENTS: readonly Placement[] = [
   { id: 'body_alcove',      zone: 'exterior', origin: [d(-1225), e(1350),  d(-1948)], size: [d(2450), d(800),  d(1948)], movable: false },
   { id: 'body_habitation',  zone: 'exterior', origin: [d(-1225), e(-400),  d(0)],     size: [d(2450), d(2550), d(4050)], movable: false },
   { id: 'skirt',            zone: 'exterior', origin: [d(-1225), e(-700),  d(0)],     size: [d(2450), d(300),  d(4050)], movable: false },
-  { id: 'slideout_box',     zone: 'exterior', origin: [d(1225),  e(0),     e(150)],   size: [d(580),  e(1300), e(1900)], movable: false },
+  // 2000 mm tall, matching slideout_shell exactly. At the old estimated 1300 the exterior box
+  // stopped 700 mm short of the interior shell it is supposed to enclose, and the kerb
+  // three-quarter looked straight through the gap into the cabin.
+  { id: 'slideout_box',     zone: 'exterior', origin: [d(1225),  e(0),     e(150)],   size: [d(580),  d(2000), e(1900)], movable: false },
   { id: 'wheel_front_off',  zone: 'exterior', origin: [e(-988),  d(-1050), d(-1270)], size: [e(225),  e(744),  e(744)],  movable: false },
   { id: 'wheel_front_kerb', zone: 'exterior', origin: [e(763),   d(-1050), d(-1270)], size: [e(225),  e(744),  e(744)],  movable: false },
   { id: 'wheel_rear_off',   zone: 'exterior', origin: [e(-988),  d(-1050), d(2030)],  size: [e(225),  e(744),  e(744)],  movable: false },
@@ -200,7 +207,7 @@ export const HOTSPOTS: readonly Hotspot[] = [
   // +40 to -10 and +20 to -10. Rounded outward to give the viewer somewhere to go.
   {
     id: 'dinette',
-    // Forward of the partition at Z 2500, in the gap between the fridge and the wardrobe.
+    // Forward of the partition at Z 2500, in the clear band between the booth and the wardrobe.
     // The old Z 2.6 stop now stood in the service room looking through a doorway.
     label: 'Lounge',
     camera: { position: [0.15, 1.55, 2.3], target: [-0.15, 0.95, 0.3] },
@@ -243,15 +250,16 @@ export const HOTSPOTS: readonly Hotspot[] = [
     view: { kind: 'look', pitch: [-30 * D, 30 * D] },
   },
   {
-    // Three-quarter front, off side — the flat flank, because the slide-out deploys to the
-    // kerb. That does put the stop opposite the flank the video details (awning, hatches,
-    // control panel, galley window), which is the kerb one; full azimuth is unlimited, so the
-    // orbit reaches it. Target sits at the body's mid-height so the vehicle fills the frame
-    // without tipping. The one stop where orbiting is the right verb: outside, there is room
-    // to swing around the subject.
+    // Three-quarter front, kerb side. Not the flat flank — the slide-out deploys to this one —
+    // but the flank with everything on it: the awning and its strip, the storage bay, the
+    // washer porthole, the control panel and the galley window, which is the walkaround the
+    // video actually films. The off flank is flatter and carries only the livery band. Since
+    // the vehicle is modelled deployed, the box is part of the subject rather than something
+    // to hide from. Full azimuth is unlimited, so the orbit reaches the off flank too. Target
+    // sits at the body's mid-height so the vehicle fills the frame without tipping.
     id: 'exterior',
     label: 'Exterior',
-    camera: { position: [-6.4, 1.6, -5.2], target: [0.0, 0.5, 1.0] },
+    camera: { position: [6.9, 1.9, -4.6], target: [0.0, 0.4, 1.2] },
     view: {
       kind: 'orbit',
       azimuth: [-Math.PI, Math.PI],
