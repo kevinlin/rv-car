@@ -12,3 +12,6 @@ model/*.blend1
 
 # Tooling caches
 .firecrawl/
+
+# macOS
+.DS_Store
