@@ -32,9 +32,36 @@ def _door_reveal(a, name, centre, width, height, axis, role='metal.dark', t=.055
 def build_exterior(a):
     # Body masses. The FRP alcove moulding overhangs the cab to full width, which is the
     # shape that makes a C-type read as a C-type from outside.
-    for name in ('body_cab', 'body_alcove', 'body_habitation'):
+    #
+    # body_habitation and body_alcove stay boxes: between them they carry three of the four
+    # envelope extremes — the rear face at y 4.05, both flanks at x +-1.225, and the alcove
+    # roof at z 2.15.
+    for name in ('body_alcove', 'body_habitation'):
         centre, size = a.placement(name)
         a.box(name, centre, size, 'body.paint', bevel=.06)
+
+    # body_cab carries the fourth extreme, its nose plane at y -1.948, and it stays a BOX.
+    #
+    # The windscreen rake this pass set out to add is blocked, and by the cab interior rather
+    # than by the envelope check. build_cab's seats reach y -1.925 — 23 mm inside that nose
+    # plane — and the flat front face is the only thing hiding them. Raking the face pulls it
+    # back to -1.705 at seat height, and the seats then burst 220 mm out through the
+    # windscreen. Clearing them needs shear <= 28 mm, which is no rake at all.
+    #
+    # So the cab gets its bonnet, grille and mirrors, which are the rest of what the walkaround
+    # shows, and the rake waits for the cab furniture to move aft. Do not re-add a shear here
+    # without first checking what build_cab puts in front of y -1.9.
+    (cx, cy, cz), (cw, cd, ch) = a.placement('body_cab')
+    a.box('body_cab', (cx, cy, cz), (cw, cd, ch), 'body.paint', bevel=.06)
+    a.box('cab_bonnet', (cx, cy - cd / 2 + .30, cz - ch / 2 + .26), (cw - .06, .60, .34),
+          'body.paint', bevel=.05)
+    a.box('cab_grille', (cx, cy - cd / 2 + .012, cz - ch / 2 + .30), (cw * .62, .03, .22),
+          'metal.dark', bevel=.02)
+    for side in (-1, 1):
+        a.box('cab_mirror_arm', (side * (cw / 2 + .07), cy - .18, cz + ch / 2 - .40),
+              (.14, .04, .04), 'metal.dark', bevel=.012)
+        a.box('cab_mirror', (side * (cw / 2 + .15), cy - .18, cz + ch / 2 - .40),
+              (.05, .10, .24), 'metal.dark', bevel=.02)
 
     centre, size = a.placement('skirt')
     a.box('skirt', centre, size, 'metal.dark', bevel=.02)

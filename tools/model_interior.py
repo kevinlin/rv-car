@@ -50,6 +50,39 @@ def box(name, center, size, role, bevel=.01):
     return finish(obj, name, role)
 
 
+def wedge(name, center, size, role, shear, axis=1, bevel=.01):
+    """A box whose top-front edge is displaced along `axis`, raking the face it belongs to.
+
+    Enough for a windscreen rake and for the tapered nose of the over-cab moulding, which are
+    the two shapes model_exterior needs and cannot get from a cube. `shear` is metres of
+    displacement, positive toward +axis, applied to the four vertices that are both at the top
+    and at the -axis end.
+
+    The top-front EDGE rather than the whole top face, deliberately. Shearing the face moves
+    its rear edge by the same amount, and on body_cab that pushed the mass 340 mm past the
+    placement box check_models.mjs holds it to. Displacing only the front edge leaves the rear
+    square, and leaves the bottom of the front face where it was — which on body_cab is the
+    nose plane at y -1.948, the envelope's length minimum.
+
+    The vertex loop runs in local space after box() applied its scale, so `center` and `size`
+    are the same values box() received.
+    """
+    obj = box(name, center, size, role, bevel=0)
+    top, front = size[2] / 2, -size[axis] / 2
+    for vert in obj.data.vertices:
+        if vert.co[2] > top - 1e-4 and vert.co[axis] < front + 1e-4:
+            vert.co[axis] += shear
+    if bevel:
+        mod = obj.modifiers.new('Edge radius', 'BEVEL')
+        mod.width = min(bevel, min(size) * .48)
+        mod.segments = 3
+        bpy.ops.object.select_all(action='DESELECT')
+        obj.select_set(True)
+        bpy.context.view_layer.objects.active = obj
+        bpy.ops.object.modifier_apply(modifier=mod.name)
+    return obj
+
+
 def cylinder(name, center, radius, depth, role, rotation=(0, 0, 0)):
     bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=radius, depth=depth,
                                       location=center, rotation=rotation)
