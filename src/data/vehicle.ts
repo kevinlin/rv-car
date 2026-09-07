@@ -171,6 +171,18 @@ export const PLACEMENTS: readonly Placement[] = [
   { id: 'wheel_rear_kerb',  zone: 'exterior', origin: [e(763),   d(-1050), d(2030)],  size: [e(225),  e(744),  e(744)],  movable: false },
 ];
 
+/**
+ * The horizontal section height for the plan stop, in millimetres.
+ *
+ * Derived, not chosen. Both lounge locker runs have their underside at 1400 and the alcove
+ * mattress tops out at 1350, so one plane at 1400 takes the ceiling, both cove fascias and
+ * every locker run with it while leaving the beds whole. Move a locker run and the cut
+ * follows it; placements.test.ts fails if the relationship breaks.
+ */
+const underside = (id: string) => PLACEMENTS.find((p) => p.id === id)!.origin[1].v;
+
+export const PLAN_CUT_MM = Math.min(underside('lockers_off'), underside('lockers_kerb'));
+
 export const aabb = (p: Placement) => ({
   min: [p.origin[0].v, p.origin[1].v, p.origin[2].v] as [number, number, number],
   max: [

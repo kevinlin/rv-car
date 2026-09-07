@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ENVELOPE, PLACEMENTS, aabb, type Placement } from './vehicle';
+import { ENVELOPE, PLACEMENTS, PLAN_CUT_MM, aabb, type Placement } from './vehicle';
 
 const byId = (id: string): Placement => {
   const p = PLACEMENTS.find((x) => x.id === id);
@@ -128,5 +128,26 @@ describe('exterior', () => {
     const front = -ENVELOPE.cabDepth!.v + ENVELOPE.frontAxleFromNose!.v;
     expect(centre('wheel_front_off')).toBe(front);
     expect(centre('wheel_rear_off')).toBe(front + ENVELOPE.wheelbase!.v);
+  });
+});
+
+describe('PLAN_CUT_MM', () => {
+  const find = (id: string) => PLACEMENTS.find((p) => p.id === id)!;
+
+  it('sits at or below every locker run, so the plan view loses all of them', () => {
+    for (const id of ['lockers_off', 'lockers_kerb', 'alcove_lockers']) {
+      expect(PLAN_CUT_MM).toBeLessThanOrEqual(find(id).origin[1].v);
+    }
+  });
+
+  it('sits above every mattress, so no bed renders sliced', () => {
+    for (const id of ['alcove_bed', 'slideout_bed']) {
+      const p = find(id);
+      expect(PLAN_CUT_MM).toBeGreaterThanOrEqual(p.origin[1].v + p.size[1].v);
+    }
+  });
+
+  it('is 1400 mm today, which is the lounge lockers underside', () => {
+    expect(PLAN_CUT_MM).toBe(1400);
   });
 });
