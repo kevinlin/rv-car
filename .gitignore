@@ -15,3 +15,7 @@ model/*.blend1
 
 # macOS
 .DS_Store
+
+# Agent Handoff
+.handoff/
+.claude/agents/
