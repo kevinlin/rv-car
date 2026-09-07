@@ -35,3 +35,14 @@ describe('neutral roles', () => {
       .toBeGreaterThan(MAX_NEUTRAL_SATURATION);
   });
 });
+
+describe('the livery decal', () => {
+  it('lands exactly one copy on the 3.4 x 0.70 m panel', () => {
+    // The UV spans 3.4 x 0.70 because box_uv writes it that way, matching the 1.0 UV/m the rest
+    // of the pipeline holds every unwrap to. A repeat of 1 would tile the wordmark four times
+    // across the flank.
+    const map = DEFAULT_REGISTRY['body.graphic'].variants[0]!.params.map!;
+    expect(map.repeat![0]! * 3.4).toBeCloseTo(1, 6);
+    expect(map.repeat![1]! * 0.70).toBeCloseTo(1, 6);
+  });
+});

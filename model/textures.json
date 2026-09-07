@@ -103,7 +103,7 @@
       ],
       "size": 512,
       "quality": 88,
-      "note": "Seat back, not a dinette chair face: the chairs are panelled everywhere, and this window samples 152,149,150 \u2014 the neutral grey the spec quotes as #808182 in shadow."
+      "note": "Seat back, not a dinette chair face: the chairs are panelled everywhere, and this window samples 152,149,150 — the neutral grey the spec quotes as #808182 in shadow."
     },
     {
       "out": "leather-camel",
@@ -261,38 +261,6 @@
       ],
       "size": 256,
       "quality": 86,
-      "colour": true,
-      "flatField": 0,
-      "tile": false
-    },
-    {
-      "out": "side-graphic",
-      "role": "body.graphic",
-      "note": "The flank livery's stripe band, aft of the lettering. Deliberately logo-free: the exterior body is smart-projected, so its UV islands neither start at zero nor span a whole number of tiles, and any repeat setting cuts a word in half. Stripes tile without a reader noticing. Reproduced by eye, so estimated.",
-      "source": "docs/research/reference/exterior-hero.jpg",
-      "corners": [
-        [
-          700,
-          1176
-        ],
-        [
-          950,
-          1182
-        ],
-        [
-          950,
-          1288
-        ],
-        [
-          700,
-          1282
-        ]
-      ],
-      "size": [
-        512,
-        216
-      ],
-      "quality": 88,
       "colour": true,
       "flatField": 0,
       "tile": false

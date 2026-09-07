@@ -1,0 +1,41 @@
+<!--
+  The flank livery, drawn by eye from docs/research/walkthrough/exterior-kerb-flank-0m59s.jpg.
+
+  NOT rectified from a frame, deliberately: the presenter stands in front of the flank in every
+  shot that shows enough of it, and the showroom ceiling reflects off the paint. Rectifying that
+  would bake a person's shadow and a showroom into the vehicle's paintwork.
+
+  The canvas is 3.4 : 0.70, matching the decal plane in tools/model_exterior.py. x = 0 lands at
+  the AFT end on the kerb flank — the flank the reference photograph shows — and at the forward
+  end on the off flank, because the two flanks are mirror images and one texture cannot give both
+  the same composition and legible lettering at once. See box_uv's `flip` in model_exterior.py.
+  Background is transparent, so body.paint shows through as the white of the livery.
+
+  Colours sampled from the frame and white-balanced against the body panels, which read #7e8e8d
+  under the showroom's light:
+    teal   #12657c   the leading chevron
+    black  #191b1c   the trailing chevron
+    orange #e8912a   the panel under the window, and the wordmark
+
+  Rasterise with: node tools/render_livery.mjs
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 422" width="2048" height="422">
+  <!-- The orange panel. Its forward end runs off the plane; its aft end is raked, which is what
+       the two chevrons lie against. -->
+  <path d="M 820 0 H 2048 V 244 L 1180 272 L 900 150 Z" fill="#e8912a"/>
+
+  <!-- Two nested arrowheads pointing aft and down, the way the reference has them. Mitred, not
+       rounded: these are cut vinyl, not brush strokes. -->
+  <path d="M 990 12 L 200 202 L 700 402" fill="none" stroke="#191b1c"
+        stroke-width="56" stroke-linejoin="miter" stroke-miterlimit="6"/>
+  <path d="M 990 121 L 528 224 L 780 325" fill="none" stroke="#12657c"
+        stroke-width="56" stroke-linejoin="miter" stroke-miterlimit="6"/>
+
+  <!-- DACHIRV 大驰, on the white below the panel, where the reference puts it. -->
+  <text x="1290" y="368" fill="#e8912a" font-size="96" letter-spacing="14"
+        font-family="Avenir Next, Helvetica Neue, Arial, sans-serif" font-weight="600"
+      >DACHIRV</text>
+  <text x="1810" y="366" fill="#e8912a" font-size="80"
+        font-family="PingFang SC, Hiragino Sans GB, Heiti SC, sans-serif" font-weight="600"
+      >大驰</text>
+</svg>

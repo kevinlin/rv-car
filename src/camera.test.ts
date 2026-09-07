@@ -1,9 +1,28 @@
 import { describe, it, expect } from 'vitest';
-import { HOTSPOTS, PLACEMENTS, aabb } from './data/vehicle';
+import { HOTSPOTS, PLACEMENTS, PLAN_CUT_MM, aabb, type Hotspot } from './data/vehicle';
 import * as THREE from 'three';
 import { applyHotspotLimits, clamp, easeInOutCubic, tweenTo } from './camera';
 import { ENCLOSURES } from './check';
 import type { SceneBundle } from './scene';
+
+/** Minimal stand-ins: tweenTo only touches the camera and the controls' limits and target. */
+const bundle = () => {
+  const camera = new THREE.PerspectiveCamera();
+  const controls = {
+    target: new THREE.Vector3(),
+    enabled: true,
+    minAzimuthAngle: 0, maxAzimuthAngle: 0,
+    minPolarAngle: 1.2, maxPolarAngle: 1.4,
+    minDistance: 2, maxDistance: 2,
+    update: () => {},
+  };
+  const look = {
+    enabled: false,
+    aim: () => {}, setPitch: () => {}, update: () => {}, dispose: () => {},
+  };
+  const renderer = { clippingPlanes: [] as THREE.Plane[] };
+  return { camera, controls, look, renderer } as unknown as SceneBundle;
+};
 
 describe('clamp', () => {
   it('passes values inside the range through', () => {
@@ -72,17 +91,17 @@ describe('HOTSPOTS', () => {
   });
 
   it('gives every interior stop free look', () => {
-    // The whole point of this change: no interior stop may clamp azimuth, because orbiting
-    // a 2.36 m cabin at 1.2 m radius drives the camera through the walls.
-    // Cast: ZoneId does not carry 'exterior' until the exterior placements land, and this
-    // must keep excluding the exterior stop once it does.
-    const interior = HOTSPOTS.filter((h) => (h.id as string) !== 'exterior');
-    expect(interior.every((h) => h.view.kind === 'look')).toBe(true);
+    // No stop inside the cabin may clamp azimuth: orbiting a 2.36 m cabin at 1.2 m radius
+    // drives the camera through the walls. Discriminating on view.kind rather than on
+    // id !== 'exterior' is what lets a second outside-the-cabin stop exist.
+    const inside = HOTSPOTS.filter((h) => h.view.kind === 'look');
+    expect(inside.length).toBeGreaterThanOrEqual(6);
+    expect(inside.every((h) => h.view.kind === 'look')).toBe(true);
   });
 
   it('places every interior camera inside the vehicle, roughly at eye height', () => {
     for (const h of HOTSPOTS) {
-      if (h.id === 'exterior') continue; // stands outside the body by design
+      if (h.view.kind !== 'look') continue; // outside stops stand where they must
       const [x, y, z] = h.camera.position;
       expect(Math.abs(x!)).toBeLessThan(2.0);
       expect(y!).toBeGreaterThan(0.3);
@@ -136,24 +155,6 @@ describe('the partition splits the stops in two', () => {
 });
 
 describe('tweenTo', () => {
-  /** Minimal stand-ins: tweenTo only touches the camera and the controls' limits and target. */
-  const bundle = () => {
-    const camera = new THREE.PerspectiveCamera();
-    const controls = {
-      target: new THREE.Vector3(),
-      enabled: true,
-      minAzimuthAngle: 0, maxAzimuthAngle: 0,
-      minPolarAngle: 1.2, maxPolarAngle: 1.4,
-      minDistance: 2, maxDistance: 2,
-      update: () => {},
-    };
-    const look = {
-      enabled: false,
-      aim: () => {}, setPitch: () => {}, update: () => {}, dispose: () => {},
-    };
-    return { camera, controls, look } as unknown as SceneBundle;
-  };
-
   it('releases the previous hotspot polar limits before flying', () => {
     // Without this the previous zone's polar floor drags the arriving camera off its pose.
     globalThis.requestAnimationFrame = () => 0; // vitest runs in node; the flight never ticks
@@ -210,5 +211,40 @@ describe('the exterior stop', () => {
     const [x, y, z] = exterior!.camera.position;
     expect(Math.hypot(x!, z!)).toBeGreaterThan(3.5);
     expect(y!).toBeGreaterThan(-1.05); // floorAboveGround: the ground plane
+  });
+});
+
+describe('the plan stop', () => {
+  const plan = () => HOTSPOTS.find((h) => h.id === 'plan')!;
+
+  it('exists and orbits', () => {
+    expect(plan().view.kind).toBe('orbit');
+  });
+
+  it('stands above the roof, looking down the cabin', () => {
+    const [x, y, z] = plan().camera.position;
+    expect(y!).toBeGreaterThan(2.15);            // clear of the roof line
+    expect(Math.abs(x!)).toBeLessThan(1.0);      // near the centreline
+    expect(z!).toBeGreaterThan(0);
+    expect(z!).toBeLessThan(4.05);               // within the habitation length
+  });
+
+  it('never tips below a steep three-quarter, where cut edges read as broken geometry', () => {
+    const view = plan().view as Extract<Hotspot['view'], { kind: 'orbit' }>;
+    expect(view.polar[0]).toBeGreaterThan(0);    // 0 exactly degenerates OrbitControls
+    expect(view.polar[1]).toBeLessThanOrEqual(55 * (Math.PI / 180));
+  });
+});
+
+describe('arrive sets the section plane', () => {
+  it('clips at PLAN_CUT_MM at the plan stop and nowhere else', async () => {
+    const b = bundle();                          // the existing stub factory in this file
+    await tweenTo(b, HOTSPOTS.find((h) => h.id === 'plan')!, 0);
+    expect(b.renderer.clippingPlanes).toHaveLength(1);
+    expect(b.renderer.clippingPlanes[0]!.constant).toBeCloseTo(PLAN_CUT_MM / 1000, 6);
+    expect(b.renderer.clippingPlanes[0]!.normal.y).toBe(-1);
+
+    await tweenTo(b, HOTSPOTS.find((h) => h.id === 'galley')!, 0);
+    expect(b.renderer.clippingPlanes).toHaveLength(0);
   });
 });
