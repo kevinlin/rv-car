@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { ENVELOPE, PLACEMENTS, PLAN_CUT_MM, aabb, type Placement } from './vehicle';
+import {
+  ENVELOPE, PLACEMENTS, PLAN_CUT_MM, PLAN_LABELS, aabb, labelAnchorM, labelDetail,
+  type Placement,
+} from './vehicle';
 
 const byId = (id: string): Placement => {
   const p = PLACEMENTS.find((x) => x.id === id);
@@ -149,5 +152,35 @@ describe('PLAN_CUT_MM', () => {
 
   it('is 1400 mm today, which is the lounge lockers underside', () => {
     expect(PLAN_CUT_MM).toBe(1400);
+  });
+});
+
+describe('PLAN_LABELS', () => {
+  it('names only placements that exist', () => {
+    const ids = new Set(PLACEMENTS.map((p) => p.id));
+    for (const l of PLAN_LABELS) {
+      if (l.placement) expect(ids.has(l.placement)).toBe(true);
+    }
+  });
+
+  it('gives every label exactly one anchor', () => {
+    for (const l of PLAN_LABELS) {
+      expect(Boolean(l.placement) !== Boolean(l.at)).toBe(true);
+    }
+  });
+
+  it('reads dimensions off the geometry, carrying its confidence tag', () => {
+    const bed = PLAN_LABELS.find((l) => l.placement === 'alcove_bed')!;
+    // 2200 x 1400 is published, and is the number the parent spec calibrated the whole
+    // reconstruction against. A label that could drift from it would be worse than no label.
+    expect(labelDetail(bed)).toBe('2200 × 1400 published');
+  });
+
+  it('anchors at the placement centre, in metres', () => {
+    const bed = PLAN_LABELS.find((l) => l.placement === 'alcove_bed')!;
+    const [x, y, z] = labelAnchorM(bed);
+    expect(x).toBeCloseTo(0, 6);        // -1100 + 2200/2
+    expect(y).toBeCloseTo(1.25, 6);     // 1150 + 200/2
+    expect(z).toBeCloseTo(-0.7, 6);     // -1400 + 1400/2
   });
 });

@@ -1,4 +1,4 @@
-import { mm, type Mm } from './units';
+import { mm, toM, toMTriple, type Confidence, type Mm } from './units';
 
 export type ZoneId =
   | 'shell' | 'cab' | 'alcove' | 'dinette' | 'sofa' | 'storage' | 'galley' | 'washroom'
@@ -182,6 +182,55 @@ export const PLACEMENTS: readonly Placement[] = [
 const underside = (id: string) => PLACEMENTS.find((p) => p.id === id)!.origin[1].v;
 
 export const PLAN_CUT_MM = Math.min(underside('lockers_off'), underside('lockers_kerb'));
+
+/**
+ * A label for the plan stop. Its dimensions are read off the placement it names, so a label
+ * cannot claim a size the geometry does not have — the same discipline §2 of the design spec
+ * applies to every number in this file, extended to the one place those numbers become copy a
+ * viewer reads. Anything that is not a placement (an aisle width, a doorway) carries its own
+ * anchor and detail string instead.
+ */
+export interface PlanLabel {
+  readonly text: string;
+  readonly placement?: string;
+  readonly at?: readonly [Mm, Mm, Mm];
+  readonly detail?: string;
+}
+
+const byId = (id: string) => PLACEMENTS.find((p) => p.id === id)!;
+
+/** Label anchor in scene units: the placement's centre, or the explicit point. */
+export const labelAnchorM = (l: PlanLabel): [number, number, number] => {
+  if (l.at) return toMTriple(l.at);
+  const p = byId(l.placement!);
+  return [0, 1, 2].map((i) => toM(p.origin[i]!) + toM(p.size[i]!) / 2) as [number, number, number];
+};
+
+/** "2200 × 1400 published" — the two largest plan dimensions, plus the weaker confidence tag. */
+export const labelDetail = (l: PlanLabel): string => {
+  if (l.detail) return l.detail;
+  const p = byId(l.placement!);
+  const plan = [p.size[0]!, p.size[2]!].sort((a, b) => b.v - a.v);
+  const rank: Record<Confidence, number> = { published: 0, derived: 1, estimated: 2 };
+  const weakest = [p.size[0]!, p.size[2]!].reduce((a, b) => (rank[b.c] > rank[a.c] ? b : a));
+  return `${plan[0]!.v} × ${plan[1]!.v} ${weakest.c}`;
+};
+
+export const PLAN_LABELS: readonly PlanLabel[] = [
+  { text: 'Alcove bed',    placement: 'alcove_bed' },
+  { text: 'Slide-out bed', placement: 'slideout_bed' },
+  { text: '卡座 booth',     placement: 'dinette_table' },
+  { text: 'Wardrobe',      placement: 'wardrobe' },
+  { text: 'Fridge 148 L',  placement: 'fridge' },
+  { text: 'Galley',        placement: 'galley_run' },
+  { text: 'Washroom',      placement: 'washroom_pod' },
+  { text: 'Sliding partition', placement: 'partition' },
+  // Not placements: an aisle is the gap between two of them, and the door is an opening cut
+  // into wall_rear rather than a piece of furniture.
+  { text: 'Aisle', at: [d(0), d(900), d(1000)], detail: '560 mm derived' },
+  { text: 'Aisle', at: [d(0), d(900), d(3300)], detail: '800 mm derived' },
+  { text: '后上门',  at: [d(100), d(900), d(4050)], detail: 'rear boarding door' },
+];
 
 export const aabb = (p: Placement) => ({
   min: [p.origin[0].v, p.origin[1].v, p.origin[2].v] as [number, number, number],
