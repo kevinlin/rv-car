@@ -25,6 +25,9 @@ export const createScene = (canvas: HTMLCanvasElement): SceneBundle => {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
+  // Global clipping planes are off by default and are what the plan stop sections the vehicle
+  // with. Nothing else in the app sets a plane, so this is inert until that stop is visited.
+  renderer.localClippingEnabled = true;
 
   const scene = new THREE.Scene();
   // Daylight standing in for the world outside: the glazing is 24 % opaque, so without a bright

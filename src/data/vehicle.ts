@@ -285,4 +285,23 @@ export const HOTSPOTS: readonly Hotspot[] = [
       distance: [6.0, 14.0],
     },
   },
+  {
+    // The floorplan the manufacturer never published, shown rather than drawn. Above the roof
+    // line at 2.15, on the centreline, targeted at the middle of the OVERALL body rather than
+    // of the habitation box: the vehicle runs Z -1.948 to 4.05, so its centre is 1.05 and a
+    // target at 2.0 pushed the cab and the alcove off the top of the frame. 8.4 m of standoff
+    // is what a 50 deg vertical field needs to hold all 6 m with margin. Polar floor is 0.05
+    // rather than 0 because OrbitControls degenerates at the pole; the 55 deg ceiling lets the
+    // viewer tip toward a three-quarter dollhouse without dropping to eye level, where the
+    // sectioned walls stop reading as a cut and start reading as broken geometry.
+    id: 'plan',
+    label: 'Floorplan',
+    camera: { position: [0.0, 8.8, 1.05], target: [0.0, 0.4, 1.05] },
+    view: {
+      kind: 'orbit',
+      azimuth: [-Math.PI, Math.PI],
+      polar: [0.05, 55 * D],
+      distance: [5.0, 12.0],
+    },
+  },
 ];

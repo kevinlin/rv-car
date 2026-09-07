@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import type { Hotspot } from './data/vehicle';
+import { PLAN_CUT_MM, type Hotspot } from './data/vehicle';
 import type { SceneBundle } from './scene';
 
 /** NaN-safe: a NaN progress value would propagate into the camera position and blank the frame. */
@@ -37,9 +37,18 @@ export const applyHotspotLimits = (
   controls.update();
 };
 
+/**
+ * The section plane for the plan stop. Normal points down, so everything above the constant is
+ * clipped. Batching merges the whole vehicle into one mesh per role before the first frame, so
+ * there is no ceiling or locker object left to hide by name — clipping is per-fragment and does
+ * not care how the geometry was grouped.
+ */
+const SECTION = new THREE.Plane(new THREE.Vector3(0, -1, 0), PLAN_CUT_MM / 1000);
+
 /** Hand the camera to whichever controller this hotspot's view calls for. */
 const arrive = (bundle: SceneBundle, h: Hotspot): void => {
-  const { camera, controls, look } = bundle;
+  const { camera, controls, look, renderer } = bundle;
+  renderer.clippingPlanes = h.id === 'plan' ? [SECTION] : [];
   if (h.view.kind === 'look') {
     controls.enabled = false;
     look.enabled = true;
