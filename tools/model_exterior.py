@@ -9,6 +9,12 @@ passed in by its dispatch, matching how model_furniture's builders are called.
 """
 
 
+# Rearward displacement of the over-cab moulding's top-front edge, in metres. Kept modest so
+# the raked face stays forward of the alcove's interior front panel at y -1.415, and so the
+# forward window's flat frame does not sink through it.
+ALCOVE_TAPER = .16
+
+
 def _door_reveal(a, name, centre, width, height, axis, role='metal.dark', t=.055):
     """A frame scribed into the body: four strips, nothing across the opening.
 
@@ -36,9 +42,38 @@ def build_exterior(a):
     # body_habitation and body_alcove stay boxes: between them they carry three of the four
     # envelope extremes — the rear face at y 4.05, both flanks at x +-1.225, and the alcove
     # roof at z 2.15.
-    for name in ('body_alcove', 'body_habitation'):
-        centre, size = a.placement(name)
-        a.box(name, centre, size, 'body.paint', bevel=.06)
+    centre, size = a.placement('body_habitation')
+    a.box('body_habitation', centre, size, 'body.paint', bevel=.06)
+
+    # The FRP over-cab moulding, tapered. The taper is CARVED OUT of body_alcove rather than
+    # added in front of it: a mass in front of the nose plane at y -1.948 would make the
+    # vehicle 6318 mm long, and check_models.mjs would not catch it — it measures the eight
+    # named bodies, and an added detail mesh is not one of them. Same restraint the spare
+    # wheel already documents.
+    #
+    # Raking the alcove's own front face is free of all four extremes: the top-front edge moves
+    # in y only, so the roof stays at z 2.15 and the flanks at x +-1.225, and body_cab still
+    # carries the length minimum at the bottom of the nose. The face lands at y -1.788 at the
+    # roof line, well forward of the alcove_front panel at -1.415, so nothing interior shows.
+    (ax, ay, az), (aw, ad, ah) = a.placement('body_alcove')
+    a.wedge('body_alcove', (ax, ay, az), (aw, ad, ah), 'body.paint',
+            shear=ALCOVE_TAPER, axis=1, bevel=.06)
+
+    # Its forward window: one filled dark panel, not a four-strip reveal.
+    #
+    # The raked face slopes 11 deg over the alcove's 0.8 m, so across a 0.40 m window it moves
+    # 80 mm in y — five times the 16 mm a reveal strip is thick. A flat frame therefore sinks
+    # into the face at one end and floats off it at the other, and rendered as three sides of a
+    # frame. A single 100 mm-deep box bridges the slope instead.
+    #
+    # Filling this aperture is safe, unlike every other one on the body: the rule against it
+    # exists because a filled rectangle blacks out the interior glazing behind, and there is no
+    # forward-facing glazing here — build_shell puts an opaque alcove_front panel at y -1.415
+    # and the alcove's windows on the flanks. So this reads as the tinted forward pane the
+    # walkaround shows, and changes nothing seen from the bed.
+    nose_at_mid = ay - ad / 2 + ALCOVE_TAPER * .5
+    a.box('body_window_alcove_front', (ax, nose_at_mid, az + .04), (1.10, .10, .40),
+          'metal.dark', bevel=.02)
 
     # body_cab carries the fourth extreme, its nose plane at y -1.948, and it stays a BOX.
     #
