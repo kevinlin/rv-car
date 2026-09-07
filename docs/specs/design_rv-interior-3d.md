@@ -45,12 +45,16 @@ Stated so they don't get relitigated:
 - **Slide-out is modelled deployed only.** No retract animation, despite +27 % being a headline
   claim. The stowable booth table follows the same rule, for the same reason.
 - No furniture-drag UI, no VR, no physics, no persistence, no pricing, no lead capture.
-- The exterior is massed rather than sculpted: bodies, wheels, a skirt and flat decal panels for
-  the side graphics, the entry door and the storage hatches. The hero shot's shaped cab, curved
-  over-cab moulding and window apertures are not modelled.
+- No orthographic camera. The plan stop in §8 uses the existing perspective camera from high up;
+  a second camera type would fork `scene.ts`, `camera.ts` and every resize path.
+- No rectified photograph for the body livery. The presenter stands in front of the flank in every
+  frame that shows enough of it, so rectifying bakes a person and a showroom into the paintwork.
 
-Two non-goals from the first pass were reversed on purpose and are now scope: exterior bodywork
-(§9) and cab interior detail beyond seat shells and a blocked dash (§5's `cab` module).
+Three non-goals from earlier passes were reversed on purpose and are now scope: exterior bodywork
+(§9), cab interior detail beyond seat shells and a blocked dash (§5's `cab` module), and the
+sculpted exterior — the over-cab taper, hand-drawn livery, black window frames and fittings that
+§9 now carries. The windscreen rake is the one part of that reversal still outstanding, and §14
+records why.
 
 ### Success criteria
 
@@ -393,10 +397,17 @@ whole story: check → scene → load → bind → finish → light → UI.
 | `camera.ts` | Hotspot tweens; orbit clamps for the one orbit stop | `data/vehicle` |
 | `calibrate.ts` | The `?calibrate` white-balance measurement | `scene` |
 | `scene.ts` | Renderer, tone mapping, ground, sky, frame loop, both controllers | the above |
-| `ui.ts` | Zone buttons, finish swatches | `camera`, `finishes` |
+| `labels.ts` | The plan stop's `CSS2DRenderer` overlay; text derived from `PLACEMENTS` | `data/vehicle` |
+| `ui.ts` | Zone buttons, finish swatches, the labels toggle | `camera`, `finishes` |
 
 The two `data/` files depend on nothing, which is what makes them safe to edit, safe for a future
 customisation UI to write to, and cheap to test — vitest runs with `environment: 'node'`.
+
+`labels.ts` draws a DOM layer over the canvas rather than sprites. Sprites would cost draw calls
+at a stop already carrying the exterior body, go blurry when zoomed, and need billboarding;
+`CSS2DRenderer` draws nothing on the GPU. It renders unconditionally, because it hides the DOM node
+of every child of an invisible object — gating the call on visibility leaves the last frame's
+labels frozen on screen when the toggle goes off.
 
 Dev-only query flags: `?verify` exposes `window.__rv` and writes draw calls, triangles and fps to
 `canvas.dataset`; `?calibrate` runs §7's saturation measurement.
@@ -474,12 +485,77 @@ the eye plus forward — and hands the camera to the correct controller on arriv
 
 `SceneBundle` carries both controllers; `render()` updates whichever is enabled.
 
+### The plan stop
+
+An eighth stop, `id: 'plan'`, which is the floorplan the manufacturer never published, shown
+rather than drawn. It orbits, and it sections the vehicle with a global clip plane at
+`PLAN_CUT_MM` — 1400 mm, read off the two lounge locker runs' undersides rather than written as a
+literal, so moving a locker run moves the cut. One plane there takes the ceiling, both cove
+fascias and every locker run, and leaves both mattresses whole.
+
+A clip plane rather than hiding the roof, because `batching.ts` has merged the roof panels, the
+locker carcasses and the walls into one `panel.wall` mesh before the first frame; there is no
+roof object left to hide by name. Clipping is per-fragment and does not care how geometry was
+grouped. `arrive()` sets the plane on arrival and clears it on departure, and `scene.ts` sets
+`localClippingEnabled` once.
+
+Two consequences the code has to carry:
+
+- `Hotspot.id` is `StopId = ZoneId | 'plan'`. A camera stop is not a zone: `ZoneId` feeds
+  `ZONE_VOLUME`, `Placement.zone` and the containment check, and the plan stop owns no furniture.
+- `refreshProbe` saves, clears and restores `renderer.clippingPlanes` around its capture, for the
+  same reason it hides the exterior body. See §7's probe trap.
+
+The arrival pose sits **on** the 0.05 polar floor rather than straight overhead. Directly above the
+target the view direction is parallel to the camera's up vector, so which way the plan reads is
+decided by whatever pose the tween came from; leaning 0.42 m aft pins it nose-up, the way §2 of the
+spatial brief draws every floor plan. The target is the body's centre at `Z = 1050`, not the
+habitation box's, or the cab and the alcove fall off the top of the frame.
+
+Labels over the plan come from `PLAN_LABELS`, and each one reads its dimensions and its confidence
+tag off the placement it names, so a label cannot claim a size the geometry does not have. Things
+that are not placements — the two aisle widths, the boarding door — carry an explicit anchor and
+detail string instead. A toggle beside the finish swatches shows and hides them, and it is present
+only at this stop.
+
 ## 9. Exterior
 
-An `exterior` collection built by `tools/model_exterior.py`: cab and bonnet, FRP over-cab
-moulding, body sides, deployed slide-out box, wheels and skirts. Side graphics, the entry door and
-the storage hatches are photo decals on flat panels rather than modelled relief. Roles:
-`body.paint`, `body.graphic`, `tyre`, `wheel`.
+An `exterior` collection built by `tools/model_exterior.py`: cab with bonnet, grille and mirrors,
+FRP over-cab moulding, body sides, deployed slide-out box, wheels and skirts, plus the fittings the
+walkaround stops at — roof air conditioner, front-loader washer door, awning cassette and strip,
+storage bay, control panel, rear light clusters, alloy spokes, mudflaps and grab rails. Roles:
+`body.paint`, `body.graphic`, `tyre`, `wheel`, and the shared `metal.dark`, `metal.chrome`,
+`metal.brushed`, `glass`, `led.cove` and `graphic.screen`. The sculpting pass added no new role,
+which is why it cost no draw calls: batching is global per role.
+
+### Livery, apertures and the taper
+
+The flank livery is hand-drawn artwork in `model/side-livery.svg`, rasterised by
+`tools/render_livery.mjs`, not a rectified photograph — see §1's non-goals. It carries a wordmark,
+so it cannot tile: the decal planes get an explicit box UV from `box_uv()` spanning their own
+3.4 × 0.70 m at 1.0 UV/m, and the registry divides that back to one copy with
+`repeat: [1/3.4, 1/0.70]`. Two pipeline details are load-bearing:
+
+- `KEEPS_OWN_UV` in `model_interior.py` exempts these planes from **both** the `<module>_details`
+  join and the re-unwrap in `main()`. The join runs first, so exempting only the unwrap would miss.
+- `box_uv` writes `1 - v`, because the glTF exporter flips every V on the way out. Without that,
+  a UV of 0 to `span` exports as `1 - span` to 1 and the registry's repeat turns the offset into a
+  roll.
+
+One texture cannot give both flanks legible lettering **and** the same fore-aft composition; they
+are mirror images. Lettering wins, so `box_uv` takes a `flip` and the artwork lands chevrons-aft on
+the kerb flank, matching the reference photograph.
+
+Window apertures stay **open** — four `metal.dark` strips scribed around a hole, never a filled
+rectangle, because anything filling one sits between the interior glazing and the sky and renders
+that glazing black from indoors. The one exception is the over-cab forward window, where the
+surface behind is `build_shell`'s opaque `alcove_front` panel rather than glazing, so a single
+filled panel is safe and is what bridges the taper's slope.
+
+The over-cab taper is **carved out of** `body_alcove`'s own front face, not added in front of it.
+An added mass would sit forward of the nose plane and make the vehicle 6318 mm long, and
+`check_models.mjs` would not catch it: that assertion measures the eight named bodies, and a detail
+mesh is not one. The restraint has to be deliberate, exactly as it already is for the spare wheel.
 
 ### The geometry is already determined
 
@@ -609,8 +685,10 @@ Open:
 1. Whether the alcove bed slides, and how far. Modelled extended.
 2. Wheel and tyre size, estimated from the Daily 4.5 t. Affects ride height in the exterior view
    only, nothing dimensional inside.
-3. The exterior side graphic is legible but not sharp in the hero shot. Reproduced by eye as a
-   stripe band, tagged `estimated`.
+3. ~~The exterior side graphic is legible but not sharp in the hero shot.~~ Redrawn by eye from
+   the walkthrough's kerb-flank frame as the full teal/black/orange livery with its `DACHIRV 大驰`
+   wordmark, on both flanks. Colours sampled from the frame and white-balanced against the body
+   panels; still `estimated`.
 4. The rear-wall door has no photograph behind it. Both walkaround stills show only a kerb-corner
    door, which the washroom pod has since displaced. It is modelled because the layout brief is
    explicit about a rear entry sequence. Removing it is a two-line change to `build_shell`.
@@ -621,7 +699,20 @@ Known gaps, carried deliberately:
   large, but risk 5 concerns a phone's fill rate, which no desktop measurement predicts.
 - **No bloom and no GTAO.** §7 asks for both. The cove strips still read as bright geometry rather
   than light sources.
-- **The exterior is massed rather than sculpted**, per §1's non-goals.
+- **The windscreen is not raked.** §1's massed-exterior non-goal is otherwise reversed, but this
+  one part of it is blocked by the cab interior rather than by the envelope: `build_cab`'s seats
+  reach `Z = -1925`, 23 mm inside the nose plane, and the flat front face is the only thing hiding
+  them. Raking it pulls the face to -1705 at seat height and the seats burst through the
+  windscreen. Clearing them needs a shear of 28 mm, which is no visible rake. Unblocking it means
+  moving the cab furniture aft first.
+- **Window apertures read as white panels in black frames, not as dark glazing.** The frames are
+  scribed onto a solid body, so what fills them is body paint. Closing this needs a dark pane in
+  the aperture carrying a role `EXTERIOR_ROLES` can hide, so it does not black the windows out
+  from inside: one new role, one draw call.
+- **The livery is legible only on the off flank.** The exterior stop looks at the kerb flank, where
+  the deployed slide-out box covers the decal over exactly the span the wordmark occupies.
+- **Interior geometry shows through the cab/habitation step**, the 125 mm each side where the
+  2200 mm cab meets the 2450 mm body. Predates the sculpting pass.
 - **The white-balance patches in `calibrate.ts` were mirrored with the furniture** during the rear
   service room correction rather than re-verified against a marked screenshot. Two of the three
   sample the lounge, and the lounge is the half of the cabin that swapped sides.
@@ -1173,3 +1264,70 @@ it as "scene ≤ 40, post chain excluded" or drop it in favour of the frame-rate
 - Length 5995 vs 5998 mm, recorded and not acted on: 5998 cascades into `habLength` and the 1 mm
   envelope assertion.
 - The mid-range phone frame rate has still never been measured on hardware.
+
+## Plan view and sculpted exterior (2026-09-07)
+
+Both phases of [plan_plan-view-and-exterior.md](plan_plan-view-and-exterior.md) built. The child
+spec [design_rv-plan-view-and-exterior.md](design_rv-plan-view-and-exterior.md) keeps the full
+measurements in its §7a and §7b; this entry is what changed and what the build refused.
+
+### Added
+
+- **An eighth camera stop, `plan`.** Sections the vehicle with a global clip plane at 1400 mm,
+  derived from the locker placements rather than written as a literal. §8 has the shape of it.
+- **A label overlay.** `labels.ts`, a `CSS2DRenderer` layer whose text comes from `PLACEMENTS`, so
+  no label can claim a dimension the geometry does not have. Toggled from the UI at that stop only.
+- **`StopId`.** `Hotspot.id` was `ZoneId`, and two camera tests discriminated on
+  `id !== 'exterior'` with a cast to mean "interior". Both now discriminate on `view.kind`, which
+  is what they meant.
+- **The flank livery**, hand-drawn, one uncut copy per panel, on both flanks.
+- **Black window frames**, the over-cab taper and its forward window, the cab's bonnet, grille and
+  mirrors, and the fittings the walkaround stops at.
+
+### Measured
+
+| Axis | Ceiling | Result |
+|---|---|---|
+| Triangles | 350,000 | 101,028 |
+| Bytes | 25 MB | 10.16 MB |
+| Draw calls, worst interior | 40 | **45** — 30 scene plus a fixed 15 for the post chain, unchanged |
+| Draw calls, exterior and plan | 60 | 57 at both |
+| Frame rate | 60 fps at 1080p | 120, vsync-capped, at every one of the eight stops |
+| Envelope | 5998 × 2450 × 3200 mm | exact, no violations |
+| vitest + `tsc` | — | 138 tests, clean |
+| Neutral balance | 0.08 | 0.052 / **0.084** / 0.074 |
+
+The sculpting pass added no new role, so it cost no draw calls at all; the exterior stop sits where
+it started. Interior stops each gained about 9,000 triangles, because the window frames changed
+from `body.paint` to `metal.dark` and `metal.dark` is not in `EXTERIOR_ROLES`, so they are no
+longer hidden indoors. The chair-panel saturation of 0.084 is over its ceiling and is inherited: it
+read 0.083 before this pass began.
+
+### The probe trap fired twice
+
+Once as predicted: a clip plane left set during `refreshProbe`'s capture would show the probe a
+roofless cabin open to sky. Fixed by saving, clearing and restoring `clippingPlanes` around the
+capture, and proved by measurement — a finish swap at the plan stop returns the same three hex
+values, to the byte, as the identical swap at the lounge where no plane is set.
+
+Once unpredicted, and worse. `roof_ac` was placed at `Y = 1300`, where its 980 mm shroud covers the
+700 mm roof hatch completely; the hatch is the interior's only daylight source, and the shroud's
+vent is `metal.dark`, so it capped that daylight inside the probe capture as well as outside. The
+`?calibrate` patches went to 0.105 / 0.089 / 0.078, two of three failing, before it moved aft to
+`Y = 3100`. Anything opaque added to the roof band needs checking against the hatch, and anything
+outside the cabin that is not an `EXTERIOR_ROLE` is inside the probe.
+
+### What the build refused
+
+- **The windscreen rake.** Blocked by the cab furniture, not the envelope. §14 has it.
+- **`alcove_taper` as a separate mass.** It would have sat 320 mm in front of the nose plane and
+  made the vehicle 6318 mm long, past a check that measures only the eight named bodies. Carved out
+  of `body_alcove`'s own face instead.
+- **A four-strip reveal on the raked face.** The face moves 80 mm in Y across a 400 mm window
+  against a 16 mm strip, so the frame rendered as three sides. One filled panel instead, safe only
+  there because the surface behind it is opaque.
+
+### Still open
+
+Everything in the previous entry's list, plus §14's four new gaps: the unraked windscreen, the
+white apertures, the off-flank-only livery, and the pre-existing cab/habitation step.

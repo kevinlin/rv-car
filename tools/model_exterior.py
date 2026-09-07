@@ -202,8 +202,14 @@ def build_exterior(a):
     # rather than one of the eight named bodies, so it does not enter the 3200 mm height
     # assertion — the same latitude the spare wheel has, and the same reason to be deliberate
     # about it: 180 mm is a real Dometic-class shroud, not a number chosen to fit.
-    a.box('roof_ac', (0, 1.30, 2.15 + .09), (.72, .98, .18), 'body.paint', bevel=.05)
-    a.box('roof_ac_vent', (0, 1.30, 2.15 + .18), (.52, .74, .02), 'metal.dark', bevel=.008)
+    #
+    # Mounted at y 3.10, over the service room, and NOT at 1.30. The roof hatch spans
+    # y 1.05-1.75 and is the interior's only daylight source; an AC at 1.30 covers it
+    # completely. Its vent is metal.dark, which is not an EXTERIOR_ROLE, so it stayed visible
+    # through refreshProbe's capture and capped that daylight in the bounce light as well —
+    # the ?calibrate patches read 0.105/0.089/0.078 there against 0.052/0.083/0.069 here.
+    a.box('roof_ac', (0, 3.10, 2.15 + .09), (.72, .98, .18), 'body.paint', bevel=.05)
+    a.box('roof_ac_vent', (0, 3.10, 2.15 + .18), (.52, .74, .02), 'metal.dark', bevel=.008)
 
     # Rear light clusters, inboard of the spare and clear of the boarding door.
     for side in (-1, 1):

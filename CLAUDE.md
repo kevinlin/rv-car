@@ -5,14 +5,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 A Three.js walkthrough of a 大驰 无极境500 C-type motorhome — six interior stops with free look,
-plus an exterior stop that orbits the body. Portfolio piece, not a product.
+an exterior stop that orbits the body, and a plan stop that sections the cabin at 1400 mm and
+labels it. Portfolio piece, not a product.
 
 [docs/specs/design_rv-interior-3d.md](docs/specs/design_rv-interior-3d.md) is the single design
 spec. Sections 1–14 state the design as built; the implementation record after them keeps the
-dated passes in order, including the layout readings each one replaced. Two plans built it:
-[plan_rv-interior-3d.md](docs/specs/plan_rv-interior-3d.md) for the interior, and
+dated passes in order, including the layout readings each one replaced. Three plans built it:
+[plan_rv-interior-3d.md](docs/specs/plan_rv-interior-3d.md) for the interior,
 [plan_rv-photoref-360-exterior.md](docs/specs/plan_rv-photoref-360-exterior.md) for the
-photo-referenced correction, the textures, free look and the exterior.
+photo-referenced correction, the textures, free look and the exterior, and
+[plan_plan-view-and-exterior.md](docs/specs/plan_plan-view-and-exterior.md) for the plan stop and
+the sculpted exterior. That last one has its own child spec,
+[design_rv-plan-view-and-exterior.md](docs/specs/design_rv-plan-view-and-exterior.md), whose §7a
+and §7b hold the measurements.
 
 Read the design spec before making architectural changes: it records decisions (no lightmaps,
 slide-out deployed only, AO-only bakes) that the code depends on and that should not be
@@ -96,7 +101,10 @@ node environment (vitest runs with `environment: 'node'`).
   AO only.
 - `look.ts`: yaw and pitch about a fixed eye. `OrbitControls` cannot do this — it swings the
   camera at a radius, and a full turn inside a 2.36 m cabin goes through a wall. Every interior
-  hotspot is a `look` stop; the exterior one is the only `orbit` stop.
+  hotspot is a `look` stop; the exterior and plan stops are the two `orbit` stops.
+- `labels.ts`: the plan stop's `CSS2DRenderer` overlay. Text and dimensions derive from
+  `PLACEMENTS`, so a label cannot claim a size the geometry does not have. Draws nothing on the
+  GPU, and renders unconditionally — it hides its own DOM nodes when the group is invisible.
 - `calibrate.ts`: the `?calibrate` white-balance measurement.
 
 ### Coordinate frame
@@ -130,9 +138,11 @@ because the pod takes the corner the kerb door used to occupy. The exterior stop
 which is the flat one now. Do not re-derive any of this from the stills — two passes did, and both
 were wrong; the walkthrough video is what settled it.
 
-Measured: 73,404 triangles of 350,000, 9.5 MB transferred of 25 MB, 30 draw calls at the worst
-interior stop against a ceiling of 40, and 40 at the exterior against 60. Results tables in the
-spec's implementation record.
+Measured after the plan-view and exterior pass: 101,028 triangles of 350,000, 10.16 MB of 25 MB,
+45 draw calls at the worst interior stop against a stale ceiling of 40 (30 of them scene geometry,
+the rest a fixed post-chain cost the ceiling predates), and 57 at both the exterior and plan stops
+against 60. 120 fps, vsync-capped, at all eight stops. Results tables in the spec's implementation
+record.
 
 Three conventions worth knowing before editing geometry:
 
@@ -143,6 +153,13 @@ Three conventions worth knowing before editing geometry:
   camera checks via `ENCLOSURES` in `check.ts`. Anything that wraps the cabin belongs in one of
   them; a built-in appliance cannot be a placement, because it shares the volume of the
   cabinetry it sits in.
+- **Anything opaque on the roof band must clear the roof hatch at Y 1050–1750**, and anything
+  outside the cabin whose role is not in `EXTERIOR_ROLES` is inside the environment probe's
+  capture. The roof air conditioner broke both at once: it covered the hatch, which is the
+  interior's only daylight source, and its `metal.dark` vent carried that into the bounce light.
+- **`box_uv()` in `tools/model_interior.py` writes `1 - v`** because the glTF exporter flips every
+  V on the way out, and `KEEPS_OWN_UV` exempts its objects from the `<module>_details` join as
+  well as from the re-unwrap. The join runs first, so exempting only the unwrap does nothing.
 - **Furniture geometry measures from its placement's own ends, never from fixed offsets.**
   `tools/model_furniture.py` builders receive a centre and a size; a hard-coded `y - .39` is
   correct only at the length it was tuned at. Shortening the galley run exposed four of these

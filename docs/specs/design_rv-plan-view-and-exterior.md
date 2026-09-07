@@ -1,7 +1,7 @@
 # Spec: plan view and the sculpted exterior
 
 - Date: 2026-09-07
-- Status: designed, not implemented
+- Status: implemented 2026-09-07; results in §7a and §7b
 - Parent: [design_rv-interior-3d.md](design_rv-interior-3d.md). This is a child spec in the same
   shape as `design_rv-photoref-360-exterior.md` was, and should be absorbed into the parent's
   numbered sections once it is built.
@@ -376,6 +376,108 @@ Two label pairs overlap at the default zoom — `卡座 booth` against the forwa
 viewer orbits or zooms. Anchors are placement centres by design, so the fix is either a collision
 solver or hand-placed anchors, and the second would give up the guarantee that a label cannot
 drift from the geometry it names. Left as is.
+
+## 7b. Phase B results — 2026-09-07
+
+Measured at 1920 x 1080, `?verify`, Chrome, Apple silicon, one tab. fps is vsync-capped at 120.
+
+| Stop | Draw calls | Triangles | fps |
+|---|---|---|---|
+| Lounge | 45 | 84,102 | 119.9 |
+| Alcove bed | 36 | 77,422 | 120.0 |
+| Slide-out bed | 39 | 79,782 | 120.1 |
+| Galley | 31 | 76,286 | 119.9 |
+| Washroom | 29 | 73,654 | 120.0 |
+| Cab | 30 | 69,898 | 119.9 |
+| Exterior | 57 | 100,970 | 120.0 |
+| Floorplan | 57 | 100,970 | 120.0 |
+
+`pnpm budget`: 101,028 triangles of 350,000, 10.16 MB of 25 MB. `check:models` reports the
+envelope at `width 2.450, length 5.998, height 3.200` with no violations, and its role-batched
+draw estimate unchanged at 40. The whole pass added no new role, so §4's budget of two was not
+spent. Exterior draw calls sit where they started, at 57 of 60.
+
+Interior stops each carry about 9,000 more triangles than in phase A. That is the window frames:
+§4's fix changes them from `body.paint` to `metal.dark`, and `metal.dark` is not in
+`EXTERIOR_ROLES`, so unlike the strips they replaced they are no longer hidden at interior stops.
+Zero extra draw calls, because that batch already existed. Windows are unaffected seen from
+inside, because the frames sit outside the aperture rather than across it.
+
+### The probe fix, measured again
+
+`?calibrate` at the lounge with no swap: 0.052 / 0.084 / 0.074. Swapping the wood finish **at the
+plan stop**, section plane set, then measuring at the lounge: 0.064 / 0.084 / 0.066. The control,
+the identical swap at the lounge where no plane is set, returns `#a29c98 / #c2bbb2 / #ddd7cf`,
+the same three values to the byte. §8's risk 2 stays closed.
+
+The chair panel reads 0.084 against a criterion of 0.08. It read 0.083 before this pass began and
+0.089 at its worst during it; the overrun is inherited, not introduced.
+
+### Four things the plan asked for that the build could not take as written
+
+**The dispatch loop joins before it unwraps.** `main()` in `model_interior.py` merges every
+non-placement mesh into `<module>_details` *before* the unwrap loop, so a `KEEPS_OWN_UV` name
+check at the loop alone never fires, because the object no longer exists under its own name by
+then. The exemption has to cover the join as well. §8's risk 7 was real and this is where it fired.
+
+**A UV of 0 to `span` does not survive the exporter.** Blender writes `1 - v` on the way out, so a
+UV spanning 0 to 0.70 exports as 0.30 to 1.0, and the registry's `1 / 0.70` repeat turns that
+constant offset into a roll: the artwork came out sliced with its top band wrapped to the bottom.
+`box_uv` writes `1 - dv` to pre-compensate. The related claim in §4, that this would collide with
+`check_blend.py`'s density assertion, was wrong: `TEXTURED_ROLES` does not include
+`role.body.graphic`, so that assertion never covered it. The exemption still earns its place,
+because a wordmark needs a known origin and span that `smart_project` does not give.
+
+**One texture cannot serve both flanks.** The flanks are mirror images, so a single decal can have
+legible lettering on both or the same fore-aft composition on both, never both at once. Lettering
+won. The artwork lands chevrons-aft on the kerb flank, matching the reference photograph, and
+mirrored fore-aft on the off flank, where the wordmark is the half a viewer actually reads.
+
+**The windscreen rake is blocked by the cab interior, not by the envelope.** `build_cab`'s seats
+reach `Z = -1925`, 23 mm inside the nose plane at -1948, and the flat front face is the only thing
+hiding them. Raking it pulls the face to -1705 at seat height and the seats burst 220 mm out
+through the windscreen. `docs/research/cab-rake-blocked.png` is that render. Clearing them needs
+a shear of 28 mm, which is no visible rake. So the cab gets its bonnet, grille and mirrors and
+stays a box, and the rake waits for the cab furniture to move aft. §4's four load-bearing surfaces
+were never the constraint; `check:models` passed at every shear tried.
+
+### Two things the plan would have broken
+
+**`alcove_taper` in front of the nose.** As written it sat 320 mm forward of `Z = -1948`, which
+`check_models.mjs` would not have caught, since it measures the eight named bodies and a detail mesh
+is not one, but which would have made the vehicle 6318 mm long against a published 5998 pinned to the
+C1 limit. The taper is carved out of `body_alcove`'s own front face instead. That touches none of
+the four extremes: the top-front edge moves in Y only, so the roof stays at 2150 and the flanks at
+±1225, and `body_cab` still carries the length minimum.
+
+**`roof_ac` over the roof hatch.** At `Y = 1300` the 980 mm shroud covers the 700 mm hatch
+completely, and the hatch is the interior's only daylight source. Its vent is `metal.dark`, so it
+stayed visible through `refreshProbe`'s capture and capped that daylight in the bounce light too:
+the `?calibrate` patches went to 0.105 / 0.089 / 0.078, two of three failing. Moved to `Y = 3100`,
+over the service room, they return to 0.052 / 0.084 / 0.074.
+
+### The exterior, side by side with the 0m59s frame
+
+Closer, and still not the same vehicle. What matches now: the silhouette with its tapered over-cab
+moulding, the black window frames, the roof air conditioner, the washer door, the awning and its
+strip, the skirt and the spare.
+
+What still differs:
+
+- **Glazing reads white, not dark.** The apertures are frames scribed onto a solid body, so what
+  fills them is body paint. Black frames made that *more* obvious, not less, because there is now
+  a hard edge around a white panel. §9's open question 2 asked exactly this and the answer is no:
+  frames alone do not close the gap. Closing it needs a dark pane in the aperture, which needs a
+  role that `EXTERIOR_ROLES` can hide so it does not black the windows out from inside: one new
+  role, one draw call, inside §4's budget of two. Not taken here, because §4 decided against a
+  second pane and this pass is not the place to reverse it.
+- **The cab is still a box.** See the rake above.
+- **The livery is legible only on the off flank.** The exterior stop looks at the kerb flank, and
+  the deployed slide-out box covers the decal from `Z` 150 to 2050, which is where the wordmark
+  lands. §4 chose that flank deliberately, so this is recorded rather than fixed.
+- **A pre-existing gap at the cab/habitation step.** Interior geometry shows through the 125 mm
+  step where the 2200 mm cab meets the 2450 mm body. Visible in the committed `exterior.png` from
+  before this pass, so it is not this pass's, and left alone.
 
 ## 8. Risks
 
