@@ -1,9 +1,3 @@
-Below is a ready-to-paste spatial brief for an agent that has never seen the RV.
-
-One important caveat: current listings call the vehicle **大驰无极·境500MAX**, while detailed 2026 interior coverage often shortens the name to **境500**. The confirmed layout is 后上门 entry, a rear kitchen/bathroom service zone, a sliding partition, a central side-slide lounge, and a cab-over bed. 后上门 names where the door sits along the vehicle, not which wall it is in: the passenger door is in the **kerb (right) flank forward of the rear corner**, and the rear elevation is closed apart from a ventilation window over the kitchen worktop. Published dimensions include a **2200 × 1400 mm cab-over bed** and a **2000 × 1350 mm convertible sofa bed**. ([21RV][1])
-
-I have not found an authoritative complete dimensioned floor plan for the 境500MAX. Its closely related 境280 predecessor uses essentially the same interior architecture and bed dimensions, and measures 5998 × 2450 × 3090 mm externally. Therefore, dimensions marked **ESTIMATED** below are useful for visualization or rough 3D reconstruction, but should not be treated as CAD/manufacturing dimensions. ([21RV][2])
-
 ## Agent-ready spatial description
 
 ```text
@@ -13,7 +7,7 @@ DaChi (大驰) Wuji (无极) Jing 500 MAX, 2026-generation C-class motorhome.
 PRIMARY DESIGN IDEA:
 This is NOT a conventional RV with a side entrance next to the lounge.
 
-It uses 后上门 entry: one passenger door in the KERB (RIGHT) FLANK,
+It uses REAR-SIDE ENTRY: one rear side door in the KERB (RIGHT) FLANK,
 forward of the rear corner. THE REAR ELEVATION IS CLOSED. Its only
 opening is a ventilation window over the kitchen worktop.
 
@@ -22,7 +16,7 @@ the cabin's width before you move forward at all.
 
 CORE CIRCULATION, the movement the model has to support:
 
-    door in the kerb flank, forward of the rear corner
+    rear side door, in the kerb flank forward of the rear corner
         -> step in and cross leftward, along the vehicle's WIDTH
         -> at the washroom door on the off (left) flank, turn right,
            that is, toward the front
@@ -160,11 +154,11 @@ NOT TO EXACT SCALE:
           │ ┌──────┐   ┌──────────┐│
           │ │ 冰箱 │    │高柜/微蒸烤││
           │ └──────┘   └──────────┘├────┐
-          │ ┌───────┐ ↑ ②右转向车头 │ 门 │ ← 右后侧入门
-          │ │ 卫浴   │ ← ①入门后向左├────┘   curb side
-          │ │900×940│ ┌───────────┐│
-          │ └───────┘ │工作台 / 水槽││
-          └───────────┴───────────┴┘
+          ├─────────┐ ↑ ②右转向车头 │ 门 │ ← 右后侧入门
+          │         │ ← ①入门后向左├────┘   curb side
+          │   卫浴   │ ┌───────────┐│
+          │ 900×940 │ │工作台 / 水槽││
+          └─────────┴─┴───────────┴┘
                        车尾
 ```
 
@@ -399,7 +393,7 @@ Sequence:
 ```text
 OUTSIDE, kerb side
    |
-door in the kerb flank, forward of the rear corner
+rear side door, in the kerb flank forward of the rear corner
    |
    v
 stand inside, facing the off flank:
@@ -447,7 +441,7 @@ COOKING + TOILET + SHOWER
 When the partition is closed, cooking fumes and bathroom moisture are
 isolated from the main lounge/bedroom.
 
-The 2026 sources explicitly describe this 后上门 entry, rear kitchen and
+The 2026 sources explicitly describe this rear-side entry (后上门), rear kitchen and
 bathroom, followed by a sliding partition separating the service zone
 from the lounge. Owner feedback puts that door in the kerb flank. ([Sohu][3])
 
@@ -557,7 +551,7 @@ X half-height cabinet
 It can be closed to make:
 
 ```text
-ZONE 1: kitchen + bathroom + rear entrance
+ZONE 1: kitchen + bathroom + rear side door
 
 ZONE 2: lounge + beds + cab
 ```
@@ -595,9 +589,9 @@ Think of the interior as four stacked/adjacent volumes:
 
        ^                  ^
        |                  |
-  door in the       side-slide located
-  kerb flank,        around lounge
-  near the rear
+  rear side door,   side-slide located
+  in the kerb        around lounge
+  flank
 ```
 
 So the vehicle is not simply:
@@ -609,7 +603,7 @@ cab -> lounge -> kitchen -> rear bed
 Instead it is:
 
 ```text
-rear entrance
+rear side door
      ->
 rear utility room
      ->
@@ -685,9 +679,9 @@ Use this only to understand the volumes, not as an exact perspective.
        |        sliding partition          | /
        |===================================|/
        |                                   |
-       |   WASHROOM         tall cabinet   |__  door in the kerb
-       |                                   |     flank, forward of
-       |   worktop / sink / fridge         |     the rear corner
+       |   WASHROOM         tall cabinet   |__  rear side door, in
+       |                                   |     the kerb flank,
+       |   worktop / sink / fridge         |     forward of the corner
        |___________________________________|
            rear wall closed, ventilation
            window over the worktop
@@ -724,7 +718,7 @@ Owner feedback fixes the following, and they carry the same authority as
 those two bed sizes:
 
 ```
-passenger door      kerb (right) flank, forward of the rear corner
+rear side door      kerb (right) flank, forward of the rear corner
 rear elevation      closed, one ventilation window over the worktop
 washroom pod        off (left) flank, against the partition
 worktop run         backs onto the rear wall, crosses the centreline,
@@ -743,9 +737,9 @@ right.
 
 If the receiving agent does not need all the detail above, this is the compact description I would use:
 
-> Model a roughly six-metre C-class Iveco motorhome with a single side slide-out in the central lounge and one passenger door in the kerb (right) flank, forward of the rear corner. The rear elevation is closed; its only opening is a ventilation window over the kitchen worktop. Unlike a conventional RV, the rear is a self-contained utility zone containing the kitchen and enclosed shower/toilet room. Immediately forward of that zone is a full-width sliding partition that can isolate cooking, toilet and shower activity from the main living space. Forward of the partition is a large lounge. One side has three individual adjustable automotive-style seats and a folding wall table; the opposite side has a roughly 2.0 m long sofa that pulls out into a confirmed 2000 × 1350 mm bed. The slide-out expands this lounge laterally when parked. Continue forward through an open connection into the Iveco driver cab. Above the cab is the permanent main double bed, confirmed at 2200 mm across the vehicle × 1400 mm front-to-back. Treat the cab-over bed as an elevated mezzanine volume. Use an approximately 6.0 m × 2.45 m × 3.1-3.2 m outer envelope only as a visualization scaffold, not as verified 境500MAX engineering geometry. The strongest visual concept is the sequence: **kerb-flank rear door → cross the cabin's width leftward → right turn at the washroom door, toward the front → closable sliding partition → expandable living room → driver cab, with the main bedroom stacked above the cab.**
+> Model a roughly six-metre C-class Iveco motorhome with a single side slide-out in the central lounge and one rear side door in the kerb (right) flank, forward of the rear corner. The rear elevation is closed; its only opening is a ventilation window over the kitchen worktop. Unlike a conventional RV, the rear is a self-contained utility zone containing the kitchen and enclosed shower/toilet room. Immediately forward of that zone is a full-width sliding partition that can isolate cooking, toilet and shower activity from the main living space. Forward of the partition is a large lounge. One side has three individual adjustable automotive-style seats and a folding wall table; the opposite side has a roughly 2.0 m long sofa that pulls out into a confirmed 2000 × 1350 mm bed. The slide-out expands this lounge laterally when parked. Continue forward through an open connection into the Iveco driver cab. Above the cab is the permanent main double bed, confirmed at 2200 mm across the vehicle × 1400 mm front-to-back. Treat the cab-over bed as an elevated mezzanine volume. Use an approximately 6.0 m × 2.45 m × 3.1-3.2 m outer envelope only as a visualization scaffold, not as verified 境500MAX engineering geometry. The strongest visual concept is the sequence: **rear side door → cross the cabin's width leftward → right turn at the washroom door, toward the front → closable sliding partition → expandable living room → driver cab, with the main bedroom stacked above the cab.**
 
-The predecessor 境280 is particularly useful as a visual reference because 21世纪房车 documents essentially the same **kerb-flank rear entry + isolated rear kitchen/bath + three-seat lounge + 2000 × 1350 sofa bed + 2200 × 1400 cab-over bed** architecture, while the 2026 境500 coverage confirms that this arrangement carries over to the Iveco-based model. :contentReference[oaicite:4]{index=4}
+The predecessor 境280 is particularly useful as a visual reference because 21世纪房车 documents essentially the same **rear-side entry + isolated rear kitchen/bath + three-seat lounge + 2000 × 1350 sofa bed + 2200 × 1400 cab-over bed** architecture, while the 2026 境500 coverage confirms that this arrangement carries over to the Iveco-based model. :contentReference[oaicite:4]{index=4}
 ```
 
 [1]: https://www.21rv.com/auto/brand/359?utm_source=chatgpt.com "大驰房车 - 官网|车型总览|经销商|预约试驾"
