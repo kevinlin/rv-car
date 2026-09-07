@@ -139,6 +139,34 @@ def normalise_uv_density(obj, target=TEXEL_DENSITY):
         loop.uv = (loop.uv.x * factor, loop.uv.y * factor)
 
 
+# Objects that write their own UV and must not be re-unwrapped, nor swept into the
+# `<module>_details` join that runs before the unwrap. Currently only the livery decals: a
+# wordmark cannot tile, so it needs one copy across a known span with a known origin, and
+# smart_project gives neither. The join matters as much as the unwrap — an exempt object that
+# has already been merged into a metre-scale catch-all no longer exists under its own name.
+KEEPS_OWN_UV = ('body_graphic',)
+
+
+def box_uv(obj, span):
+    """Planar UV across the object's dominant plane, from 0 to `span` UV units.
+
+    UVMap runs at TEXEL_DENSITY UV/m everywhere else, so `span` must equal the object's size in
+    metres on the two axes it spans. The registry's `repeat` then divides it back to one copy.
+    """
+    mesh = obj.data
+    layer = mesh.uv_layers['UVMap'] if mesh.uv_layers else mesh.uv_layers.new(name='UVMap')
+    size = list(obj.dimensions)
+    thin = size.index(min(size))
+    u, v = [i for i in range(3) if i != thin]
+    lo = [min(vert.co[i] for vert in mesh.vertices) for i in range(3)]
+    for poly in mesh.polygons:
+        for loop in poly.loop_indices:
+            co = mesh.vertices[mesh.loops[loop].vertex_index].co
+            du = (co[u] - lo[u]) / size[u] * span[0] if size[u] else 0
+            dv = (co[v] - lo[v]) / size[v] * span[1] if size[v] else 0
+            layer.data[loop].uv = (du, dv)
+
+
 def group(name, parts):
     bpy.ops.object.select_all(action='DESELECT')
     for p in parts:
@@ -360,7 +388,8 @@ def main():
     else:
         import model_furniture
         getattr(model_furniture,'build_'+module)(sys.modules[__name__])
-    extras = [o for o in COLLECTION.objects if o.type == 'MESH' and o.name not in PLACEMENTS]
+    extras = [o for o in COLLECTION.objects if o.type == 'MESH' and o.name not in PLACEMENTS
+              and not o.name.startswith(KEEPS_OWN_UV)]
     if extras:
         group(module+'_details', extras)
     bpy.context.view_layer.update()
@@ -369,6 +398,8 @@ def main():
             assert bpy.data.objects.get(p['id']), p['id']
     for obj in COLLECTION.objects:
         if obj.type != 'MESH':
+            continue
+        if obj.name.startswith(KEEPS_OWN_UV):
             continue
         bpy.ops.object.select_all(action='DESELECT')
         obj.select_set(True)
