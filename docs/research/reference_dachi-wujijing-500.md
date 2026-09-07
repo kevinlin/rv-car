@@ -12,8 +12,10 @@ product page or a named secondary source. Anything I inferred is marked **inferr
 | S2 | https://www.dachirv.cn/h-col-104.html — Dachi news index | Sibling model dimensions, 境280 equipment list | Primary |
 | S3 | https://www.163.com/dy/article/KV8B2GQA0527AES8.html — 21世纪房车 review of 无极·御500, 2026-06-12 | Chassis, dimensions, bed sizes, systems, regulatory framing | Secondary, closest documented sibling |
 | S4 | https://www.21rv.com/news/article/7c41a93f-... — 无极境280 review | Zone layout of the 境 family | Secondary |
+| S5 | https://www.douyin.com/video/7627690532785694434 — 18-minute manufacturer walkthrough, 新款房车发布：大驰境500，后上门后置厨卫车型做到极致 | Handedness of every zone, service-room arrangement, booth layout, fittings | Primary. The only moving-camera source; overrides the stills where they disagree. |
 
-Local copies: [reference/](reference/) (brochure crops + the raw scrape of S1).
+Local copies: [reference/](reference/) (brochure crops + the raw scrape of S1) and
+[walkthrough/](walkthrough/) (S5 stills, catalogued frame by frame in its README).
 
 ## Model identity
 
