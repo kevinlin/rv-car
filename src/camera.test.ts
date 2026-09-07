@@ -72,17 +72,17 @@ describe('HOTSPOTS', () => {
   });
 
   it('gives every interior stop free look', () => {
-    // The whole point of this change: no interior stop may clamp azimuth, because orbiting
-    // a 2.36 m cabin at 1.2 m radius drives the camera through the walls.
-    // Cast: ZoneId does not carry 'exterior' until the exterior placements land, and this
-    // must keep excluding the exterior stop once it does.
-    const interior = HOTSPOTS.filter((h) => (h.id as string) !== 'exterior');
-    expect(interior.every((h) => h.view.kind === 'look')).toBe(true);
+    // No stop inside the cabin may clamp azimuth: orbiting a 2.36 m cabin at 1.2 m radius
+    // drives the camera through the walls. Discriminating on view.kind rather than on
+    // id !== 'exterior' is what lets a second outside-the-cabin stop exist.
+    const inside = HOTSPOTS.filter((h) => h.view.kind === 'look');
+    expect(inside.length).toBeGreaterThanOrEqual(6);
+    expect(inside.every((h) => h.view.kind === 'look')).toBe(true);
   });
 
   it('places every interior camera inside the vehicle, roughly at eye height', () => {
     for (const h of HOTSPOTS) {
-      if (h.id === 'exterior') continue; // stands outside the body by design
+      if (h.view.kind !== 'look') continue; // outside stops stand where they must
       const [x, y, z] = h.camera.position;
       expect(Math.abs(x!)).toBeLessThan(2.0);
       expect(y!).toBeGreaterThan(0.3);

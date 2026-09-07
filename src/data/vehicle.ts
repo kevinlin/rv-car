@@ -4,6 +4,12 @@ export type ZoneId =
   | 'shell' | 'cab' | 'alcove' | 'dinette' | 'sofa' | 'storage' | 'galley' | 'washroom'
   | 'exterior';
 
+/**
+ * A camera stop is not a zone. ZoneId means "a zone furniture belongs to" — it feeds
+ * ZONE_VOLUME, Placement.zone and the containment check — and the plan stop owns no furniture.
+ */
+export type StopId = ZoneId | 'plan';
+
 export type VolumeId = 'habitation' | 'slideout' | 'alcove' | 'cab';
 
 /** Axis-aligned box in millimetres, in the frame defined by the plan's Global Constraints. */
@@ -175,7 +181,7 @@ export const aabb = (p: Placement) => ({
 });
 
 export interface Hotspot {
-  readonly id: ZoneId;
+  readonly id: StopId;
   readonly label: string;
   /** Metres, in the runtime frame. In look mode `target` sets the initial heading. */
   readonly camera: {

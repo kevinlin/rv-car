@@ -1,4 +1,4 @@
-import { HOTSPOTS, type ZoneId } from './data/vehicle';
+import { HOTSPOTS, type StopId } from './data/vehicle';
 import { DEFAULT_REGISTRY, type Role } from './data/finishes';
 
 /**
@@ -9,7 +9,7 @@ import { DEFAULT_REGISTRY, type Role } from './data/finishes';
 export const WOOD_ROLES: Role[] = ['wood.cabinet', 'wood.trim', 'panel.locker'];
 
 export interface UiOptions {
-  onHotspot: (id: ZoneId) => void;
+  onHotspot: (id: StopId) => void;
   onWood: (variantId: string) => void;
 }
 
