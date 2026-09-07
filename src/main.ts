@@ -108,7 +108,13 @@ if (import.meta.env.DEV && new URLSearchParams(location.search).has('verify')) {
   Object.assign(window, { __rv: bundle, __refreshProbe: refreshProbe });
   canvas.dataset.loadedModules = loaded.join(',');
   canvas.dataset.boundPlacements = String(bindPlacements(vehicle).size);
+  // The composer calls renderer.render once per pass, and each call resets the counters — so
+  // without this the readout is whatever the last full-screen quad drew, which is 1. Reset once
+  // per frame instead and the number covers the scene plus the post chain, which is what the
+  // budget is actually spending.
+  bundle.renderer.info.autoReset = false;
   bundle.renderer.setAnimationLoop(() => {
+    bundle.renderer.info.reset();
     bundle.render();
     canvas.dataset.drawCalls = String(bundle.renderer.info.render.calls);
     canvas.dataset.triangles = String(bundle.renderer.info.render.triangles);
