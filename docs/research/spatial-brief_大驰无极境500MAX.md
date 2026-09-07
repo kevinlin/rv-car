@@ -165,14 +165,25 @@ NOT TO EXACT SCALE:
 ````
 
 The handing of this rear zone is fixed by owner feedback rather than
-inferred: the door is in the kerb flank, the washroom pod sits on the
-off flank against the partition, the worktop run backs onto the rear
-wall and crosses the centreline with the fridge at its off end, and the
-tall combi-oven cabinet stands on the kerb flank forward of the door.
+inferred: the door is in the kerb flank, the worktop run backs onto the
+rear wall and crosses the centreline, the fridge column stands on the
+off flank hard against the partition, the washroom pod fills the rear-off
+corner aft of it, and the tall combi-oven cabinet stands on the kerb
+flank forward of the door.
+
+Read the plan above literally on that last point. An earlier revision of
+this paragraph put the pod against the partition and the fridge at the
+worktop's off end, contradicting the drawing directly above it, and the
+3D model followed the prose rather than the picture until 2026-09-07. The
+2026-05-18 搜狐汽车 interior set and the walkthrough at 6m56s and 7m04s
+both confirm the drawing: the fridge is opened from the lounge side of
+the partition doorway with a booth seat over the presenter's shoulder,
+and the pod is entered from the aisle beside the worktop --
+"就是把整个夹角利用起来".
 
 Exact cabinet sizes are still undocumented; use the ESTIMATED values
-below for those. Take the handing from the list above rather than
-re-deriving it from photographs.
+below for those. Take the handing from the plan and the list above rather
+than re-deriving it from photographs.
 
 ---
 
@@ -397,10 +408,14 @@ rear side door, in the kerb flank forward of the rear corner
    |
    v
 stand inside, facing the off flank:
-   left hand, aft   -> worktop, basin, fridge, along the rear wall
+   left hand, aft   -> worktop and basin along the rear wall, under the
+                       ventilation window, extractor hood above
    right hand, fwd  -> tall cabinet with the 3-in-1 combi oven,
                        against the kerb flank
-   ahead            -> washroom pod, off flank, against the partition
+   ahead            -> washroom pod, off flank, in the REAR corner,
+                       opening inboard beside the worktop's off end
+   beyond it, fwd   -> the fridge column, off flank, hard against the
+                       partition
    |
    v
 cross the width to the washroom door, turn right toward the front
@@ -679,9 +694,9 @@ Use this only to understand the volumes, not as an exact perspective.
        |        sliding partition          | /
        |===================================|/
        |                                   |
-       |   WASHROOM         tall cabinet   |__  rear side door, in
+       |   fridge           tall cabinet   |__  rear side door, in
        |                                   |     the kerb flank,
-       |   worktop / sink / fridge         |     forward of the corner
+       |   WASHROOM   worktop / sink       |     forward of the corner
        |___________________________________|
            rear wall closed, ventilation
            window over the worktop
@@ -720,9 +735,11 @@ those two bed sizes:
 ```
 rear side door      kerb (right) flank, forward of the rear corner
 rear elevation      closed, one ventilation window over the worktop
-washroom pod        off (left) flank, against the partition
+washroom pod        off (left) flank, in the REAR corner
+fridge column       off (left) flank, hard against the partition,
+                    forward of the pod, opened from the lounge side
 worktop run         backs onto the rear wall, crosses the centreline,
-                    fridge at its off end
+                    starting at the pod's inboard face
 combi-oven cabinet  kerb flank, forward of the door
 entry path          in, leftward across the width, right turn at the
                     washroom door, through the partition, lounge

@@ -62,7 +62,8 @@ describe('handedness', () => {
   // and vent on the flank aft of it. The room is arranged about the path leading in from that
   // door: worktop and basin on your left as you enter, which is the run backing onto the rear
   // wall; the 3-in-1 oven shelf on your right, against the kerb flank forward of the door; the
-  // washroom pod ahead, on the off flank against the partition.
+  // washroom pod ahead, in the REAR-OFF corner, with the fridge column filling the off flank
+  // between it and the partition.
   //
   // Evidence in docs/research/walkthrough/ and docs/research/spatial-brief_*.md.
   const box = (id: string) => aabb(PLACEMENTS.find((p) => p.id === id)!);
@@ -104,20 +105,27 @@ describe('handedness', () => {
     expect(oven.min[0]).toBeGreaterThanOrEqual(380);
   });
 
-  it('stands the pod on the off flank against the partition, and the fridge beside the run', () => {
+  it('corners the pod at the rear and fills the off flank forward of it with the fridge', () => {
+    // The order along the off flank, partition to rear wall, is fridge then pod then nothing.
+    // Reversing the two is the reading this replaced, and it is the one thing about the service
+    // room the stills settle on their own: the pod is entered from the aisle beside the worktop,
+    // and the fridge is opened from the lounge side of the partition doorway.
     const pod = box('washroom_pod');
-    expect(pod.max[0]).toBeLessThanOrEqual(0);
-    expect(pod.min[2]).toBeGreaterThanOrEqual(box('partition').max[2]!);
     const fridge = box('fridge');
-    expect(fridge.max[0]).toBeLessThanOrEqual(0);
-    expect(fridge.min[2]).toBe(box('galley_run').min[2]);
-    expect(fridge.max[0]).toBe(box('galley_run').min[0]);
+    const partition = box('partition');
+    for (const b of [pod, fridge]) expect(b.max[0]).toBeLessThanOrEqual(0);
+    expect(fridge.min[2]).toBe(partition.max[2]);
+    expect(pod.min[2]).toBe(fridge.max[2]);
+    expect(pod.max[2]).toBe(box('wall_rear').min[2]);
   });
 
   it('leaves a walkable path in from the door and on to the partition doorway', () => {
     // Straight in from the door, between the oven shelf and the worktop.
     expect(box('galley_run').min[2]! - box('galley_oven').max[2]!).toBeGreaterThanOrEqual(400);
-    // And on forward, between the pod and the shelf, to the doorway.
-    expect(box('galley_oven').min[0]! - box('washroom_pod').max[0]!).toBeGreaterThanOrEqual(400);
+    // And on forward, between the fridge and the shelf, to the doorway.
+    expect(box('galley_oven').min[0]! - box('fridge').max[0]!).toBeGreaterThanOrEqual(400);
+    // The pod's opening faces the aisle beside the worktop's off end, so that gap is the one
+    // an adult turns into. Measured from the pod's inboard face to the kerb wall.
+    expect(VOLUMES.habitation.max[0] - box('washroom_pod').max[0]!).toBeGreaterThanOrEqual(400);
   });
 });

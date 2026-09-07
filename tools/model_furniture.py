@@ -169,7 +169,7 @@ def build_galley(a):
     back, front = y + depth / 2, y - depth / 2      # rear wall face, aisle face
     to_aisle = lambda face, dist: face - dist
     to_wall = lambda face, dist: face + dist
-    x0, x1 = x - run_len / 2, x + run_len / 2       # off end, beside the fridge; kerb end
+    x0, x1 = x - run_len / 2, x + run_len / 2       # off end, beside the pod; kerb end
     parts = [a.box('galley base floor', (x, y, .045), (run_len, depth, .09), 'wood.cabinet', .016),
              a.box('galley back panel', (x, to_aisle(back, .015), .45), (run_len, .03, .80),
                    'wood.cabinet', .008)]
@@ -194,7 +194,7 @@ def build_galley(a):
     for j in range(4):
         cx = x0 + (j + .5) * bay
         if j == 0:
-            # The bay beside the fridge holds the electrical gear: the 5 kg washer is outside,
+            # The bay beside the pod holds the electrical gear: the 5 kg washer is outside,
             # in its hatch on the kerb flank, so this is a service cabinet with a systems panel
             # on its door rather than an appliance fascia.
             parts.append(a.box('electrical_cabinet', (cx, to_wall(front, .036), .43), (bay - .02, .028, .77), 'wood.cabinet', .012))
@@ -213,9 +213,12 @@ def build_galley(a):
     parts.append(a.tube('black gooseneck', [(sink_x, to_aisle(back, r), zz) for r, zz in
                                             [(.11, .90), (.11, 1.11), (.12, 1.17), (.17, 1.20),
                                              (.25, 1.20), (.30, 1.17), (.30, 1.12)]], .012, 'metal.dark'))
-    # Black pegboard accessory wall, on the stretch of backsplash beside the fridge. The rear
-    # window covers x -0.34 to 0.52, so this is the only clear run above the counter.
-    board_x0, board_x1 = x0 + .03, x0 + .33
+    # Black pegboard accessory wall. The rear window's aperture is the constraint: it spans
+    # x -0.36 to 0.54, and with the pod now taking the rear-off corner the run starts at -0.28,
+    # so the only clear stretch of backsplash left is the kerb end. Measured from x1 rather than
+    # x0 for that reason -- anchored to the off end it would hang across the glazing.
+    board_x1 = x1 - .03
+    board_x0 = board_x1 - .30
     parts.append(a.box('galley_pegboard', ((board_x0 + board_x1) / 2, to_aisle(back, .014), 1.125),
                        (board_x1 - board_x0, .022, .42), 'metal.dark', .004))
     for level in (.98, 1.05, 1.12, 1.19, 1.26):
@@ -349,7 +352,7 @@ def build_softgoods(a):
 def build_washroom(a):
     """Corner vanity, mirror cabinet, ribbed shell, recessed niches and a drawn curtain.
 
-    The pod is a 900 x 1000 mm moulding in the rear kerb corner. Which flank it hugs follows from
+    The pod is a 900 x 940 mm moulding in the rear corner, off flank. Which flank it hugs follows from
     which side of the centreline it sits on, so `side` is derived rather than written down: every
     position here is measured from the pod's outer wall or its inboard opening, and mirroring the
     pod across the cabin is a data change. Absolute metres are what stranded the basin, the

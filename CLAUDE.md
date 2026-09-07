@@ -150,18 +150,25 @@ door, not as two runs down opposite flanks. It is a rear side door in the sense 
 means it: in the **kerb flank** forward of the rear corner, not in the rear wall. The walkaround opens it
 there, with the grab rail, keypad and vent on the 390 mm of flank left aft of it. Standing in
 that door looking in, your left hand is aft: **left** is the worktop and basin, a run backing onto
-the rear wall and crossing the centreline with the fridge at its off end; **right** is a tall
-shelf carrying the 3-in-1 combi oven, against the kerb flank forward of the door; **ahead** is the
-900 × 940 washroom pod, on the off flank against the partition. Because that run crosses the
-centreline, `check.ts` stops sampling the aisle at the door. Aft of it there is no corridor to
-protect, only a dead-end galley.
+the rear wall and crossing the centreline under the ventilation window; **right** is a tall shelf
+carrying the 3-in-1 combi oven, against the kerb flank forward of the door; **ahead** is the
+900 × 940 washroom pod, in the **rear-off corner**, opening inboard beside the worktop's off end.
+The off flank between the partition and the pod is the 148 L fridge column, opened from the lounge
+side of the partition doorway. Because that run crosses the centreline, `check.ts` stops sampling
+the aisle at the door. Aft of it there is no corridor to protect, only a dead-end galley.
+
+The pod and the fridge were the other way round until 2026-09-07: pod at the partition, fridge in
+the corner. The spatial brief's ASCII plan always drew it correctly; a paragraph added underneath
+that plan contradicted it, and the model followed the paragraph. Both are fixed, and
+`src/check.test.ts` now pins the order along the off flank as well as the flank assignment.
 
 The lounge and the service room are handed independently, which is what every wrong reading got
 wrong by assuming one chain of inference ran the length of the vehicle. The exterior stop looks at
 the **kerb** flank, the one the slide-out box and the door are on. Do not re-derive any of this
 from the stills — four passes did, and all four were wrong; the walkthrough video settles the
-lounge, `docs/research/spatial-brief_大驰无极境500MAX.md` settles the service room, and
-`src/check.test.ts` pins both.
+lounge, `docs/research/spatial-brief_大驰无极境500MAX.md` and the stills catalogued in
+[docs/research/walkthrough/README.md](docs/research/walkthrough/README.md) settle the service
+room, and `src/check.test.ts` pins both.
 
 Measured after the plan-view and exterior pass: 101,028 triangles of 350,000, 10.16 MB of 25 MB,
 45 draw calls at the worst interior stop against a stale ceiling of 40 (30 of them scene geometry,

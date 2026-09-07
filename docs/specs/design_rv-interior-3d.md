@@ -1517,3 +1517,97 @@ of the walking path at 400 mm.
   marked screenshot rather than a guess.
 - The alcove moulding, the chevron LED bars and the projector are all still as the previous
   entry's "found and not fixed" list leaves them.
+
+---
+
+## The pod and the fridge changed places — 2026-09-07
+
+Evidence: the 2026-05-18 搜狐汽车 review of the 境500
+([sohu.com/a/1024282184_99893844](https://www.sohu.com/a/1024282184_99893844)), whose twelve
+interior photographs are shot wider and brighter than any video frame, re-read against the
+walkthrough. Six new stills are catalogued in
+[../research/walkthrough/README.md](../research/walkthrough/README.md).
+
+### The brief's plan and the brief's prose disagreed, and the model followed the prose
+
+`docs/research/spatial-brief_大驰无极境500MAX.md` §2 draws the service room as an ASCII plan:
+`冰箱` under the partition line on the off flank, `卫浴 900×940` below it toward the rear, the
+worktop along the rear beside the pod, the combi-oven cabinet on the kerb flank. That drawing is
+right. The paragraph immediately beneath it, added later under "fixed by owner feedback", says
+the opposite: pod against the partition, fridge at the worktop's off end. The previous pass
+took the paragraph, and `check.test.ts` then pinned the wrong reading in place.
+
+Three frames settle it, and none of them needs a handedness argument:
+
+- **6m56s.** "这个位置是房车专用冰箱 … 弗洛斯特的啊", the fridge opened with a booth seat over the
+  presenter's shoulder and the partition leaf beside it. It is reached from the lounge side of
+  the doorway, so it is at the partition, not in the rear corner 1.5 m further aft.
+- **7m04s.** "就是把整个夹角利用起来" — using the whole corner. The camera faces the off flank:
+  hood, window and black sink on the left, the pod's opening straight ahead, panelling forward of
+  it. The pod is the corner it means.
+- **`service-room-high-angle-sohu.jpg`.** The whole room in one frame. The white moulded door in
+  the middle of it reads as a washroom door until you notice the louvred panel, the grab handle
+  and the door bin: it is the boarding door, open, in the kerb flank. That misreading is what let
+  the pod look like it sat mid-room.
+
+### What moved
+
+| Placement | Was | Now |
+|---|---|---|
+| `fridge` | X −1180…−580, Z 3500…4050 | X −1180…−580, Z **2550…3110** |
+| `washroom_pod` | Z 2550…3490 | Z **3110…4050**, hard to the rear wall |
+| `galley_run` / `galley_overhead` | X −580…880 | X **−280**…880, clearing the pod |
+| `washroom` stop | `[0.35, 1.6, 3.15]` → `[-0.85, 1.05, 3.0]` | `[0.35, 1.55, 3.06]` → `[-0.78, 1.10, 3.62]` |
+
+The off flank aft of the partition is now used end to end and in one order: 2550 + 560 + 940 =
+4050. Neither depth is a free constant, so a future move of either shows up as an arithmetic
+error rather than as a gap.
+
+### Four stranded constants, one of which was already stranded
+
+Moving the pod broke three checks that had the old position written flat, and each was rewritten
+to derive rather than to be re-typed:
+
+- `check_blend.py`'s two bowl-normal stations for the basin and the toilet pan. They now read the
+  pod's own bounds and apply `build_washroom`'s offsets.
+- `check_blend.py`'s roller-blind window ray, likewise.
+- `build_shell`'s off-wall aperture and `washroom_window`, which had `3.12/3.37/3.245` written in
+  while `build_washroom` cut the pod's matching aperture at `pod centre + .10 … + .35`. Both ends
+  now come off the placement.
+
+The fourth was already wrong before this pass: `decal_galley_wall` sat at `(-0.575, 2.80, 1.30)`,
+which is the fridge's inboard face at a Y the fridge had not occupied since it moved to the rear
+wall. It has been hanging in mid-air, and moving the fridge to the partition put it back on the
+door it was drawn for. Nothing was edited to fix it.
+
+`build_galley`'s pegboard needed a real change rather than a derivation. It was anchored to the
+run's off end, which was clear backsplash at X −580; with the run starting at −280 the rear
+window's aperture (X −360…540) is directly behind it. It anchors to the kerb end now, which is
+the only clear stretch left.
+
+### Verification
+
+`pnpm check` green, 137 tests. `check:blend` passes with all three bowls upward and all seven
+aperture rays reaching `role.glass`. `check:models` reports no violations and holds the
+role-batched draw estimate at 40. `pnpm budget`: **106,140 triangles of 350,000, 11.01 MB of
+25 MB** — up from 101,028 and 10.16 MB, which is the galley run and the pod being re-meshed at
+their new sizes, not new geometry.
+
+The layout guard in `check.test.ts` was rewritten again. It now pins the order along the off
+flank as well as the flank assignment: fridge touches the partition, pod touches the fridge, pod
+touches the rear wall. Stated as three touches rather than three coordinates, so the room can be
+re-proportioned without the test needing new numbers.
+
+### Left over
+
+- **The off flank carries two windows the exterior photographs do not show.** `service_window` at
+  Z 2250 and `washroom_window` at the pod's centre both survive from an earlier reading. Both
+  studio flank shots in the sohu set show the off flank blank aft of the lounge window. Not
+  touched here: it is a shell change, not a service-room one, and the pod's window is what
+  `check_blend.py`'s seventh aperture ray proves open.
+- **`PLAN_LABELS`' aft aisle still says "800 mm derived".** The gap it names is the pod's inboard
+  face to the kerb wall, which is 1430 mm and was 1430 mm before this pass too. Hand-written
+  `detail` strings are exempt from the derive-from-geometry rule by design, but this one is
+  simply wrong.
+- `calibrate.ts`'s patches have now moved for the third pass running and still have not been
+  re-verified against a marked screenshot.

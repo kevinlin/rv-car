@@ -316,8 +316,12 @@ def build_shell():
     # that lights the aisle beside the washroom pod; the kerb flank takes the slide-out aperture
     # and, aft of it, the galley window over the counter — the one the exterior walkaround
     # looks through.
+    # The pod's own aperture is cut at pod centre +.10 to +.35 in build_washroom, so the shell's
+    # has to be read off the same placement or the two drift apart the moment the pod moves --
+    # which it just did, from the partition to the rear corner.
+    (_wx, wpy, _wz), _wsz = placement('washroom_pod')
     wall('wall_off',*placement('wall_off'),
-         [(.32,.9,1.76,1.36),(1.975,.93,2.525,1.35),(3.12,1.28,3.37,1.62)])
+         [(.32,.9,1.76,1.36),(1.975,.93,2.525,1.35),(wpy+.10,1.28,wpy+.35,1.62)])
     # The entry door is an opening in the wall, so it belongs to the shell alongside the
     # windows rather than to a zone. As a furniture placement it overlapped the wardrobe and
     # the galley at once, which is what the overlap check exists to forbid.
@@ -358,7 +362,7 @@ def build_shell():
     window('service_window',-1.165,2.25,1.14,.55,.42)
     # High and small, between two of the pod's ribs, matching the aperture cut through the
     # moulding in build_washroom. The video gives it a roller blind.
-    window('washroom_window',-1.165,3.245,1.45,.50,.34)
+    window('washroom_window',-1.165,wpy+.225,1.45,.50,.34)
     # Over the counter, which is where the reference puts the galley window.
     window('galley_window',1.165,3.22,1.14,.64,.42)
     for x in [-1.125,1.125]:

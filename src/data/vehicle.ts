@@ -135,9 +135,10 @@ export const PLACEMENTS: readonly Placement[] = [
   { id: 'lockers_kerb',  zone: 'sofa', origin: [e(1280), e(1400), e(150)],size: [e(450), e(450), e(1900)], movable: false },
 
   // --- storage. The wardrobe is the only thing left in the band forward of the partition. The
-  // 148 L fridge column stands in the SERVICE room, at the off end of the rear run, beside the
-  // worktop rather than in the lounge.
-  { id: 'fridge',   zone: 'storage', origin: [e(-1180), e(0), e(3500)], size: [e(600), e(1800), e(550)], movable: false },
+  // 148 L fridge column stands in the SERVICE room, on the off flank hard against the partition,
+  // where the walkthrough opens it (6m56s, 弗洛斯特) with a booth seat over its shoulder. The off
+  // end of the rear run, where it used to sit, is where the pod actually goes.
+  { id: 'fridge',   zone: 'storage', origin: [e(-1180), e(0), e(2550)], size: [e(600), e(1800), e(560)], movable: false },
   // 250 mm deep, which is the storage band the design spec states (Z 2050-2300); at 400 it
   // also filled the floor in front of the entry door.
   { id: 'wardrobe', zone: 'storage', origin: [e(600), e(0), e(2100)],   size: [e(550), e(1900), e(250)], movable: false },
@@ -152,19 +153,28 @@ export const PLACEMENTS: readonly Placement[] = [
   //
   // Standing in that door looking in, your left hand is aft and your right hand is forward. So:
   //   left  — the worktop and basin, a run backing onto the REAR wall and crossing the
-  //           centreline, with the fridge at its off end and the overheads above it;
+  //           centreline, under the rear window, with the overheads and the hood above it;
   //   right — a tall shelf carrying the 3-in-1 combi oven, against the kerb flank forward of
   //           the door;
-  //   ahead — the washroom pod, hard against the partition on the off flank.
-  // The clear path between the oven shelf's aft face and the worktop's front face is 540 mm,
-  // and the route on to the partition doorway passes between the pod and the shelf at 680 mm.
+  //   ahead — the washroom pod, in the REAR-OFF corner, its opening facing inboard so it sits
+  //           immediately beside the worktop's off end.
+  //
+  // The off flank aft of the partition is used end to end and in this order: fridge column,
+  // then pod, then the rear wall. 2550 + 560 + 940 = 4050, so neither depth is a free constant.
+  // The pod sat against the partition and the fridge in the rear corner until the sohu 2026
+  // interior set and the walkthrough's 6m56s-7m00s pan settled it the other way round: entering
+  // the door and turning to the off flank puts the basin and the hood on your LEFT with the pod
+  // straight ahead in the corner, and the fridge is opened from the lounge side of the room.
+  //
+  // The clear path between the oven shelf's aft face and the worktop's front face is 545 mm,
+  // and the route on to the partition doorway passes between the fridge and the shelf.
   //
   // The rear run crossing the centreline is why check.ts stops sampling the aisle at the door:
   // aft of the boarding door there is no through-corridor to protect, only a dead-end galley.
-  { id: 'galley_run',      zone: 'galley', origin: [e(-580), e(0), e(3500)],    size: [e(1460), e(900), e(550)], movable: false },
-  { id: 'galley_overhead', zone: 'galley', origin: [e(-580), e(1350), e(3500)], size: [e(1460), e(450), e(550)], movable: false },
+  { id: 'galley_run',      zone: 'galley', origin: [e(-280), e(0), e(3500)],    size: [e(1160), e(900), e(550)], movable: false },
+  { id: 'galley_overhead', zone: 'galley', origin: [e(-280), e(1350), e(3500)], size: [e(1160), e(450), e(550)], movable: false },
   { id: 'galley_oven',     zone: 'galley', origin: [e(400), e(0), e(2550)],     size: [e(780), e(1900), e(410)], movable: false },
-  { id: 'washroom_pod',    zone: 'washroom', origin: [e(-1180), e(0), e(2550)], size: [e(900), e(1950), e(940)], movable: false },
+  { id: 'washroom_pod',    zone: 'washroom', origin: [e(-1180), e(0), e(3110)], size: [e(900), e(1950), e(940)], movable: false },
 
   // --- exterior. Every value derives from ENVELOPE, so the published envelope becomes
   // verifiable geometry. Excluded from overlap and containment checks: the body encloses
@@ -331,10 +341,11 @@ export const HOTSPOTS: readonly Hotspot[] = [
   },
   {
     id: 'washroom',
-    // In the entry path, looking forward-and-off into the pod's opening. The pod moved forward
-    // to the partition when the rear strip became the galley run, and this stop moved with it.
+    // In the entry path, looking aft-and-off into the pod's opening. The pod is in the rear-off
+    // corner, so the stop stands inboard of the boarding door and turns the way the walkthrough
+    // does: worktop and hood on the right of frame, pod straight ahead.
     label: 'Washroom',
-    camera: { position: [0.35, 1.6, 3.15], target: [-0.85, 1.05, 3.0] },
+    camera: { position: [0.35, 1.55, 3.06], target: [-0.78, 1.10, 3.62] },
     view: { kind: 'look', pitch: [-40 * D, 30 * D] },
   },
   {

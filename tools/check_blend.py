@@ -9,11 +9,26 @@ modules = ['shell', 'dinette', 'sofa_slideout', 'alcove_bed', 'lockers', 'cab', 
 assert all(scene.get('modelled_' + name) for name in modules)
 
 # The inside bottoms of all three bowls must face up, including the regenerated binaries.
-# Stations track the placements: the galley run backs onto the rear wall now and the pod moved
-# forward to the partition, so all three moved when the boarding door moved to the kerb flank.
+#
+# The galley station is absolute because the run's sink is pinned to the rear window's centre.
+# The pod's two are not: build_washroom measures the basin off the pod's forward face and the
+# toilet off its rear one, so the stations are read off the pod's own bounds with the builder's
+# offsets applied. Written flat they stranded the moment the pod moved to the rear corner, which
+# is exactly the failure the "measure from the placement's own ends" convention exists to stop.
+def _bounds(name):
+    obj = bpy.data.objects[name]
+    vs = [obj.matrix_world @ v.co for v in obj.data.vertices]
+    return [min(c(v) for v in vs) for c in (lambda v: v.x, lambda v: v.y, lambda v: v.z)] + \
+           [max(c(v) for v in vs) for c in (lambda v: v.x, lambda v: v.y, lambda v: v.z)]
+
+_px0, _py0, _, _px1, _py1, _ = _bounds('washroom_pod')
+_vanity_d = min(.36, (_py1 - _py0) - .64)
 for name, x, y, z in [('galley_run', .09, 3.775, .746),
-                      ('washroom_pod', -.88, 2.71, .72),
-                      ('washroom_pod', -.51, 3.14, .34)]:
+                      # Basin, in the pod's forward corner against the outer (off) wall.
+                      ('washroom_pod', _px0 + .05 + min(.50, (_px1 - _px0) - .34) / 2,
+                       _py0 + .01 + _vanity_d / 2, .72),
+                      # Toilet pan, against the pod's rear wall on the inboard side.
+                      ('washroom_pod', _px1 - .23, _py1 - .35, .34)]:
     obj = bpy.data.objects[name]
     faces = [p for p in obj.data.polygons
              if abs((obj.matrix_world @ p.center).z - z) < .001
@@ -43,7 +58,10 @@ for origin, direction in [((0, 1.4, 1.8), (0, 0, 1)),
                           ((0, 2.25, 1.14), (-1, 0, 0)),
                           ((.4, 3.31, 1.3875), (1, 0, 0)),
                           ((0, 3.9, 1.14), (0, 1, 0)),
-                          ((-.70, 3.245, 1.45), (-1, 0, 0))]:
+                          # The pod's roller-blind window, fired from inside the pod. Both the
+                          # moulding's aperture and the shell's derive from the pod placement,
+                          # so this station does too.
+                          ((_px1 - .20, (_py0 + _py1) / 2 + .225, 1.45), (-1, 0, 0))]:
     hit, loc, normal, index, obj, matrix = scene.ray_cast(depsgraph, Vector(origin), Vector(direction))
     assert hit
     role = obj.data.materials[obj.data.polygons[index].material_index].name
