@@ -7,6 +7,8 @@ away from the published envelope.
 Blender frame: X lateral (+X kerb), Y rearward, Z up, metres. `a` is tools/model_interior,
 passed in by its dispatch, matching how model_furniture's builders are called.
 """
+import math
+
 
 
 # Rearward displacement of the over-cab moulding's top-front edge, in metres. Kept modest so
@@ -171,9 +173,13 @@ def build_exterior(a):
     # three things the walkaround stops at, in the order it stops at them.
     a.box('hatch_storage', (kerb+.006, 3.30, -.22), (.03, .92, .46), 'metal.dark', bevel=.02)
     a.box('hatch_storage_trim', (kerb+.014, 3.30, -.22), (.014, .96, .50), 'body.paint', bevel=.02)
-    a.cylinder('hatch_washer', (kerb+.008, 2.58, -.20), .21, .03, 'metal.dark',
+    # The washing machine, which the walkaround stops at and calls out by capacity. A full
+    # front-loader door with a chrome ring, replacing the 210 mm porthole the first pass gave
+    # it. `glass` for the window, so it reads as a drum behind a pane rather than a disc.
+    a.box('washer_surround', (kerb+.010, 2.58, -.20), (.02, .62, .62), 'metal.dark', bevel=.03)
+    a.cylinder('washer_door', (kerb+.026, 2.58, -.20), .24, .04, 'metal.chrome',
                rotation=(0, 1.5708, 0))
-    a.cylinder('hatch_washer_glass', (kerb+.020, 2.58, -.20), .15, .012, 'glass',
+    a.cylinder('washer_glass', (kerb+.046, 2.58, -.20), .18, .02, 'glass',
                rotation=(0, 1.5708, 0))
     a.box('panel_control', (kerb+.008, 2.24, -.18), (.02, .26, .20), 'graphic.screen', bevel=.01)
 
@@ -191,3 +197,31 @@ def build_exterior(a):
     # only, so the restraint has to be deliberate.
     a.cylinder('spare_wheel', (-.70, rear+.085, .46), .34, .16, 'tyre', rotation=(1.5708, 0, 0))
     a.cylinder('spare_wheel_face', (-.70, rear+.125, .46), .20, .07, 'wheel', rotation=(1.5708, 0, 0))
+
+    # Roof air conditioner. It sits above body_alcove's roof line, but it is a detail mesh
+    # rather than one of the eight named bodies, so it does not enter the 3200 mm height
+    # assertion — the same latitude the spare wheel has, and the same reason to be deliberate
+    # about it: 180 mm is a real Dometic-class shroud, not a number chosen to fit.
+    a.box('roof_ac', (0, 1.30, 2.15 + .09), (.72, .98, .18), 'body.paint', bevel=.05)
+    a.box('roof_ac_vent', (0, 1.30, 2.15 + .18), (.52, .74, .02), 'metal.dark', bevel=.008)
+
+    # Rear light clusters, inboard of the spare and clear of the boarding door.
+    for side in (-1, 1):
+        a.box('rear_lamp', (side * .92, rear + .014, .58), (.16, .026, .46),
+              'graphic.screen', bevel=.02)
+
+    # Alloy spokes: five slots around each wheel face. The wheel axis runs across the vehicle,
+    # so the ring lies in the Y-Z plane and the placement's own half-height sets its radius.
+    for name in ('wheel_front_off', 'wheel_front_kerb', 'wheel_rear_off', 'wheel_rear_kerb'):
+        (wx, wy, wz), (width, _, height) = a.placement(name)
+        outboard = -width * .34 if 'off' in name else width * .34
+        for i in range(5):
+            angle = i * math.tau / 5
+            a.box('wheel_spoke', (wx + outboard, wy + math.cos(angle) * height * .21,
+                                  wz + math.sin(angle) * height * .21),
+                  (width * .10, height * .13, height * .13), 'wheel', bevel=.006)
+
+    # Mudflaps behind each axle, and the chrome rail beside the boarding door.
+    for side in (-1, 1):
+        a.box('mudflap', (side * 1.10, 2.98, -.86), (.22, .014, .24), 'metal.dark', bevel=.006)
+    a.box('rear_rail', (.52, rear + .040, 1.20), (.030, .07, .52), 'metal.chrome', bevel=.012)
