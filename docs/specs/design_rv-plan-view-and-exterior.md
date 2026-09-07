@@ -217,13 +217,18 @@ which at 1.0 UV/m means a UV span of 3.4, not 1.
 
 The resolution is to keep the density and divide it back in the registry:
 
-- Give the decal planes an explicit box UV in `model_exterior.py` running `0 → 3.4` by
-  `0 → 0.70`, so density is exactly 1.0 UV/m and the island origin is known rather than wherever
-  `smart_project` left it.
+- Give the decal planes an explicit box UV running `0 → 3.4` by `0 → 0.70`, so density is exactly
+  1.0 UV/m and the island origin is 0 rather than wherever `smart_project` left it.
 - Set `repeat: [1/3.4, 1/0.70]` on the `body.graphic` map, which lands one copy on the panel.
 
-If the island origin cannot be pinned, the fallback is an `offset` field on `TextureSpec` — three
-lines, across `finishes.ts`, `textures.ts` and the registry entry. Prefer the explicit UV.
+**Setting that UV inside `model_exterior.py` is not enough.** `main()` in `model_interior.py`
+re-unwraps every mesh in the collection after the builder returns, running `smart_project` and
+then `normalise_uv_density` unconditionally, so a UV written by the builder is discarded before
+the file is saved. The dispatch loop needs an exemption set, and the decal planes go in it. That is a
+pipeline change, not an exterior change, and it is the first task of the exterior phase.
+
+If the island origin still cannot be pinned, the fallback is an `offset` field on `TextureSpec` —
+three lines, across `finishes.ts`, `textures.ts` and the registry entry. Prefer the explicit UV.
 
 ### Glazing: black frames, no new glass
 
@@ -249,6 +254,19 @@ additions to the shared helper vocabulary in `model_interior.py`:
 Then grille, bonnet, mirrors on arms, and the moulding's forward window. Nothing here introduces a
 measured number: the rake and the taper are proportions of the existing `body_cab` and
 `body_alcove` placements.
+
+**The sculpt may not move any envelope extreme.** `check_models.mjs` measures width, length and
+height across eight named bodies (`body_cab`, `body_alcove`, `body_habitation`, `skirt` and the
+four wheels) and asserts 2450 × 5998 × 3200 mm to a millimetre. Four surfaces carry those
+extremes and have to survive untouched: the cab's nose plane at `Z = -1948` (length minimum), the
+rear face at `Z = 4050` (length maximum), the habitation and alcove flanks at `X = ±1225` (width),
+and the alcove roof at `Y = 2150` (height).
+
+Everything the sculpt wants to cut is somewhere else. A raked windscreen removes the cab box's
+upper front, and the length minimum is the bonnet at the bottom of that face. Wheel arches cut
+upward from the underside, and the width extreme is the flank above them. So the sculpt is legal,
+but `pnpm exec npm run check:models` is the gate on every commit that touches those bodies, not
+just the last one.
 
 ### Fittings
 
@@ -312,7 +330,8 @@ exterior's 60 for the plan stop because that stop draws the body too.
 | 3 | The fittings pass introduces new roles and blows the 60 draw-call ceiling | At most two new roles, each argued for; measure at the exterior stop after every batch of additions |
 | 4 | The clip plane also clips shadow rendering, so the roof stops shadowing the floor | Wanted, not a defect — a dollhouse lit through a missing roof is the intended read. Confirm by eye |
 | 5 | 55° polar is the wrong ceiling for the plan stop | Cheap to retune once there is something to look at. Named here so it is a decision, not a drift |
-| 6 | A sculpted cab drifts from the published envelope | Every proportion derives from `body_cab` / `body_alcove`; `check:models` measures the named bodies and would catch it |
+| 6 | A sculpted cab moves an envelope extreme and breaks the 1 mm assertion | §4 names the four surfaces that carry the extremes; `check:models` runs on every commit touching a named body, not only at the end |
+| 7 | A builder-written UV is silently discarded by the dispatch loop's re-unwrap | The exemption set is the exterior phase's first task and is verified by `check:blend` before any artwork exists |
 
 ## 9. Open questions
 
