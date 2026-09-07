@@ -137,13 +137,14 @@ export const DEFAULT_REGISTRY: Registry = {
   'glass':             one('clear', 'Clear', { color: 0xdfe6ea, roughness: 0.05, metalness: 0, emissive: 0xeef4ff, emissiveIntensity: 1.4 }),
 
   'body.paint':   one('white-grp', 'White GRP', { color: 0xf2f3f2, roughness: 0.35, metalness: 0 }),
-  // The map is a stripe band rather than the full livery, and it tiles. The exterior body is
-  // smart-projected, so its UV islands start at 0.034 and span 4.01 over a 3.4 m panel: no
-  // repeat maps one copy onto the flank without cutting it, which is why the artwork carries
-  // no lettering to cut. See model/textures.json.
-  'body.graphic': one('side-decal', 'Side decal', {
+  // One copy across the flank, not a tile: the artwork carries a wordmark, and a wordmark
+  // cannot be cut. box_uv gives the decal plane a UV spanning 3.4 x 0.70 at 1.0 UV/m, which is
+  // what the rest of the pipeline holds every unwrap to, and this repeat divides it back to a
+  // single copy. The UV survives the dispatch loop because model_interior.KEEPS_OWN_UV exempts
+  // it; without that exemption smart_project would supply an origin and span nobody knows.
+  'body.graphic': one('livery', 'Livery', {
     color: 0xffffff, roughness: 0.4, metalness: 0, transparent: true,
-    map: { url: '/textures/side-graphic.webp', repeat: [1, 2] },
+    map: { url: '/textures/side-livery.webp', repeat: [1 / 3.4, 1 / 0.70] },
   }),
   'tyre':         one('rubber', 'Rubber', { color: 0x1a1a1c, roughness: 0.9, metalness: 0 }),
   'wheel':        one('alloy', 'Alloy', { color: 0xa8acb0, roughness: 0.3, metalness: 1 }),

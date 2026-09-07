@@ -57,12 +57,22 @@ def build_exterior(a):
     # measures the named bodies, and this is a detail mesh.
     _door_reveal(a, 'body_door_rear', (.10, 4.056, .925), .76, 1.89, 'y')
 
-    # Side graphic as a decal plane just proud of the body — off flank only. The kerb flank
-    # carries the deployed slide-out box, which stands 580 mm outboard from y 0.15 to 2.05 and
-    # hides most of that flank; what the box does not hide is seen at a grazing angle through
-    # the gap beside it, where a 4 mm decal plane reads as moiré rather than as livery. The
-    # vehicle is modelled deployed, so this is a permanent condition, not a view-dependent one.
-    a.box('body_graphic_off', (-1.228, 2.0, .95), (.004, 3.4, .70), 'body.graphic', bevel=0)
+    # Livery, both flanks. The kerb flank carries the deployed slide-out box from y 0.15 to
+    # 2.05, so its decal sits aft of the box where the artwork is seen face-on rather than at
+    # the grazing angle that made an earlier pass drop it.
+    #
+    # box_uv rather than the dispatch loop's smart_project: a wordmark cannot tile, so it needs
+    # exactly one copy across a known span from a known origin. The names start with
+    # 'body_graphic', which is what model_interior.KEEPS_OWN_UV exempts from both the
+    # `exterior_details` join and the re-unwrap that would otherwise discard this UV.
+    for name, x in (('body_graphic_off', -1.228), ('body_graphic_kerb', 1.228)):
+        plane = a.box(name, (x, 2.0, .95), (.004, 3.4, .70), 'body.graphic', bevel=0)
+        # The kerb flank is read from +X and the off flank from -X, so exactly one of the two
+        # needs u reversed or its wordmark comes out in mirror writing. One texture cannot also
+        # give both flanks the same fore-aft composition — they are mirror images of each other
+        # — so legible lettering wins and the artwork lands chevrons-aft on the kerb flank,
+        # which is the flank the reference photograph shows, and chevrons-forward on the off.
+        a.box_uv(plane, (3.4, .70), flip=x > 0)
 
     # Kerb-flank detail. This does NOT mirror with the interior: the video fixes the awning, the
     # external washer, the storage bay and the control panel to the vehicle's right side, and

@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-09-07T03:35:50.252Z",
+  "checkedAt": "2026-09-07T03:51:35.388Z",
   "toleranceMetres": 0.001,
   "modules": [
     {
@@ -1425,8 +1425,8 @@
           "errors": []
         }
       ],
-      "primitives": 19,
-      "aoPrimitives": 17,
+      "primitives": 20,
+      "aoPrimitives": 18,
       "errors": []
     },
     {
@@ -1624,15 +1624,15 @@
           "errors": []
         }
       ],
-      "primitives": 19,
-      "aoPrimitives": 17,
+      "primitives": 20,
+      "aoPrimitives": 18,
       "errors": []
     }
   ],
   "violations": [],
-  "triangles": 94436,
-  "bytes": 10009280,
-  "optimizedPrimitiveInstances": 118,
+  "triangles": 94448,
+  "bytes": 10070804,
+  "optimizedPrimitiveInstances": 119,
   "exteriorEnvelope": {
     "width": 2.45,
     "length": 5.998,

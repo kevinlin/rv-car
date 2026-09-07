@@ -147,11 +147,25 @@ def normalise_uv_density(obj, target=TEXEL_DENSITY):
 KEEPS_OWN_UV = ('body_graphic',)
 
 
-def box_uv(obj, span):
+def box_uv(obj, span, flip=False):
     """Planar UV across the object's dominant plane, from 0 to `span` UV units.
 
     UVMap runs at TEXEL_DENSITY UV/m everywhere else, so `span` must equal the object's size in
     metres on the two axes it spans. The registry's `repeat` then divides it back to one copy.
+
+    `flip` reverses u across the whole object, for artwork that carries lettering and so has a
+    handedness. A decal on the off flank is read from -X and one on the kerb flank from +X, so
+    one of the two needs it or its wordmark comes out in mirror writing.
+
+    Whole-object, deliberately, not per-face-normal. The glTF export marks these materials
+    double-sided, and a 4 mm plane whose two large faces disagree about u shows both copies
+    through each other — which is what a per-face version rendered. The far face is never seen
+    on its own: an opaque body sits directly behind it.
+
+    v is written as `1 - dv` to pre-compensate for the glTF exporter, which flips every V to
+    `1 - v` on the way out. Without that, a UV spanning 0 to `span` exports as `1 - span` to 1,
+    and the registry's `1 / span` repeat turns that constant offset into a roll: the image comes
+    out sliced across the panel with its top band wrapped round to the bottom.
     """
     mesh = obj.data
     layer = mesh.uv_layers['UVMap'] if mesh.uv_layers else mesh.uv_layers.new(name='UVMap')
@@ -164,7 +178,7 @@ def box_uv(obj, span):
             co = mesh.vertices[mesh.loops[loop].vertex_index].co
             du = (co[u] - lo[u]) / size[u] * span[0] if size[u] else 0
             dv = (co[v] - lo[v]) / size[v] * span[1] if size[v] else 0
-            layer.data[loop].uv = (du, dv)
+            layer.data[loop].uv = (span[0] - du if flip else du, 1 - dv)
 
 
 def group(name, parts):
