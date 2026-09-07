@@ -138,7 +138,7 @@ pins handedness to a named fact — `galley_run` sits wholly on the kerb flank (
 that flips it then fails loudly instead of silently. One assertion, and it is the cheapest thing
 here that prevents a fifth pass.
 
-## Task 2 — Palette: the cabin is walnut-dominant
+## Task 2 (done) — Palette: the cabin is walnut-dominant
 
 Confirmed decision: video wins over spec row 4 ("locker doors cream in a walnut frame"). Record it
 as a correction, not a silent flip.
@@ -151,7 +151,7 @@ as a correction, not a silent flip.
 - Seats carry far too much camel. Video shows grey leather with a narrow camel base band and
   piping. Shrink the bolster meshes in `_chair` — the role split is right, the areas are not.
 
-## Task 3 — Galley
+## Task 3 (done) — Galley
 
 In `build_galley`:
 - Replace the washer fascia with an electrical panel.
@@ -160,14 +160,14 @@ In `build_galley`:
   `role.metal.dark` (already at `finishes.ts:98`). The square stainless bowl and chrome tap are wrong.
 - Update the `check_blend.py` sink coordinate in the same change (see Task 1).
 
-## Task 4 — Washroom
+## Task 4 (done) — Washroom
 
 - Hinged walnut door with chrome lever and full-length mirror on the outer face, modelled swung
   open so the hotspot still sees in. Build it as a **detail mesh**, not a placement — a placement
   would overlap `washroom_pod`, exactly as the spec's "Row 10 could not be placements" records.
 - Ceiling vent fan flanked by two downlights, retractable clothesline, roller-blind window, shower rail.
 
-## Task 5 — Lounge and alcove props
+## Task 5 (done) — Lounge and alcove props
 
 - Lounge: roof-hatch projector, small wall monitor above the sofa (`graphic.screen`), table drawer,
   plinth LED strips under seats and sofa (`led.cove`), under-seat drawers, framed plaque
@@ -177,7 +177,7 @@ In `build_galley`:
 - Alcove: side windows with curtains, small screen at one end, reading lights, curved cove reveals
   in the shell. The render's alcove ceiling is flat where the video's is sculpted.
 
-## Task 6 — Exterior
+## Task 6 (done) — Exterior
 
 `docs/research/final/exterior.png` is a plain white box. **Exterior flank detail does not mirror** —
 the video fixes it to the kerb flank independently of the interior reading, and under the mirrored
@@ -194,7 +194,7 @@ Two landmines:
 - Any new exterior role must go into `EXTERIOR_ROLES` (`finishes.ts:143`), or the interior
   environment probe captures it and darkens the cabin — the trap section 9 already records.
 
-## Task 7 — Lighting and post
+## Task 7 (done) — Lighting and post
 
 Spec section 7 asks for bloom and GTAO; no pass has shipped a post chain, and the video's whole look
 is LED strips reading as light against dark walnut.
@@ -205,7 +205,7 @@ is LED strips reading as light against dark walnut.
   shifts the probe.
 - Re-run `?calibrate` with the re-derived patches from Task 1.
 
-## Task 8 — Record the evidence
+## Task 8 (done) — Record the evidence
 
 - Save the best walkthrough stills into `docs/research/reference/`, matching the existing convention.
 - Append an implementation-record section to `docs/specs/design_rv-interior-3d.md` — the photoref

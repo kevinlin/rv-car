@@ -1009,3 +1009,167 @@ vehicle. A whole turn is now written as no limit at all, which is what OrbitCont
 
 Placement bounds, the exterior envelope, the AO wiring and texel density all still pass. The
 rear-entry ray is unchanged in intent and passes again, now that the rear door is back.
+
+## Walkthrough-video correction (2026-09-07)
+
+Driven by the manufacturer's own 18-minute walkthrough
+(douyin.com/video/7627690532785694434), sampled at 119 frames plus 48 targeted high-resolution
+stills. Planned in [plan_correct-against-walkthrough-video.md](plan_correct-against-walkthrough-video.md).
+Frames kept in [../research/walkthrough/](../research/walkthrough/), renders re-captured into
+[../research/final/](../research/final/).
+
+### Handedness: the two halves are handed opposite ways
+
+The plan called for mirroring the whole cabin, on this chain: the pod and the galley face each
+other, the galley continues the line the fridge starts, and the fridge stands beside a booth seat
+— so moving the pod moves everything. **The middle link is false for this vehicle**, and the
+mirror was implemented, pushed, and then corrected.
+
+What the frames show. From the lounge looking aft through the partition (8:32–8:56, hi-res) the
+sofa bench is on the left and the booth's pair of seats on the right; looking aft, left is kerb.
+Through the same doorway the galley's pegboard and counter are on the left and the mirrored
+washroom door on the right. The 3:50 frame through the open rear door, where left and right
+reverse, agrees on the service room.
+
+| | Off flank (−X) | Kerb flank (+X) |
+|---|---|---|
+| Lounge | 卡座 booth | slide-out, sofa bed |
+| Storage | — | wardrobe |
+| Service room | fridge, washroom pod | galley run |
+
+So the galley sits behind the *wardrobe*, opposite the fridge, not after it. This is also why the
+exterior kerb-window crop (which shows a galley overhead above its own counter) and the lounge
+frame had looked irreconcilable for two passes: both readings were correct.
+
+`src/check.test.ts` now pins both halves separately, with the evidence cited. That guard is the
+cheapest thing in this pass and it is what stops a fifth flip.
+
+### The fridge is service-room furniture
+
+Owner correction during the pass: the 148 L column stands aft of the sliding door, hard against
+the washroom pod, not in the lounge storage band. It moved to Z 2550–3050 on the off flank and
+widened to 500 mm so it meets the pod exactly. Consequences: the off flank has no wall left aft
+of the partition, so the second off-flank window moved forward of it, to Z 1975–2525.
+
+### Palette
+
+| # | Was | Now | Evidence |
+|---|---|---|---|
+| 1 | `panel.locker` bone gloss — cream doors in a walnut frame | Gloss walnut, three variants, joined to `WOOD_ROLES` | The video's locker fronts are lacquered timber with specular highlights over visible grain |
+| 2 | Seat cushion and whole backrest surround in camel | Grey throughout, camel reduced to a band at the backrest base plus a badge | The seats are light grey top to bottom; the render read as orange furniture |
+| 3 | No fascia above the locker runs | Charcoal fascia, one per run | It is what separates the gloss fronts from the cream ceiling in every wide shot |
+
+The wood swap now restyles three roles rather than two. A locker run left walnut beside oak
+cabinets would have been a worse lie than the one this fixes; `ui.test.ts` asserts all three
+timber roles carry the same variant ids, so a swap cannot half-apply.
+
+**No walnut wall band.** The video's cabin is walnut-dominant, but in the lounge that walnut is
+the locker fronts and the fascia: the side walls are window from 0.90 to 1.40 and locker run
+above, so no wall is left showing. A band added at 1.42–1.90 rendered inside the locker carcasses.
+
+### Fittings
+
+- **Galley.** Black composite bowl and black gooseneck tap replace the stainless bowl and chrome
+  tap. The interior washer is gone — last year's bay now carries electrical gear behind a
+  cabinet door with a systems panel and a vent. Black pegboard accessory wall with brushed
+  slats, on the only clear stretch of backsplash forward of the window. The oven's full-height
+  lit fascia became a dark glass door with a control strip: at full size the emissive read as a
+  glowing blue rectangle where the video shows black glass.
+- **Washroom.** Hinged walnut door with chrome lever and full-length mirror, standing open flat
+  against the pod's inboard face and hinged at the *aft* end — two constraints fix that, the
+  hotspot sightline crossing the plane at Y 3.32 and the rear-entry ray at the centreline.
+  Ceiling vent fan flanked by two downlights, retractable clothesline, and a roller-blind window
+  cut through both the pod moulding and the vehicle's off wall, sitting between two ribs.
+- **Lounge and alcove.** Roof-hatch projector, table drawer, plinth LED strips under every seat
+  and the sofa, alcove reading lights and end screen. The framed plaque and the exterior-camera
+  monitor went on the partition's lounge face rather than the side walls the video hangs them
+  on, because those walls are window and locker run here — a deliberate relocation.
+- **Exterior.** Awning cassette and its LED along the kerb roof edge, seven window apertures
+  scribed as reveals, lower storage bay, round-porthole washer hatch, external control panel,
+  and on the rear face a keypad, chrome grab handle, vent grille and a flat-mounted spare.
+  Everything is `exterior_details`, so the 1 mm envelope assertion is untouched.
+
+Three defects the exterior work exposed, all the same shape — geometry hidden inside a solid mass:
+
+1. `body_door_rear` was recessed a millimetre *inside* the rear face and had never rendered.
+2. The kerb-flank hatches and the slide-out window reveal sat behind the deployed slide-out box,
+   which stands 580 mm outboard from Y 0.15 to 2.05. They moved aft of it; the kerb livery decal
+   was dropped, because what the box does not hide is seen at a grazing angle where a 4 mm plane
+   reads as moiré.
+3. `slideout_box` was 1300 mm tall against a `slideout_shell` of 2000 mm, so the kerb
+   three-quarter looked straight through the gap into the cabin. Matched to 2000, `derived`.
+
+The exterior stop moved to the **kerb** three-quarter. That flank carries the awning, the
+hatches, the control panel and the galley window, and it is the walkaround the video films. It
+also carries the deployed slide-out box, which is why an earlier pass pointed the stop at the
+flat off flank instead; the vehicle is modelled deployed, so the box is part of the subject.
+
+### Post: bloom shipped, GTAO measured and cut
+
+Section 7 has asked for both since the first pass. Bloom is the load-bearing one and it ships.
+
+**GTAO was cut on measurement.** It re-renders the whole scene twice, for depth and normals:
+
+| At 1920 × 1080 | Lounge | Washroom | Exterior |
+|---|---|---|---|
+| Bloom only | 120 fps | 120 fps | 120 fps |
+| Bloom + GTAO | **40.4 fps** | **39.2 fps** | 84 fps |
+
+Against a success criterion of 60 fps at 1080p, that is a hard fail, and interior draw calls went
+45 → 79. The AO bake already supplies contact shading, so GTAO was buying a second-order effect
+for two-thirds of the frame budget. Do not re-add it without re-measuring.
+
+**The bloom threshold is in linear HDR, not in the tone-mapped output.** RenderPass writes a float
+target and OutputPass applies ACES at the end, so the textbook 0.92 caught the cream panels and
+the daylight behind the glazing and fogged the whole cabin. The `led.cove` emissive runs at 14 and
+the panels sit nearer 1 to 3, so 5.0 divides them.
+
+`renderer.info` is reset per `renderer.render` call, and the composer calls it once per pass — so
+the `?verify` draw-call readout showed 1 until `info.autoReset` was turned off and the reset moved
+to once per frame. The number now covers the scene plus the post chain.
+
+### White balance, honestly measured
+
+The patches in `calibrate.ts` had been *mirrored* with the furniture during an earlier pass rather
+than re-verified, which the spec already recorded as a known gap. They are now derived by
+raycasting the live scene and keeping only coordinates whose whole neighbourhood returns the
+intended role **and** a constant surface normal. The normal matters more than it looks: an 8 px
+square straddling a bevel underside read 0.144 where the flat panel 20 px away read 0.082.
+
+| Patch | Result |
+|---|---|
+| Aisle floor | 0.055 |
+| Chair panel | 0.063 |
+| Washroom wall | 0.063 |
+
+All three under the 0.08 ceiling. Mid-pass, with honest patches and the old palette, the chair
+panel sat at 0.082–0.086 and failed; the walnut-dominant palette and the post chain closed it.
+
+### Results
+
+| Axis | Ceiling | Result |
+|---|---|---|
+| Triangles | 350,000 | 94,436 |
+| Bytes | 25 MB | 10.0 MB |
+| Draw calls, worst interior | 40 | **45** — 30 scene plus a fixed 15 for the post chain |
+| Draw calls, exterior | 60 | 57 |
+| Frame rate | 60 fps at 1080p | 120, vsync-capped, at both 1920 × 1080 and 3200 × 1800 |
+| vitest + `tsc` | — | 122 tests, clean |
+| Aisle | 400 mm | 560 mm lounge, 800 mm service |
+| Apertures | — | 7 of 7 reach `role.glass`, rear-entry ray clear to Y 4.048 |
+
+The interior draw-call ceiling is exceeded, and the number is reported rather than explained away.
+The 40 was set before any post chain existed and counts scene geometry, which is still 30. Bloom
+adds a fixed ~15 regardless of stop. The performance criterion the ceiling exists to protect is
+met with a wide margin, so the ceiling is the stale proxy; a future pass should either re-baseline
+it as "scene ≤ 40, post chain excluded" or drop it in favour of the frame-rate measurement.
+
+### Still open
+
+- The kerb three-quarter shows a narrow sliver of interior at the slide-out box's aft edge,
+  where the exterior box's rear face and the interior `slide_rear` panel sit 15 mm apart.
+- The cab's engine tunnel is `metal.dark` and reads as a black slab down the centreline of every
+  forward-looking lounge shot. Correct geometry, plausible material, wrong result.
+- Length 5995 vs 5998 mm, recorded and not acted on: 5998 cascades into `habLength` and the 1 mm
+  envelope assertion.
+- The mid-range phone frame rate has still never been measured on hardware.
