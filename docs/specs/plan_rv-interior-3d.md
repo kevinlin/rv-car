@@ -9,7 +9,7 @@
 **Spec:** [design_rv-interior-3d.md](design_rv-interior-3d.md) — the single design spec, which
 has since absorbed the photo-reference and exterior child spec. Section numbers below refer to
 the merged document.
-**Evidence:** [../research/2026-09-04-dachi-wujijing-500-reference.md](../research/2026-09-04-dachi-wujijing-500-reference.md)
+**Evidence:** [../research/reference_dachi-wujijing-500.md](../research/reference_dachi-wujijing-500.md)
 
 ## Status — 2026-09-05
 

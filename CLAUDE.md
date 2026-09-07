@@ -166,7 +166,7 @@ The lounge and the service room are handed independently, which is what every wr
 wrong by assuming one chain of inference ran the length of the vehicle. The exterior stop looks at
 the **kerb** flank, the one the slide-out box and the door are on. Do not re-derive any of this
 from the stills — four passes did, and all four were wrong; the walkthrough video settles the
-lounge, `docs/research/spatial-brief_大驰无极境500MAX.md` and the stills catalogued in
+lounge, `docs/research/spatial-desc_dachi-wujijing-500.md` and the stills catalogued in
 [docs/research/walkthrough/README.md](docs/research/walkthrough/README.md) settle the service
 room, and `src/check.test.ts` pins both.
 

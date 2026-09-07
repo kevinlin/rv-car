@@ -2,8 +2,8 @@
 
 - Date: 2026-09-05, merged and brought current 2026-09-06
 - Status: implemented
-- Evidence base: [../research/2026-09-04-dachi-wujijing-500-reference.md](../research/2026-09-04-dachi-wujijing-500-reference.md),
-  [../research/spatial-brief_大驰无极境500MAX.md](../research/spatial-brief_大驰无极境500MAX.md),
+- Evidence base: [../research/reference_dachi-wujijing-500.md](../research/reference_dachi-wujijing-500.md),
+  [../research/spatial-desc_dachi-wujijing-500.md](../research/spatial-desc_dachi-wujijing-500.md),
   and the manufacturer's stills and walkthrough video (sources listed in the record)
 - Skills in play: `threejs-webgl` (runtime), `blender-web-pipeline` (assets)
 - Plans: [plan_rv-interior-3d.md](plan_rv-interior-3d.md) built §1–§3, §5–§7 and §10–§14;
@@ -961,7 +961,7 @@ than no check. `emptyOutDir: false` in `vite.config.ts` fixes it.
 
 ## Layout correction (2026-09-06)
 
-Driven by [../research/spatial-brief_大驰无极境500MAX.md](../research/spatial-brief_大驰无极境500MAX.md)
+Driven by [../research/spatial-desc_dachi-wujijing-500.md](../research/spatial-desc_dachi-wujijing-500.md)
 and the manufacturer's walkaround photography. Four things about the plan were wrong, and the
 evidence for three of them was already sitting in this project's own research note.
 
@@ -1436,7 +1436,7 @@ green.
 
 ## Rear service room, re-planned about a side door — 2026-09-07
 
-The updated [spatial brief](../research/spatial-brief_大驰无极境500MAX.md) draws the entry as
+The updated [spatial brief](../research/spatial-desc_dachi-wujijing-500.md) draws the entry as
 **后部侧入门**, a door in the kerb flank near the rear, and the walkaround frames agree: 2:38 and
 3:23 both show it there, forward of the rear corner, with the chrome grab rail, the keypad and
 the louvred vent on the stretch of flank aft of it. The model had it as a leaf in the rear wall.
@@ -1530,7 +1530,7 @@ walkthrough. Six new stills are catalogued in
 
 ### The brief's plan and the brief's prose disagreed, and the model followed the prose
 
-`docs/research/spatial-brief_大驰无极境500MAX.md` §2 draws the service room as an ASCII plan:
+`docs/research/spatial-desc_dachi-wujijing-500.md` §2 draws the service room as an ASCII plan:
 `冰箱` under the partition line on the off flank, `卫浴 900×940` below it toward the rear, the
 worktop along the rear beside the pod, the combi-oven cabinet on the kerb flank. That drawing is
 right. The paragraph immediately beneath it, added later under "fixed by owner feedback", says
