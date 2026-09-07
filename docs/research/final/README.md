@@ -29,6 +29,14 @@ Ceilings are 40 interior and 60 exterior, so both hold with room to spare. The f
 measured over 120 frames into a 3840 x 1882 buffer, which is four times the pixel count of
 1080p; the 60 fps criterion is met with a wide margin.
 
+## Re-captures after this set
+
+- **`plan.png`, 2026-09-07, at 2880 x 1800** (1440 x 900 CSS pixels, device pixel ratio 2). The
+  plan overlay's labels were English-only from this date, so the 2026-09-06 frame showed 卡座 and
+  后上门 where the running app now shows "Dinette booth" and "Rear boarding door". The overview
+  page's floorplan card is cropped from this file, which is why it had to follow the change.
+  Everything else in this directory is still the original 3456 x 1882 set.
+
 ## Where this still departs from the references
 
 - **The exterior is massed rather than sculpted.** Body boxes, wheels, a skirt and a decal, which

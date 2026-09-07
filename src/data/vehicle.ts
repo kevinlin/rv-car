@@ -219,7 +219,7 @@ export const labelDetail = (l: PlanLabel): string => {
 export const PLAN_LABELS: readonly PlanLabel[] = [
   { text: 'Alcove bed',    placement: 'alcove_bed' },
   { text: 'Slide-out bed', placement: 'slideout_bed' },
-  { text: '卡座 booth',     placement: 'dinette_table' },
+  { text: 'Dinette booth', placement: 'dinette_table' },
   { text: 'Wardrobe',      placement: 'wardrobe' },
   { text: 'Fridge 148 L',  placement: 'fridge' },
   { text: 'Galley',        placement: 'galley_run' },
@@ -229,7 +229,7 @@ export const PLAN_LABELS: readonly PlanLabel[] = [
   // into wall_rear rather than a piece of furniture.
   { text: 'Aisle', at: [d(0), d(900), d(1000)], detail: '560 mm derived' },
   { text: 'Aisle', at: [d(0), d(900), d(3300)], detail: '800 mm derived' },
-  { text: '后上门',  at: [d(100), d(900), d(4050)], detail: 'rear boarding door' },
+  { text: 'Rear boarding door', at: [d(100), d(900), d(4050)], detail: '100 mm off centreline' },
 ];
 
 export const aabb = (p: Placement) => ({
