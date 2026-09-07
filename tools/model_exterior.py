@@ -165,7 +165,11 @@ def build_exterior(a):
         radius = height / 2
         a.cylinder(name, (cx, cy, cz), radius, width, 'tyre', rotation=(0, 1.5708, 0))
         # Alloy face set into the outboard side, which is the one the exterior stop sees.
-        outboard = -width * .28 if 'off' in name else width * .28
+        # .32 rather than .28: at .28 the face's outboard end landed on cx + .50 * width,
+        # the tyre's own outboard plane, and two coplanar faces in different roles z-fight
+        # into a flashing checkerboard. .32 stands it 9 mm proud, which is also what an
+        # alloy does.
+        outboard = -width * .32 if 'off' in name else width * .32
         a.cylinder(name + '_face', (cx + outboard, cy, cz), radius * .60, width * .44,
                    'wheel', rotation=(0, 1.5708, 0))
 
@@ -236,7 +240,9 @@ def build_exterior(a):
     # read off that frame against the two rulers in it, the body's bottom edge at z -0.400 and
     # the slide-out window's sill at z 0.83.
     a.box('hatch_storage', (kerb+.006, 3.30, -.10), (.03, .92, .46), 'metal.dark', bevel=.02)
-    a.box('hatch_storage_trim', (kerb+.014, 3.30, -.10), (.014, .96, .50), 'body.paint', bevel=.02)
+    # Trim recessed behind the hatch, not flush with it: at kerb+.014 its outboard face sat on
+    # kerb+.021, the same plane as the hatch's, and the pair z-fought into a checkerboard.
+    a.box('hatch_storage_trim', (kerb+.005, 3.30, -.10), (.014, .96, .50), 'body.paint', bevel=.02)
     # The washing machine, which the walkaround stops at and calls out by capacity. A full
     # front-loader door with a chrome ring, replacing the 210 mm porthole the first pass gave
     # it. `glass` for the window, so it reads as a drum behind a pane rather than a disc.

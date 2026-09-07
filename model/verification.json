@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-09-07T12:58:39.378Z",
+  "checkedAt": "2026-09-07T13:09:54.834Z",
   "toleranceMetres": 0.001,
   "modules": [
     {
@@ -1715,7 +1715,7 @@
   ],
   "violations": [],
   "triangles": 106140,
-  "bytes": 11011928,
+  "bytes": 11008984,
   "optimizedPrimitiveInstances": 125,
   "exteriorEnvelope": {
     "width": 2.45,
