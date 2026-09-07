@@ -321,6 +321,62 @@ exterior's 60 for the plan stop because that stop draws the body too.
 - Renders re-captured into `docs/research/final/`, plus a new `plan.png`, and the kerb
   three-quarter set beside the 0m59s walkaround frame.
 
+## 7a. Phase A results — 2026-09-07
+
+Measured at 1920 x 1080, `?verify`, Chrome, Apple silicon.
+
+| Stop | Draw calls | Triangles | fps |
+|---|---|---|---|
+| Lounge | 45 | 74,890 | 106.3 |
+| Alcove bed | 36 | 68,210 | 109.2 |
+| Slide-out bed | 40 | 70,946 | 108.0 |
+| Galley | 31 | 67,074 | 112.4 |
+| Washroom | 29 | 64,442 | 106.4 |
+| Cab | 30 | 60,966 | 114.9 |
+| Exterior | 57 | 94,366 | 120.0 |
+| **Floorplan** | **57** | **94,366** | **120.0** |
+
+The plan stop costs exactly what the exterior stop costs, because it draws the same set: the
+whole interior plus the clipped body. 57 of a ceiling of 60. The CSS2D layer adds none, as §3
+predicted. Draw calls are identical with the overlay on and off.
+
+The lounge still reads 45 against the stale interior ceiling of 40, unchanged by this pass and
+for the reason the parent spec's record already gives: bloom adds a fixed 15 the number predates.
+
+### The probe fix, measured
+
+`?calibrate` at the lounge, before any swap: 0.052 / 0.083 / 0.069. The chair panel already sits
+above 0.08 and did so before this pass; it is not something the clip plane moved.
+
+Swapping the wood finish **at the plan stop**, with the section plane set, then measuring at the
+lounge: 0.065 / 0.073 / 0.062, all three passing.
+
+The control, the identical swap performed at the lounge where no plane is set, returns
+`#a29b97 / #e8e1d7 / #e0dad2`, the same three hex values to the byte. A clip plane leaking into
+the capture would have changed them. §8's risk 2 is closed.
+
+### Two decisions the render forced
+
+**The camera leans off the pole.** The pose in §2 put the camera straight above its target, where
+the view direction is parallel to the camera's up vector and `lookAt` resolves the roll from
+whatever pose the tween came from: arriving from the galley put the nose at the bottom of the
+frame, arriving from the lounge put it at the top. The arrival pose now sits on the 0.05 polar
+floor, 0.42 m aft of the target, which pins it nose-up, the way §2 of the spatial brief draws
+every floor plan.
+
+**The target is the body's centre, not the habitation box's.** At the specified target of Z 2000
+the cab and the alcove fell off the top of the frame. The vehicle runs Z -1948 to 4050, so its
+centre is 1050, and 8.4 m of standoff is what a 50 deg vertical field needs to hold all 6 m with
+margin.
+
+### What is still wrong
+
+Two label pairs overlap at the default zoom — `卡座 booth` against the forward `Aisle`, and
+`Fridge 148 L` against `Sliding partition`. Both remain legible and both clear as soon as the
+viewer orbits or zooms. Anchors are placement centres by design, so the fix is either a collision
+solver or hand-placed anchors, and the second would give up the guarantee that a label cannot
+drift from the geometry it names. Left as is.
+
 ## 8. Risks
 
 | # | Risk | Mitigation |
