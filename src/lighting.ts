@@ -79,8 +79,14 @@ export const installLighting = (
     // six child cameras, and setting layers on the parent does not propagate to all of them.
     const wasVisible = exterior.map((o) => o.visible);
     for (const o of exterior) o.visible = false;
+    // The plan stop sections the vehicle at PLAN_CUT_MM. The probe camera stands inside the
+    // cabin, so capturing with that plane set replaces the ceiling with sky and relights every
+    // interior material. Same trap as the exterior body two lines up, same fix.
+    const clipping = renderer.clippingPlanes;
+    renderer.clippingPlanes = [];
     scene.environment = null;
     probeCamera.update(renderer, scene);
+    renderer.clippingPlanes = clipping;
     exterior.forEach((o, i) => { o.visible = wasVisible[i]!; });
     scene.environment = cubeTarget.texture;
     scene.environmentIntensity = 2.5;
