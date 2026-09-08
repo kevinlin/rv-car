@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
+import type { SceneBundle } from './scene';
 
 export interface CoveSpec {
   readonly position: readonly [number, number, number];
@@ -39,7 +40,8 @@ export const installLighting = (
   renderer: THREE.WebGLRenderer,
   vehicle: THREE.Object3D,
   /** Held out of the probe capture: an opaque body around the cabin would black it out. */
-  exterior: readonly THREE.Object3D[] = [],
+  exterior: readonly THREE.Object3D[],
+  { sky, sun }: Pick<SceneBundle, 'sky' | 'sun'>,
 ) => {
   RectAreaLightUniformsLib.init();
 
@@ -50,7 +52,7 @@ export const installLighting = (
     scene.add(light);
   }
 
-  // Daylight through the roof hatch — the only shadow caster in the scene.
+  // Interior daylight through the roof hatch, retained alongside the exterior sun.
   const hatch = new THREE.DirectionalLight(0xdfe9ff, 2.5);
   hatch.position.set(0.3, 6, 1.2);
   hatch.target.position.set(0, 0, 1.4);
@@ -69,27 +71,41 @@ export const installLighting = (
   const probeCamera = new THREE.CubeCamera(0.1, 20, cubeTarget);
   probeCamera.position.set(0, 1.2, 1.6);
   scene.add(probeCamera);
+  const interiorBackground = scene.background;
+  scene.environment = cubeTarget.texture;
+  scene.environmentIntensity = 2.5;
+  renderer.shadowMap.autoUpdate = false;
 
   const refreshProbe = () => {
-    // Geometry and the hatch light are static. Rebuild shadows with the probe, not every
-    // camera frame; future furniture moves can call this same refresh function.
-    renderer.shadowMap.autoUpdate = false;
-    renderer.shadowMap.needsUpdate = true;
     // Toggling visibility rather than juggling render layers is deliberate: CubeCamera holds
     // six child cameras, and setting layers on the parent does not propagate to all of them.
-    const wasVisible = exterior.map((o) => o.visible);
-    for (const o of exterior) o.visible = false;
+    const hidden = [...exterior, sky, sun];
+    const wasVisible = hidden.map((o) => o.visible);
+    const { environment, environmentIntensity, background } = scene;
     // The plan stop sections the vehicle at PLAN_CUT_MM. The probe camera stands inside the
     // cabin, so capturing with that plane set replaces the ceiling with sky and relights every
     // interior material. Same trap as the exterior body two lines up, same fix.
     const clipping = renderer.clippingPlanes;
-    renderer.clippingPlanes = [];
-    scene.environment = null;
-    probeCamera.update(renderer, scene);
-    renderer.clippingPlanes = clipping;
-    exterior.forEach((o, i) => { o.visible = wasVisible[i]!; });
-    scene.environment = cubeTarget.texture;
-    scene.environmentIntensity = 2.5;
+    try {
+      for (const o of hidden) o.visible = false;
+      renderer.clippingPlanes = [];
+      scene.environment = null;
+      scene.environmentIntensity = 1;
+      scene.background = interiorBackground;
+      // The capture needs hatch shadows without the body. The first cube face consumes this
+      // flag, so invalidate again after restoring visibility for the next screen render.
+      renderer.shadowMap.needsUpdate = true;
+      probeCamera.update(renderer, scene);
+    } finally {
+      renderer.clippingPlanes = clipping;
+      hidden.forEach((o, i) => { o.visible = wasVisible[i]!; });
+      scene.environment = environment;
+      scene.environmentIntensity = environmentIntensity;
+      scene.background = background;
+      // Global section planes are excluded by WebGLClipping during shadow rendering: the
+      // plan stop's clipped roof still casts a shadow, rather than admitting false daylight.
+      renderer.shadowMap.needsUpdate = true;
+    }
   };
 
   vehicle.traverse((o) => {

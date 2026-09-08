@@ -23,6 +23,11 @@ video frame. They are the reason the pod and the fridge changed places.
 | `washroom-rear-corner-7m04s.jpg` | "就是把整个夹角利用起来". Facing the off flank: rear worktop and hood on the left, the pod straight ahead, panelling forward of it. The pod is in the REAR-OFF corner, entered from the aisle beside the worktop |
 | `service-room-high-angle-sohu.jpg` | The whole room in one frame from above the partition. Left to right: partition doorway with the lounge beyond, the kerb counter, the open boarding door (louvred panel, grab handle, door bin: not a washroom door), then the rear worktop under its blind |
 | `lounge-from-partition-sohu.jpg` | The slide-out bench square-on, service room showing past the partition post. Pins which flank the sliding leaf parks on |
+| `exterior-kerb-flank-2m38s.jpg` | The kerb flank square-on, nose right: the livery's extent, the boarding door, the open washer hatch, the storage hatches, the awning cassette and its LED strip. The flank is FLAT — the slide-out is retracted |
+| `exterior-kerb-three-quarter-3m14s.jpg` | The whole vehicle in one frame, the closest analogue to the tour's exterior stop framing. Radiused body corners, the sculpted FRP over-cab, wheel arches |
+| `exterior-front-three-quarter-0m05s.jpg` | The Iveco cab: raked windscreen, bonnet, grille, mirrors on arms. Shows the over-cab moulding flowing over the cab |
+| `livery-wordmark-detail.jpg` | `DACHIRV 大驰` in orange on a near-black band under the orange field. Settles the wordmark's colour and its ground, which the wider frames leave ambiguous |
+| `kerb-window-frame-detail.jpg` | The kerb window at close range: a wide black frame with large corner radii, dark tinted glass, and a top-hinged pane on black stays |
 
 Read together these give the hybrid layout recorded in `src/check.test.ts`'s handedness guard.
 They also settle the order along the off flank, which the flank assignment alone does not: from
@@ -33,3 +38,8 @@ the spatial brief's prose got wrong.
 The video also settles, independently of handedness: a rear side door with keypad and grab
 handle, 前一后二 booth with a drawer in the table, "3米2" overall height, walnut-dominant cabin,
 black composite sink and gooseneck tap, no interior washer, 270 L fresh water.
+
+The five exterior frames were added 2026-09-07 for the exterior-fidelity pass. Every one of
+them is shot indoors, in an exhibition hall with skylights and a polished floor: there is no
+sky in any reference frame, which is why the sky in that pass is recorded as a deliberate
+departure rather than as something the evidence supports.

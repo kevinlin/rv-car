@@ -4,6 +4,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { Sky } from 'three/addons/objects/Sky.js';
 import { createLook, type LookControls } from './look';
 
 export interface SceneBundle {
@@ -13,6 +14,10 @@ export interface SceneBundle {
   controls: OrbitControls;
   look: LookControls;
   composer: EffectComposer;
+  bloom: UnrealBloomPass;
+  sky: Sky;
+  skyEnvironment: THREE.Texture;
+  sun: THREE.DirectionalLight;
   render: () => void;
 }
 
@@ -34,10 +39,30 @@ export const createScene = (canvas: HTMLCanvasElement): SceneBundle => {
   // background the windows read as grey holes instead of the blown-out openings in the reference.
   scene.background = new THREE.Color(0xeef3fb);
 
-  // The world outside, so the exterior stop has something to stand on and the glazing has
-  // something to reflect. The parent spec records both as known gaps.
-  const sky = new THREE.HemisphereLight(0xdcecff, 0x6a6257, 0.6);
+  scene.add(new THREE.HemisphereLight(0xdcecff, 0x6a6257, 0.6));
+
+  // Owner-requested outdoor setting. Light the front and kerb flank seen in the walkaround.
+  const sunDirection = new THREE.Vector3(6, 8, -6).normalize();
+  const sky = new Sky();
+  sky.scale.setScalar(80);
+  sky.material.uniforms.sunPosition!.value.copy(sunDirection);
+  const skyScene = new THREE.Scene();
+  skyScene.add(sky);
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const skyEnvironment = pmrem.fromScene(skyScene).texture;
+  pmrem.dispose();
+  sky.visible = false;
   scene.add(sky);
+
+  const sun = new THREE.DirectionalLight(0xfff4e5, 1.4);
+  sun.target.position.set(0, 0.4, 1.05);
+  sun.position.copy(sun.target.position).addScaledVector(sunDirection, 8);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.camera.near = 1;
+  sun.shadow.camera.far = 16;
+  sun.visible = false;
+  scene.add(sun, sun.target);
 
   const ground = new THREE.Mesh(
     new THREE.CircleGeometry(60, 48).rotateX(-Math.PI / 2),
@@ -106,5 +131,5 @@ export const createScene = (canvas: HTMLCanvasElement): SceneBundle => {
     composer.setSize(window.innerWidth, window.innerHeight);
   });
 
-  return { scene, camera, renderer, controls, look, composer, render };
+  return { scene, camera, renderer, controls, look, composer, bloom, sky, skyEnvironment, sun, render };
 };

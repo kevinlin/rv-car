@@ -5,7 +5,8 @@ export type Role =
   | 'metal.brushed' | 'metal.chrome' | 'metal.dark' | 'textile.curtain'
   | 'led.cove' | 'glass'
   | 'graphic.print' | 'graphic.screen'
-  | 'body.paint' | 'body.graphic' | 'tyre' | 'wheel';
+  | 'body.paint' | 'body.graphic' | 'body.trim' | 'body.chrome'
+  | 'body.led' | 'body.screen' | 'glass.tint' | 'tyre' | 'wheel';
 
 /**
  * A texture described, not loaded. This file imports nothing, so it cannot hold a
@@ -45,6 +46,21 @@ export type Registry = Record<Role, { active: string; variants: Variant[] }>;
 const one = (id: string, label: string, params: MaterialParams) => ({
   active: id,
   variants: [{ id, label, params }],
+});
+
+const trim = one('black', 'Matt black', { color: 0x1e1e1e, roughness: 0.4, metalness: 0.8 });
+const chrome = one('chrome', 'Chrome', { color: 0xffffff, roughness: 0.05, metalness: 1 });
+const led = {
+  active: 'warm',
+  variants: [
+    { id: 'warm',    label: 'Warm white',    params: { color: 0x000000, roughness: 1, metalness: 0, emissive: 0xffd9a0, emissiveIntensity: 3.5 } },
+    { id: 'neutral', label: 'Neutral white', params: { color: 0x000000, roughness: 1, metalness: 0, emissive: 0xfff3e0, emissiveIntensity: 3.5 } },
+  ],
+};
+const screen = one('systems', 'Systems panel', {
+  color: 0xffffff, roughness: 0.2, metalness: 0,
+  emissive: 0x3a6ea8, emissiveIntensity: 2.2,
+  map: { url: '/textures/systems-panel.webp' },
 });
 
 /** Colours are estimated from the reference imagery — see the research note's palette table. */
@@ -110,44 +126,39 @@ export const DEFAULT_REGISTRY: Registry = {
     map: { url: '/textures/grp-ribbed.webp', repeat: [2, 2] } }),
   'washroom.duckboard':one('teak', 'Teak', { color: 0x9a6b3c, roughness: 0.6, metalness: 0 }),
   'metal.brushed':     one('aluminium', 'Brushed aluminium', { color: 0xb8bcc0, roughness: 0.35, metalness: 1 }),
-  'metal.chrome':      one('chrome', 'Chrome', { color: 0xffffff, roughness: 0.05, metalness: 1 }),
-  'metal.dark':        one('black', 'Matt black', { color: 0x1e1e1e, roughness: 0.4, metalness: 0.8 }),
+  'metal.chrome':      structuredClone(chrome),
+  'metal.dark':        structuredClone(trim),
   'textile.curtain':   one('sand', 'Sand', { color: 0xd9cfbe, roughness: 0.95, metalness: 0,
     map: { url: '/textures/damask.webp', repeat: [6, 6] } }),
   // 3.5, not the 14 the first pass used: at 14 the cove strips and downlights clipped to
   // white and streaked across the wall. The strips still read as lit; the RectAreaLights
   // in lighting.ts do the illuminating either way.
-  'led.cove': {
-    active: 'warm',
-    variants: [
-      { id: 'warm',    label: 'Warm white',    params: { color: 0x000000, roughness: 1, metalness: 0, emissive: 0xffd9a0, emissiveIntensity: 3.5 } },
-      { id: 'neutral', label: 'Neutral white', params: { color: 0x000000, roughness: 1, metalness: 0, emissive: 0xfff3e0, emissiveIntensity: 3.5 } },
-    ],
-  },
+  'led.cove': structuredClone(led),
   // Flat graphics: framed art and the photo wall carry their image, the systems panel and TV
   // glow. Both keep color white so the photographic map is not tinted a second time.
   'graphic.print':  one('photo-wall', 'Photo wall', {
     color: 0xffffff, roughness: 0.9, metalness: 0, transparent: true,
     map: { url: '/textures/photo-wall.webp' },
   }),
-  'graphic.screen': one('systems', 'Systems panel', {
-    color: 0xffffff, roughness: 0.2, metalness: 0,
-    emissive: 0x3a6ea8, emissiveIntensity: 2.2,
-    map: { url: '/textures/systems-panel.webp' },
-  }),
+  'graphic.screen': structuredClone(screen),
   // Emissive rather than transparent: the world outside is not modelled, so the panes are lit
   // to read as blown-out daylight openings the way the reference shots do.
   'glass':             one('clear', 'Clear', { color: 0xdfe6ea, roughness: 0.05, metalness: 0, emissive: 0xeef4ff, emissiveIntensity: 1.4 }),
 
+  'body.trim': structuredClone(trim),
+  'body.chrome': structuredClone(chrome),
+  'body.led': structuredClone(led),
+  'body.screen': structuredClone(screen),
+  'glass.tint': one('tinted', 'Tinted glass', { color: 0x18252b, roughness: 0.05, metalness: 0 }),
   'body.paint':   one('white-grp', 'White GRP', { color: 0xf2f3f2, roughness: 0.35, metalness: 0 }),
   // One copy across the flank, not a tile: the artwork carries a wordmark, and a wordmark
-  // cannot be cut. box_uv gives the decal plane a UV spanning 3.4 x 0.70 at 1.0 UV/m, which is
+  // cannot be cut. box_uv gives the decal plane a UV spanning 3.9 x 1.75 at 1.0 UV/m, which is
   // what the rest of the pipeline holds every unwrap to, and this repeat divides it back to a
   // single copy. The UV survives the dispatch loop because model_interior.KEEPS_OWN_UV exempts
   // it; without that exemption smart_project would supply an origin and span nobody knows.
   'body.graphic': one('livery', 'Livery', {
     color: 0xffffff, roughness: 0.4, metalness: 0, transparent: true,
-    map: { url: '/textures/side-livery.webp', repeat: [1 / 3.4, 1 / 0.70] },
+    map: { url: '/textures/side-livery.webp', repeat: [1 / 3.9, 1 / 1.75] },
   }),
   'tyre':         one('rubber', 'Rubber', { color: 0x1a1a1c, roughness: 0.9, metalness: 0 }),
   'wheel':        one('alloy', 'Alloy', { color: 0xa8acb0, roughness: 0.3, metalness: 1 }),
@@ -160,4 +171,7 @@ export const ALL_ROLES = Object.keys(DEFAULT_REGISTRY) as Role[];
  * the cabin, so these must be held out of it: wrapping the cabin in an opaque body otherwise
  * replaces the daylight arriving through the glazing with bounce off warm bodywork.
  */
-export const EXTERIOR_ROLES: readonly Role[] = ['body.paint', 'body.graphic', 'tyre', 'wheel'];
+export const EXTERIOR_ROLES: readonly Role[] = [
+  'body.paint', 'body.graphic', 'body.trim', 'body.chrome', 'body.led', 'body.screen',
+  'glass.tint', 'tyre', 'wheel',
+];

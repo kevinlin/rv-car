@@ -1,41 +1,61 @@
 <!--
-  The flank livery, drawn by eye from docs/research/walkthrough/exterior-kerb-flank-0m59s.jpg.
+  The flank livery, drawn by eye from docs/research/walkthrough/exterior-kerb-flank-2m38s.jpg,
+  with the wordmark's colour and ground read off livery-wordmark-detail.jpg, which is the only
+  frame close enough to settle them.
 
   NOT rectified from a frame, deliberately: the presenter stands in front of the flank in every
-  shot that shows enough of it, and the showroom ceiling reflects off the paint. Rectifying that
-  would bake a person's shadow and a showroom into the vehicle's paintwork.
+  shot that shows enough of it, and the exhibition hall's ceiling reflects off the paint.
+  Rectifying that would bake a person's shadow and a showroom into the vehicle's paintwork.
 
-  The canvas is 3.4 : 0.70, matching the decal plane in tools/model_exterior.py. x = 0 lands at
-  the AFT end on the kerb flank — the flank the reference photograph shows — and at the forward
-  end on the off flank, because the two flanks are mirror images and one texture cannot give both
-  the same composition and legible lettering at once. See box_uv's `flip` in model_exterior.py.
+  The canvas is 3.9 : 1.75 at 525 px/m, matching the decal plane in tools/model_exterior.py,
+  which spans y 0.05-3.95 and z 0.30-2.05. Working through box_uv's `1 - dv` and the exporter's
+  V flip, v lands 0 at the plane's BOTTOM, so the SVG is the right way up: its top edge is
+  z 2.05. On the KERB flank (flip=True) u runs aft-to-forward, so this image reads left = rear,
+  right = nose — the same way round as the reference photograph. On the off flank it mirrors,
+  which is the trade recorded in the child spec's §7b: one texture cannot give two mirrored
+  flanks the same fore-aft composition and legible lettering at once.
+
   Background is transparent, so body.paint shows through as the white of the livery.
 
-  Colours sampled from the frame and white-balanced against the body panels, which read #7e8e8d
-  under the showroom's light:
-    teal   #12657c   the leading chevron
-    black  #191b1c   the trailing chevron
-    orange #e8912a   the panel under the window, and the wordmark
+  Stations that constrain the composition, all read off the placements rather than the photo:
+    boarding door   y 2.96-3.66  ->  x  152- 520   left white, the photo shows no graphic on it
+                                                   the chevron tips stop at x 600 so the miter clears it
+    flank window    y 0.29-1.91  ->  x 1071-1922   must sit inside the orange field
+                    z 0.83-1.40  ->  y  341- 641
+
+  Colours sampled from the frames and white-balanced against the body panels, which read
+  #7e8888 under the hall's light:
+    teal   #12657c   the leading edge band and the upper chevron
+    black  #191b1c   the wordmark's ground and the lower chevron
+    orange #e8912a   the main field, and the wordmark itself
 
   Rasterise with: node tools/render_livery.mjs
 -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 422" width="2048" height="422">
-  <!-- The orange panel. Its forward end runs off the plane; its aft end is raked, which is what
-       the two chevrons lie against. -->
-  <path d="M 820 0 H 2048 V 244 L 1180 272 L 900 150 Z" fill="#e8912a"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 919" width="2048" height="919">
+  <!-- The orange field: the dominant mass, enclosing the window, raked at its aft end and
+       stopping short of the boarding door. Its forward end runs off the plane onto the cab. -->
+  <path d="M 760 250 L 980 150 L 2048 95 L 2048 700 L 1080 762 L 900 660 Z" fill="#e8912a"/>
 
-  <!-- Two nested arrowheads pointing aft and down, the way the reference has them. Mitred, not
-       rounded: these are cut vinyl, not brush strokes. -->
-  <path d="M 990 12 L 200 202 L 700 402" fill="none" stroke="#191b1c"
-        stroke-width="56" stroke-linejoin="miter" stroke-miterlimit="6"/>
-  <path d="M 990 121 L 528 224 L 780 325" fill="none" stroke="#12657c"
-        stroke-width="56" stroke-linejoin="miter" stroke-miterlimit="6"/>
+  <!-- Teal along the field's leading top edge, carried to the forward edge of the plane. Cut
+       vinyl, so mitred rather than rounded. -->
+  <path d="M 738 272 L 980 108 L 2048 52 L 2048 112 L 998 166 L 782 316 Z" fill="#12657c"/>
 
-  <!-- DACHIRV 大驰, on the white below the panel, where the reference puts it. -->
-  <text x="1290" y="368" fill="#e8912a" font-size="96" letter-spacing="14"
+  <!-- The two nested chevrons at the aft end of the field, pointing aft and down, the way the
+       reference has them lying against the field's rake. -->
+  <path d="M 980 268 L 600 428 L 905 604" fill="none" stroke="#191b1c"
+        stroke-width="50" stroke-linejoin="miter" stroke-miterlimit="6"/>
+  <path d="M 960 372 L 690 468 L 880 556" fill="none" stroke="#12657c"
+        stroke-width="42" stroke-linejoin="miter" stroke-miterlimit="6"/>
+
+  <!-- The wordmark's ground: a near-black band tapering aft, below the field's lower edge.
+       livery-wordmark-detail.jpg is unambiguous that the lettering sits on dark, not on white. -->
+  <path d="M 780 800 L 2048 690 L 2048 824 L 800 904 Z" fill="#191b1c"/>
+
+  <!-- DACHIRV 大驰, orange on that band, where the reference puts it. -->
+  <text x="1210" y="818" fill="#e8912a" font-size="78" letter-spacing="11"
         font-family="Avenir Next, Helvetica Neue, Arial, sans-serif" font-weight="600"
       >DACHIRV</text>
-  <text x="1810" y="366" fill="#e8912a" font-size="80"
+  <text x="1666" y="816" fill="#e8912a" font-size="66"
         font-family="PingFang SC, Hiragino Sans GB, Heiti SC, sans-serif" font-weight="600"
       >大驰</text>
 </svg>

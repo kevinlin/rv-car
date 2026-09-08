@@ -5,7 +5,7 @@ import { roleOf } from './finishes';
 
 /** The authored modules share one AO atlas, so duplicate role materials can share a draw. */
 export function batchByRole(root: THREE.Object3D): number {
-  const movable = new Set(PLACEMENTS.filter((p) => p.movable).map((p) => p.id));
+  const owners = new Set([...PLACEMENTS.filter((p) => p.movable).map((p) => p.id), 'slideout_box']);
   const buckets = new Map<THREE.Object3D, Map<string, THREE.Mesh[]>>();
   root.updateWorldMatrix(true, true);
   root.traverse((node) => {
@@ -14,7 +14,7 @@ export function batchByRole(root: THREE.Object3D): number {
     const role = roleOf(node.material.name);
     if (!role) return;
     let owner: THREE.Object3D = node;
-    while (owner !== root && !movable.has(owner.name)) owner = owner.parent!;
+    while (owner !== root && !owners.has(owner.name)) owner = owner.parent!;
     if (!buckets.has(owner)) buckets.set(owner, new Map());
     const roles = buckets.get(owner)!;
     if (!roles.has(role)) roles.set(role, []);

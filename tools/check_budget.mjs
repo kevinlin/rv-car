@@ -51,6 +51,9 @@ export const checkBudget = async () => {
 
   let bytes = 0;
   for (const f of await glbsIn(OUT_DIR)) bytes += (await stat(f)).size;
+  for (const file of await readdir('public/textures', { recursive: true, withFileTypes: true })) {
+    if (file.isFile()) bytes += (await stat(join(file.parentPath, file.name))).size;
+  }
 
   return summarise(triangles, bytes);
 };

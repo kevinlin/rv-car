@@ -52,6 +52,23 @@ describe('DEFAULT_REGISTRY', () => {
 });
 
 describe('applyFinishes', () => {
+  it('resets inherited GLTFLoader transparency, opacity and depth writes', () => {
+    const material = new THREE.MeshStandardMaterial({
+      name: 'role.glass', transparent: true, opacity: 0.24, depthWrite: false,
+    });
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(), material);
+    applyFinishes(mesh);
+    expect(material.transparent).toBe(false);
+    expect(material.depthWrite).toBe(true);
+    expect(material.opacity).toBe(1);
+
+    material.name = 'role.body.graphic';
+    applyFinishes(mesh);
+    expect(material.transparent).toBe(true);
+    expect(material.depthWrite).toBe(false);
+    expect(material.opacity).toBe(1);
+  });
+
   it('restyles every mesh whose material carries a known role', () => {
     const root = new THREE.Group();
     root.add(meshWithMaterial('role.wood.cabinet'));

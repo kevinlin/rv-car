@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { DEFAULT_REGISTRY, type Role } from './finishes';
+import { DEFAULT_REGISTRY, EXTERIOR_ROLES, type Role } from './finishes';
 
 /** HSV saturation of a packed 0xRRGGBB colour. 0 is a perfect neutral. */
 const saturation = (hex: number): number => {
@@ -37,12 +37,35 @@ describe('neutral roles', () => {
 });
 
 describe('the livery decal', () => {
-  it('lands exactly one copy on the 3.4 x 0.70 m panel', () => {
-    // The UV spans 3.4 x 0.70 because box_uv writes it that way, matching the 1.0 UV/m the rest
+  it('lands exactly one copy on the 3.9 x 1.75 m panel', () => {
+    // The UV spans 3.9 x 1.75 because box_uv writes it that way, matching the 1.0 UV/m the rest
     // of the pipeline holds every unwrap to. A repeat of 1 would tile the wordmark four times
     // across the flank.
     const map = DEFAULT_REGISTRY['body.graphic'].variants[0]!.params.map!;
-    expect(map.repeat![0]! * 3.4).toBeCloseTo(1, 6);
-    expect(map.repeat![1]! * 0.70).toBeCloseTo(1, 6);
+    expect(map.repeat![0]! * 3.9).toBeCloseTo(1, 6);
+    expect(map.repeat![1]! * 1.75).toBeCloseTo(1, 6);
+  });
+});
+
+describe('exterior-only finishes', () => {
+  it.each(['body.trim', 'body.chrome', 'body.led', 'body.screen', 'glass.tint'])(
+    'holds %s out of interior views and probe captures', (role) => {
+      expect(EXTERIOR_ROLES).toContain(role);
+    },
+  );
+
+  it.each([
+    ['body.trim', 'metal.dark'], ['body.chrome', 'metal.chrome'],
+    ['body.led', 'led.cove'], ['body.screen', 'graphic.screen'],
+  ])('preserves the predecessor appearance for %s', (role, predecessor) => {
+    expect(DEFAULT_REGISTRY[role as Role]).toEqual(DEFAULT_REGISTRY[predecessor as Role]);
+  });
+
+  it('uses dark, smooth, non-emissive exterior glazing', () => {
+    const params = DEFAULT_REGISTRY['glass.tint' as Role]?.variants[0]?.params;
+    expect(params).toBeDefined();
+    expect(params!.color).toBeLessThan(0x303030);
+    expect(params!.roughness).toBeLessThanOrEqual(0.1);
+    expect(params!.emissive ?? 0).toBe(0);
   });
 });

@@ -24,6 +24,8 @@ document.body.appendChild(canvas);
 
 const bundle = createScene(canvas);
 const { root: vehicle, loaded, missing } = await loadModules(bundle.renderer);
+canvas.dataset.loadedModules = loaded.join(',');
+canvas.dataset.missingModules = missing.join(',');
 
 if (loaded.length === 0) {
   // No modules built yet: fall back to the phase 1 grey-box so the app still runs.
@@ -38,7 +40,18 @@ if (loaded.length === 0) {
 }
 
 const registry = structuredClone(DEFAULT_REGISTRY);
-const resolveTexture = createTextureResolver();
+// A failed image still ends its LoadingManager item. Keep errors separate from completion.
+let textureState = 'ready', texturedFrames = 0;
+const textureErrors: string[] = [];
+const textureManager = new THREE.LoadingManager();
+textureManager.onStart = () => { textureState = 'loading'; texturedFrames = 0; };
+textureManager.onError = (url) => { textureErrors.push(url); textureState = 'error'; };
+textureManager.onLoad = () => {
+  if (textureErrors.length) { textureState = 'error'; return; }
+  refreshProbe(); // Re-capture once the asynchronous finish images are available.
+  textureState = 'ready';
+};
+const resolveTexture = createTextureResolver(textureManager);
 applyFinishes(vehicle, registry, resolveTexture);
 bundle.scene.add(vehicle);
 
@@ -61,6 +74,7 @@ let refreshProbe = () => {};
  * bodywork, and drawing it anyway cost the lounge 6 draw calls — 41 against a ceiling of 40.
  */
 let showExterior = (_visible: boolean) => {};
+export let showInterior = (_visible: boolean) => {};
 
 if (usingGreybox) {
   bundle.scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 2.0));
@@ -73,6 +87,7 @@ if (usingGreybox) {
   // no "exterior" node left to look up. The roles are the stable handle.
   const exteriorRoles = new Set<Role>(EXTERIOR_ROLES);
   const exterior: THREE.Object3D[] = [];
+  const interior: THREE.Object3D[] = [];
   vehicle.traverse((o) => {
     if (!(o instanceof THREE.Mesh)) return;
     const materials = Array.isArray(o.material) ? o.material : [o.material];
@@ -80,14 +95,49 @@ if (usingGreybox) {
       const role = roleOf(mat.name);
       return role !== null && exteriorRoles.has(role);
     })) exterior.push(o);
+    else interior.push(o);
   });
-  ({ refreshProbe } = installLighting(bundle.scene, bundle.renderer, vehicle, exterior));
+  const lighting = installLighting(bundle.scene, bundle.renderer, vehicle, exterior, bundle);
   showExterior = (visible) => { for (const o of exterior) o.visible = visible; };
+  showInterior = (visible) => { for (const o of interior) o.visible = visible; };
+  refreshProbe = () => {
+    // Exterior stops hide the cabin. The interior probe still needs that cabin on all six faces.
+    const wasVisible = interior.map((o) => o.visible);
+    try {
+      showInterior(true);
+      lighting.refreshProbe();
+    } finally {
+      interior.forEach((o, i) => { o.visible = wasVisible[i]!; });
+    }
+  };
 }
+
+const slideout = vehicle.getObjectByName('slideout_box');
+const interiorEnvironment = bundle.scene.environment;
+const interiorEnvironmentIntensity = bundle.scene.environmentIntensity;
+const interiorBackground = bundle.scene.background;
 
 /** Fly to a hotspot, showing the body only when the hotspot is the one that orbits it. */
 const goTo = (h: (typeof HOTSPOTS)[number], ms?: number) => {
+  const exterior = h.id === 'exterior'; // The plan also orbits, but must keep interior lighting.
+  showInterior(!exterior);
   showExterior(h.view.kind === 'orbit');
+  // Apply last: role selection includes BOTH the original mesh and its role batch.
+  // Every descendant must agree, so ancestor visibility cannot mask a stale child flag.
+  slideout?.traverse((o) => { o.visible = !exterior; });
+  texturedFrames = 0;
+  bundle.scene.environment = exterior ? bundle.skyEnvironment : interiorEnvironment;
+  // 0.45, not 1: Sky's PMREM is far brighter than the interior probe, and at parity the white
+  // body clipped and ACES desaturated the livery to pale cream. Measured by eye against
+  // docs/research/walkthrough/exterior-kerb-flank-2m38s.jpg, where the orange stays orange.
+  bundle.scene.environmentIntensity = exterior ? 0.45 : interiorEnvironmentIntensity;
+  // Bloom's 5.0 threshold is tuned for cove strips against interior panels. Outdoors the
+  // sunlit body sails past it and the whole vehicle blooms into a white ghost, so the
+  // threshold steps out of the way and only the awning strip is left able to reach it.
+  bundle.bloom.threshold = exterior ? 12 : 5;
+  bundle.scene.background = exterior ? null : interiorBackground;
+  bundle.sky.visible = bundle.sun.visible = exterior;
+  bundle.renderer.shadowMap.needsUpdate = true;
   labels.setVisible(h.id === 'plan' && labelsWanted);
   document.body.dataset.stop = h.id;   // the toggle button hides itself off this
   return tweenTo(bundle, h, ms);
@@ -122,8 +172,7 @@ if (import.meta.env.DEV && new URLSearchParams(location.search).has('verify')) {
   // Live handle for camera and lighting tuning from the devtools console. refreshProbe is
   // included because cooling the cove tint only reaches the bounce light after a re-capture.
   Object.assign(window, { __rv: bundle, __refreshProbe: refreshProbe });
-  canvas.dataset.loadedModules = loaded.join(',');
-  canvas.dataset.boundPlacements = String(bindPlacements(vehicle).size);
+  canvas.dataset.boundPlacements = String(!usingGreybox && !missing.length ? bindPlacements(vehicle).size : 0);
   // The composer calls renderer.render once per pass, and each call resets the counters — so
   // without this the readout is whatever the last full-screen quad drew, which is 1. Reset once
   // per frame instead and the number covers the scene plus the post chain, which is what the
@@ -135,6 +184,9 @@ if (import.meta.env.DEV && new URLSearchParams(location.search).has('verify')) {
     labels.render(bundle.scene, bundle.camera);
     canvas.dataset.drawCalls = String(bundle.renderer.info.render.calls);
     canvas.dataset.triangles = String(bundle.renderer.info.render.triangles);
+    canvas.dataset.textureState = textureState;
+    canvas.dataset.textureErrors = textureErrors.join(',');
+    canvas.dataset.texturedFrames = String(textureState === 'ready' ? ++texturedFrames : (texturedFrames = 0));
     if (++frames === 120) {
       canvas.dataset.fps = (120_000 / (performance.now() - started)).toFixed(1);
       frames = 0;

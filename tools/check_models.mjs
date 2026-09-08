@@ -2,12 +2,13 @@ import { readFile, writeFile, stat } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { NodeIO } from '@gltf-transform/core';
 import { Box3, Matrix4, Quaternion, Vector3 } from 'three';
-import { ALL_ROLES } from '../src/data/finishes.ts';
+import { ALL_ROLES, EXTERIOR_ROLES } from '../src/data/finishes.ts';
 import { MAX_BYTES, MAX_TRIANGLES } from './check_budget.mjs';
 
 const MODULES = ['shell', 'cab', 'alcove_bed', 'dinette', 'sofa_slideout', 'galley', 'washroom', 'lockers', 'softgoods', 'exterior'];
 const TOLERANCE = 0.001; // One millimetre, including float and compression error.
 const ROLES = new Set(ALL_ROLES.map((role) => `role.${role}`));
+const EXTERIOR = new Set(EXTERIOR_ROLES.map((role) => `role.${role}`));
 
 // Accessor bounds also survive Draco compression. Traverse descendants so an empty
 // placement root does not hide an incorrectly positioned chair back or cabinet door.
@@ -55,6 +56,43 @@ export function checkPlacement(placement, entry, requireGeometry = true) {
   return { id: placement.id, origin, bounds: entry.bounds.isEmpty() ? null : { min: entry.bounds.min.toArray(), max: entry.bounds.max.toArray() }, errors };
 }
 
+export function checkLiveryUV(doc) {
+  const errors = [];
+  for (const name of ['body_graphic_off', 'body_graphic_kerb']) {
+    const node = doc.getRoot().listNodes().find((n) => n.getName() === name);
+    const primitives = node?.getMesh()?.listPrimitives() ?? [];
+    if (!primitives.length) { errors.push(`${name}: missing decal geometry`); continue; }
+    const world = new Matrix4().fromArray(node.getWorldMatrix());
+    const bounds = new Box3();
+    for (const primitive of primitives) {
+      const positions = primitive.getAttribute('POSITION');
+      const uv = primitive.getAttribute('TEXCOORD_0');
+      if (!positions || !uv) { errors.push(`${name}: missing positions or livery UV`); continue; }
+      if (primitive.getMaterial()?.getName().replace(/\.\d{3}$/, '') !== 'role.body.graphic') {
+        errors.push(`${name}: decal must use role.body.graphic`);
+      }
+      if (positions.getCount() !== uv.getCount()) { errors.push(`${name}: livery UV count differs`); continue; }
+      for (let i = 0; i < positions.getCount(); i++) {
+        const point = new Vector3().fromArray(positions.getElement(i, [])).applyMatrix4(world);
+        bounds.expandByPoint(point);
+        const [u, v] = uv.getElement(i, []);
+        const expectedU = name.endsWith('kerb') ? 3.95 - point.z : point.z - 0.05;
+        if (![u, v].every(Number.isFinite) || Math.abs(u - expectedU) > TOLERANCE || Math.abs(v - (point.y - 0.30)) > TOLERANCE) {
+          errors.push(`${name}: exported livery UV origin, orientation or span differs`);
+        }
+      }
+    }
+    const centre = bounds.getCenter(new Vector3()).toArray();
+    const size = bounds.getSize(new Vector3()).toArray();
+    const x = name.endsWith('kerb') ? 1.228 : -1.228;
+    if (centre.some((v, i) => Math.abs(v - [x, 1.175, 2.0][i]) > TOLERANCE)
+      || size.some((v, i) => Math.abs(v - [0.004, 1.75, 3.9][i]) > TOLERANCE)) {
+      errors.push(`${name}: decal must cover the 3.9 x 1.75 m flank`);
+    }
+  }
+  return [...new Set(errors)];
+}
+
 export async function checkModels() {
   const placements = JSON.parse(await readFile('model/placements.json', 'utf8')).objects;
   const report = { checkedAt: new Date().toISOString(), toleranceMetres: TOLERANCE, modules: [], violations: [], triangles: 0, bytes: 0, optimizedPrimitiveInstances: 0 };
@@ -66,6 +104,9 @@ export async function checkModels() {
       report.modules.push(result);
       try {
         const { json } = await new NodeIO().readAsJSON(path);
+        if (module === 'exterior' && stage === 'raw') {
+          result.errors.push(...checkLiveryUV(await new NodeIO().read(path)));
+        }
         const entries = sceneNodes(json);
         if (!entries.some((entry) => entry.primitives.length)) result.errors.push('module contains no geometry');
         for (const placement of placements.filter((p) => p.collection === module)) {
@@ -84,16 +125,20 @@ export async function checkModels() {
             const material = json.materials?.[primitive.material];
             const role = material?.name?.replace(/\.\d{3}$/, '');
             if (!ROLES.has(role)) result.errors.push(`unknown material role: ${material?.name}`);
+            if (module === 'exterior' && !EXTERIOR.has(role)) {
+              result.errors.push(`exterior primitive uses non-exterior role: ${material?.name}`);
+            }
             if (stage === 'raw') {
               const count = json.accessors[primitive.indices ?? primitive.attributes.POSITION].count;
               if ((primitive.mode ?? 4) !== 4) result.errors.push('non-triangle primitive cannot be budgeted');
               report.triangles += count / 3;
             } else {
-              const movable = placements.find((p) => p.movable && (p.id === entry.node.name || entry.ancestors.includes(p.id)));
-              batchedRoles.add(`${movable?.id ?? 'static'}:${role}`);
+              const owner = placements.find((p) => (p.movable || p.id === 'slideout_box')
+                && (p.id === entry.node.name || entry.ancestors.includes(p.id)));
+              batchedRoles.add(`${owner?.id ?? 'static'}:${role}`);
             }
             // Glass and emissive strips do not receive ambient occlusion.
-            if (role === 'role.glass' || role === 'role.led.cove') continue;
+            if (['role.glass', 'role.glass.tint', 'role.led.cove', 'role.body.led'].includes(role)) continue;
             const ao = material?.occlusionTexture;
             const texture = json.textures?.[ao?.index];
             const image = json.images?.[texture?.extensions?.KHR_texture_basisu?.source ?? texture?.source];
@@ -156,6 +201,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const report = await checkModels();
   await writeFile('model/verification.json', `${JSON.stringify(report, null, 2)}\n`);
   console.log(`${report.passed ? 'PASS' : 'FAIL'}: ${report.triangles} triangles, ${report.bytes} bytes, ${report.optimizedPrimitiveInstances} exported draws; role-batched estimate ${report.potentialRoleBatchedDrawCalls}.`);
+  if (report.exteriorEnvelope) {
+    console.log(Object.entries(report.exteriorEnvelope).map(([name, value]) => `${name} ${value.toFixed(3)}`).join(', '));
+  }
   for (const violation of report.violations) console.error(violation);
   console.log('Report: model/verification.json');
   process.exitCode = report.passed ? 0 : 1;

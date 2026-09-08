@@ -8,8 +8,8 @@ export type Resolve = (spec: TextureSpec) => THREE.Texture | null;
  * Caches by url plus the settings that would otherwise force a second GPU upload of the same
  * image. Two roles sharing a url and a repeat share one texture.
  */
-export const createTextureResolver = (): Resolve => {
-  const loader = new THREE.TextureLoader();
+export const createTextureResolver = (manager?: THREE.LoadingManager): Resolve => {
+  const loader = new THREE.TextureLoader(manager);
   const cache = new Map<string, THREE.Texture>();
 
   return (spec) => {

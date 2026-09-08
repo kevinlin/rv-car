@@ -74,7 +74,7 @@ settings = bpy.data.node_groups.get('glTF Material Output') or bpy.data.node_gro
 if not settings.interface.items_tree:
     settings.interface.new_socket(name='Occlusion',in_out='INPUT',socket_type='NodeSocketFloat')
 for mat in bpy.data.materials:
-    if mat.name in ['role.led.cove','role.glass']:
+    if mat.name in ['role.led.cove', 'role.body.led', 'role.glass', 'role.glass.tint']:
         continue
     nodes, links = mat.node_tree.nodes, mat.node_tree.links
     tex = nodes.get('AO bake target') or nodes.new('ShaderNodeTexImage')

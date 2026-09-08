@@ -14,6 +14,26 @@ const mesh = (role = 'wood.cabinet') => {
 };
 
 describe('role batching', () => {
+  it('keeps slideout_box in its own paint batch for mesh and multi-primitive roots', () => {
+    for (const groupRoot of [false, true]) {
+      const root = new THREE.Group(), body = mesh('body.paint');
+      const slideout = groupRoot ? new THREE.Group() : mesh('body.paint');
+      slideout.name = 'slideout_box';
+      slideout.position.set(1.515, 1.0075, 1.1);
+      if (groupRoot) slideout.add(mesh('body.paint'));
+      root.add(body, slideout);
+      const before = new THREE.Box3().setFromObject(slideout, true);
+      expect(batchByRole(root)).toBe(2);
+      const batch = slideout.getObjectByName('batch.body.paint') as THREE.Mesh;
+      expect(batch.parent).toBe(slideout);
+      expect(batch.geometry.getAttribute('position').count).toBe(24);
+      expect(root.getObjectByName('slideout_box')).toBe(slideout);
+      const after = new THREE.Box3().setFromObject(slideout, true);
+      expect(before.min.distanceTo(after.min)).toBeLessThan(1e-6);
+      expect(before.max.distanceTo(after.max)).toBeLessThan(1e-6);
+    }
+  });
+
   it('merges exported primitives with mixed unused tangents without losing AO UVs', () => {
     const root = new THREE.Group(), a = mesh('panel.wall'), b = mesh('panel.wall');
     a.geometry.computeTangents();

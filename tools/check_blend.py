@@ -4,7 +4,7 @@ from mathutils import Vector
 
 scene = bpy.context.scene
 assert len(bpy.data.collections) == 10
-assert len([m for m in bpy.data.materials if m.name.startswith('role.')]) == 23
+assert len([m for m in bpy.data.materials if m.name.startswith('role.')]) == 28
 modules = ['shell', 'dinette', 'sofa_slideout', 'alcove_bed', 'lockers', 'cab', 'galley', 'softgoods', 'washroom', 'exterior']
 assert all(scene.get('modelled_' + name) for name in modules)
 
