@@ -213,13 +213,22 @@ export const PLACEMENTS: readonly Placement[] = [
  * The horizontal section height for the plan stop, in millimetres.
  *
  * Derived, not chosen. Both lounge locker runs have their underside at 1400 and the alcove
- * mattress tops out at 1350, so one plane at 1400 takes the ceiling, both cove fascias and
- * every locker run with it while leaving the beds whole. Move a locker run and the cut
+ * mattress tops out at 1350, so one plane just under 1400 takes the ceiling, both cove fascias
+ * and every locker run with it while leaving the beds whole. Move a locker run and the cut
  * follows it; placements.test.ts fails if the relationship breaks.
+ *
+ * CLEARANCE is why this is 1395 and not 1400. A clip plane lying exactly on a face gives every
+ * fragment of that face an interpolated distance of zero, and float error then decides
+ * per-fragment whether it survives — both locker undersides dissolved into horizontal streaks
+ * that crawled as the camera moved. 5 mm is below the plane's own precision at this range and
+ * far below anything the eye reads as a lowered cut, and it takes the face cleanly.
  */
 const underside = (id: string) => PLACEMENTS.find((p) => p.id === id)!.origin[1].v;
 
-export const PLAN_CUT_MM = Math.min(underside('lockers_off'), underside('lockers_kerb'));
+const CLEARANCE = 5;
+
+export const PLAN_CUT_MM =
+  Math.min(underside('lockers_off'), underside('lockers_kerb')) - CLEARANCE;
 
 /**
  * A label for the plan stop. Its dimensions are read off the placement it names, so a label

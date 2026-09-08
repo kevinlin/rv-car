@@ -137,9 +137,11 @@ describe('exterior', () => {
 describe('PLAN_CUT_MM', () => {
   const find = (id: string) => PLACEMENTS.find((p) => p.id === id)!;
 
-  it('sits at or below every locker run, so the plan view loses all of them', () => {
+  it('sits strictly below every locker run, so the plan view loses all of them', () => {
+    // Strictly, not at or below: a plane lying exactly on a face makes that face dissolve into
+    // streaks, because every fragment's clip distance is zero and float error breaks the tie.
     for (const id of ['lockers_off', 'lockers_kerb', 'alcove_lockers']) {
-      expect(PLAN_CUT_MM).toBeLessThanOrEqual(find(id).origin[1].v);
+      expect(PLAN_CUT_MM).toBeLessThan(find(id).origin[1].v);
     }
   });
 
@@ -150,8 +152,8 @@ describe('PLAN_CUT_MM', () => {
     }
   });
 
-  it('is 1400 mm today, which is the lounge lockers underside', () => {
-    expect(PLAN_CUT_MM).toBe(1400);
+  it('is 1395 mm today, 5 mm under the lounge lockers underside', () => {
+    expect(PLAN_CUT_MM).toBe(1395);
   });
 });
 

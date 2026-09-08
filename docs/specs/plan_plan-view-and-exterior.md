@@ -197,3 +197,15 @@ non-interior, non-exterior stop exists.
   the service room (galley kerb, washroom pod off), updated the palette to walnut-dominant, added
   interior fittings the video revealed, and shipped a post chain (bloom + GTAO). The lounge
   handedness this plan built was already correct; only the service room and finishes changed.
+- 2026-09-07 — **Stopped two exterior details z-fighting.** `wheel_*_face` ended exactly on the
+  tyre cylinder's outboard plane and `hatch_storage_trim` exactly on `hatch_storage`'s, so each
+  pair flashed between two roles' materials. The alloy face now stands 9 mm proud at
+  `width * .32`, and the hatch trim is recessed 9 mm behind the hatch at `kerb+.005`. Same class
+  of defect as the entry above — geometry that sits exactly on another surface's plane — and the
+  reason no texture change was involved.
+- 2026-09-08 — **Stopped the plan stop's top surfaces flickering.** `PLAN_CUT_MM` was the locker
+  underside exactly, so the clip plane lay *in* both locker runs' bottom faces: every fragment's
+  clip distance was zero and float error decided per-fragment whether it survived, dissolving the
+  runs into horizontal streaks that crawled as the camera moved. The cut now sits 5 mm under the
+  minimum underside. `placements.test.ts` asserts *strictly* below rather than at-or-below, so the
+  relationship cannot silently return to coincident.
