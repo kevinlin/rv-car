@@ -10,7 +10,7 @@ import sharp from 'sharp';
 
 const OUT = 'public/textures/side-livery.webp';
 
-// density 72 is 1 SVG px to 1 output px, so the file lands at the SVG's own 2048 x 422.
+// density 72 is 1 SVG px to 1 output px, so the file lands at the SVG's own 2048 x 919.
 await sharp(await readFile('model/side-livery.svg'), { density: 72 })
   .webp({ quality: 88, alphaQuality: 100 })
   .toFile(OUT);
