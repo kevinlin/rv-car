@@ -18,15 +18,21 @@ Nothing here is started. The measurements below are done and are the basis for t
 All numbers are the median of pixels matching `r>g>b && r−b>50 && r>90`, the same filter and the
 same statistic applied to render and photograph alike, so they compare.
 
-| Source | Hex | Saturation | Hue | Peak channel |
-|---|---|---|---|---|
-| Flat artwork (`side-livery.webp`) | `#e9912b` | 0.815 | 32° | 233 |
-| `exterior-kerb-flank-2m38s` | `#b1845f` | 0.463 | 27° | 177 |
-| `exterior-kerb-three-quarter-3m14s` | `#b26d57` | 0.511 | 15° | 178 |
-| `livery-wordmark-detail` | `#a67752` | 0.506 | 26° | 166 |
-| **Render today**, env 0.20 | `#edc977` | **0.498** | **42°** | 237 |
+| Source | Hue (median, IQR) | Saturation (median, IQR) |
+|---|---|---|
+| Flat artwork (`side-livery.webp`) | 32.2° | 0.815 |
+| `exterior-kerb-flank-2m38s` | 27.9° [26.5–28.9] | 0.540 [0.451–0.682] |
+| `exterior-kerb-three-quarter-3m14s` | 30.2° [29.4–31.2] | 0.827 [0.728–0.851] |
+| `livery-wordmark-detail` | 26.5° [25.3–27.7] | 0.466 [0.397–0.638] |
+| **Render today**, env 0.20 | **41.7°** [41.7–41.8] | 0.498 [0.496–0.502] |
 
-Saturation is in band. Hue is 15–27° in the photographs and 42° in the render.
+**Hue is the defect and the gate.** The three frames agree within 4° despite different lighting,
+distance and compression, and they bracket the artwork's 32.2°. The render sits at 41.7°.
+
+**Saturation is not a target.** The same frames span 0.466 to 0.827 — a real wrap photographs at
+wildly different saturation depending on how it is lit. `TARGET.saturation` is a wide sanity band
+to catch a regression to the pale cream this work began at (0.293), nothing more. The render's
+0.498 is already inside it, and raising it further is not an objective.
 
 **The hue does not respond to light.** Thirteen combinations of `environmentIntensity` × `tone‑
 MappingExposure`, spanning env 0.20–0.50 and exposure 0.40–1.05, hold hue between 40° and 42°
@@ -93,8 +99,7 @@ appearance number the spec records.** Changing it invalidates, and requires re-d
 | Setting | Where | Why it moves |
 |---|---|---|
 | `toneMappingExposure` 1.05 | `scene.ts:29` | Tuned against ACES; AgX in particular renders darker at parity |
-| Bloom threshold 5.0 | `scene.ts:115` | Documented as linear-HDR and therefore curve-independent — **verify, do not assume**, since what it must sit *above* is the tone-mapped appearance of the cream panels |
-| Bloom threshold 12 at the exterior | `main.ts:146` | Same |
+| ~~Bloom thresholds 5.0 and 12~~ | `scene.ts:115`, `main.ts:146` | **Struck — this was backwards.** The chain is RenderPass → bloom → OutputPass, and `LuminosityHighPassShader` thresholds the incoming *linear HDR* luminance, before any tone mapping. Changing the output curve cannot change which pixels cross 5 or 12. Review visible bloom, but do not re-derive the thresholds |
 | Exterior `environmentIntensity` 0.20 | `main.ts:142` | Tuned against ACES by the sweep this plan quotes; must be re-swept |
 | Cove tint `WARM = 0xffeed8` | `lighting.ts:24` | §7's warm-cast fix exists *because* "ACES saturates the warm end". Under a different curve the original `0xffd9a0` may be admissible again — re-measure before keeping the correction |
 | The three `?calibrate` patches | recorded 0.052 / **0.084** / 0.074 against a 0.08 ceiling | All three are saturation measurements through the curve |
@@ -119,9 +124,15 @@ per stop. `renderer.toneMapping` can join them, because `OutputPass` recompiles 
 
 - **Buys:** the interior keeps ACES, so §7's warm cast, the cove tint and every `?calibrate`
   number stand untouched. The blast radius shrinks to the exterior stop.
-- **Costs:** a shader recompile on every transition into or out of the exterior stop — a
-  measurable hitch, which `capture_stops.mjs` will not catch because it navigates fresh each time.
-  Measure it with a stop-to-stop transition, not a cold load. It also means the vehicle is graded
+- **Scope BOTH the curve and the exposure.** A.1 contemplates re-deriving `toneMappingExposure`,
+  which lives on the renderer and is global. Switching the curve back at interior stops while
+  leaving a new exposure applied still re-grades the interior, and the "interior untouched"
+  guarantee is then false. Save and restore both, and include the plan stop on the interior side.
+- **Costs:** a shader rebuild the first time each curve is used. `OutputPass` sets `needsUpdate`,
+  but `WebGLRenderer` keys programs by cache key and reuses them, so later switches hit the cache
+  — a recurring per-transition hitch is **not** established, only a first-use one. Measure it with
+  a stop-to-stop transition, not a cold load; `capture_stops.mjs` reloads per stop and will not
+  see it either way. It also means the vehicle is graded
   differently outdoors than indoors, which is defensible for a walkthrough but is a real
   inconsistency to state in the spec rather than discover later.
 - **Open question this must answer:** which curve the **plan** stop gets. It orbits like the
@@ -145,8 +156,13 @@ per stop. `renderer.toneMapping` can join them, because `OutputPass` recompiles 
 ## Option B — compensate in the artwork
 
 Pre-rotate the artwork's hue so that what comes *out* of ACES matches the photographs. The
-measured error is +10° of hue (32° authored → 42° rendered), so the first probe is roughly 32 − 10
-= 22° authored, then iterate.
+measured offset is +9.5° (32.2° authored → 41.7° rendered). To land on the photographs' ~27°, the
+first probe is **27 − 9.5 ≈ 17.5° authored**, then iterate.
+
+The plan first said "32 − 10 = 22", which targets 32° *output* — the artwork's own hue, not the
+photographs'. That compensates the artwork-to-render gap instead of the render-to-photograph one,
+and the spec review caught it. The offset is also not guaranteed constant across hue, which is why
+this is a measure-fit-measure loop and not a subtraction.
 
 ### B.1 Why this is cheaper than it looks
 
@@ -183,9 +199,10 @@ knowingly reopens it.
 ### B.3 Procedure
 
 1. Commit `tools/check_livery.mjs` (Task 0) with the corrected teal sampling.
-2. Edit the three `fill=` values in [model/side-livery.svg](model/side-livery.svg) — the palette
-   appears exactly once per colour except orange, which appears in three paths, so change all
-   three or the field splits.
+2. Edit the palette in [model/side-livery.svg](model/side-livery.svg). It occupies **seven
+   attributes, not three fills**: orange is one path fill plus two text fills; teal is a fill and
+   a stroke; black is a fill and a stroke. Editing only the fills leaves the chevron strokes at
+   the original colour and the graphic splits into two palettes.
 3. `node tools/render_livery.mjs`, then `pnpm capture`, then `node tools/check_livery.mjs`.
 4. Iterate. Two or three rounds should converge; if it does not, the luminance spread in B.2 is
    the reason and Option A is the answer instead.
@@ -205,6 +222,34 @@ at "2048 x 422". It is 2048 × 919 and has been since the livery was redrawn to 
 flank. Fix the comment while in there.
 
 ---
+
+## Spec review
+
+Reviewed once by `deep_reasoner` (codex `gpt-6-astra`, xhigh, read-only, job
+`job-2026-09-08T17-47-29-52843-spec-review`). It verified every three.js and line-number claim in
+this plan as correct, and found nine issues. Seven are folded in above; two are recorded here.
+
+**Accepted and folded in.** The photographic target was contaminated — the statistic quoted was
+the median of R, G and B converted to HSV, not the median hue, and the unmasked filter selected
+skin, wood and warm lighting, over half the sample in one frame. Re-measured with a largest-blob
+mask and a true median hue, the 15° outlier disappears and the three frames cluster at 26.5–30.2°.
+Also folded in: the bloom cost was backwards, `?calibrate#exterior` does inherit exterior state,
+A.3 must scope exposure as well as the curve, the SVG palette is seven attributes, the shader
+rebuild is cached rather than per-transition, and B's starting arithmetic targeted the wrong hue.
+
+**Accepted, not resolvable here.** The review is right that matching filters do not make
+photographs under different lighting a controlled colour measurement, and that the `r − b > 50`
+term imposes a brightness-dependent saturation floor. That is why saturation is now a sanity band
+rather than a target, and why hue — which the three frames agree on to within 4° across very
+different lighting — carries the gate. This remains an owner-chosen appearance target informed by
+evidence, not a demonstrated colorimetric match, and the plan should not be read as claiming the
+latter.
+
+**Rejected.** None outright. The review's causal caution is fair: ACES is the best-supported
+explanation rather than a proven sole cause, and the sweep that "ruled out brightness" mostly held
+`environmentIntensity × exposure` near 0.20, so it varied brightness far less than it appeared to.
+That weakens the diagnosis but not the plan — both options are judged by outcome against
+`check_livery.mjs`, not by whether the diagnosis was right.
 
 ## Recommendation
 
@@ -231,14 +276,25 @@ Common to both:
    within 0.46–0.51, teal and band reported.
 3. `pnpm capture && pnpm thumbs`, then the kerb three-quarter beside `exterior-kerb-flank-2m38s`
    and `exterior-kerb-three-quarter-3m14s`. Same success criterion as the parent plan.
-4. Draw calls unchanged: 46 worst interior, 26 exterior, **63 plan against a ceiling of 60** —
-   already over, and this work must not make it worse.
+4. Draw calls unchanged: 46 worst interior, 26 exterior, 63 plan. **Two ceilings are already
+   exceeded** — the plan stop's 60, and the parent spec's interior ceiling of 40, which 46 passes.
+   Holding these numbers proves non-regression, not compliance. This work must not make either
+   worse.
+5. `node tools/check_livery.mjs dist/captures/plan.png` — the plan stop shows the same decal under
+   the interior probe, so a change to either the curve or the artwork lands there too. Report it;
+   it is not gated, because the photographs frame no equivalent view.
 
 Option A only:
 
 5. `?calibrate` at 1920 × 1080, all three patches, against 0.052 / 0.084 / 0.074. Treat 0.084 as
-   the inherited baseline to beat or hold, not as a pass. Note that `runCalibration` moves the
-   camera with `tweenTo` and **bypasses `goTo`**, so it never sees the exterior stop's settings.
+   the inherited baseline to hold, not as a pass — it is already over its 0.08 ceiling.
+   **Invoke as `tour.html?calibrate` with no hash.** `runCalibration` moves the camera with
+   `tweenTo` and bypasses `goTo`, but startup calls `goTo` from the URL hash *before* calibration
+   starts (`main.ts:172` then `main.ts:207`), so `?calibrate#exterior` measures with the exterior
+   environment set and the cabin hidden. The no-hash form falls back to `HOTSPOTS[0]`. The plan
+   previously claimed calibration "never sees" exterior settings; that was wrong.
+   The three patches are also still unverified against a marked screenshot, so treat the historical
+   numbers as a baseline to compare against, not as proof of today's state.
 6. Every interior stop compared against its committed `public/renders/*.webp` before and after —
    the whole point is that these change, so the question is whether they change acceptably.
 7. A.3 only: frame time across an exterior↔interior transition, measuring the recompile.
