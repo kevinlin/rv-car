@@ -72,7 +72,10 @@ it('keeps plan lighting indoors, preserves stop state on finish swaps, and inval
     click(`[data-hotspot="${stop}"]`);
     const exterior = stop === 'exterior';
     expect(scene.environment).toBe(exterior ? bundle.skyEnvironment : interiorEnvironment);
-    expect(scene.environmentIntensity).toBe(exterior ? 0.45 : 2.5);
+    // 0.20 is set by measurement, not by eye: it is what puts the livery's orange field at
+    // saturation 0.498, inside the 0.46-0.51 the same wrap measures in the walkaround frames.
+    // See the note in main.ts — the scene intensity is the only lever that moves it.
+    expect(scene.environmentIntensity).toBe(exterior ? 0.20 : 2.5);
     // The threshold has to leave the sunlit body alone outdoors, or the vehicle blooms white.
     expect(bundle.bloom.threshold).toBe(exterior ? 12 : 5);
     expect(scene.background).toBe(exterior ? null : interiorBackground);

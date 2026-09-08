@@ -127,10 +127,19 @@ const goTo = (h: (typeof HOTSPOTS)[number], ms?: number) => {
   slideout?.traverse((o) => { o.visible = !exterior; });
   texturedFrames = 0;
   bundle.scene.environment = exterior ? bundle.skyEnvironment : interiorEnvironment;
-  // 0.45, not 1: Sky's PMREM is far brighter than the interior probe, and at parity the white
-  // body clipped and ACES desaturated the livery to pale cream. Measured by eye against
-  // docs/research/walkthrough/exterior-kerb-flank-2m38s.jpg, where the orange stays orange.
-  bundle.scene.environmentIntensity = exterior ? 0.45 : interiorEnvironmentIntensity;
+  // 0.20, not 1: Sky's PMREM is far brighter than the interior probe, and at parity the white
+  // body clips and ACES desaturates the livery to pale cream.
+  //
+  // This was 0.45, set by eye, and by eye was not enough — the orange field still rendered
+  // #f9e6b0. Now set by measurement, against the same frames: sampling the wrap in
+  // exterior-kerb-flank-2m38s, exterior-kerb-three-quarter-3m14s and livery-wordmark-detail puts
+  // the photographed orange at saturation 0.46 to 0.51, where the flat artwork is 0.815 — a real
+  // vehicle's wrap carries the same specular wash, just less of it. Sweeping this one value maps
+  // it 0.45 -> 0.293, 0.30 -> 0.393, 0.20 -> 0.498, 0.10 -> 0.653, so 0.20 lands inside the
+  // photographed band. Note the lever is the SCENE intensity: the decal has no envMap of its
+  // own, so material.envMapIntensity does nothing here, and neither the sun nor the hemisphere
+  // moves it — a 3x cut in both changes the field by 0.005.
+  bundle.scene.environmentIntensity = exterior ? 0.20 : interiorEnvironmentIntensity;
   // Bloom's 5.0 threshold is tuned for cove strips against interior panels. Outdoors the
   // sunlit body sails past it and the whole vehicle blooms into a white ghost, so the
   // threshold steps out of the way and only the awning strip is left able to reach it.

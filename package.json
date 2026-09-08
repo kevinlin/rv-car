@@ -21,6 +21,7 @@
     "bake": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/bake_ao.py",
     "check:blend": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/check_blend.py",
     "textures": "node tools/rectify_textures.mjs",
+    "capture": "node tools/capture_stops.mjs",
     "thumbs": "node tools/make_render_thumbs.mjs"
   },
   "keywords": [],
@@ -36,6 +37,7 @@
     "@types/node": "^26.4.1",
     "@types/three": "^0.185.4",
     "jsdom": "^30.0.1",
+    "playwright": "^1.63.0",
     "sharp": "^0.35.4",
     "typescript": "^7.0.2",
     "vite": "^8.2.2",

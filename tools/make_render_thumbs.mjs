@@ -1,17 +1,15 @@
 /**
- * Home-page imagery, derived from the comparison set in docs/research/final.
+ * Home-page imagery, cropped from the frames tools/capture_stops.mjs renders.
  *
- * Those captures have the tour's own .ui bar burnt into the bottom of the frame, so every crop
- * here drops that band; a thumbnail that shows the buttons reads as a screenshot of the app
- * rather than as a view of the vehicle. Re-run after recapturing the final set.
+ * Those frames arrive at a fixed 1600 x 1000 with the tour's own chrome hidden, so unlike the
+ * hand-captured set this replaced there is no .ui bar to drop and no per-image aspect to guess:
+ * every crop below is a fraction of that one known frame. Run pnpm capture first.
  */
 import sharp from 'sharp';
 
-const src = 'docs/research/final';
+const src = 'dist/captures';
 const out = 'public/renders';
-// Height of the .ui bar as a fraction of the frame — the captures are not all the same size,
-// so a pixel count only holds for the one it was measured on.
-const UI_BAR = 0.073;
+// Capture filenames, which are not hotspot ids — capture_stops.mjs owns that map.
 const STOPS = ['lounge', 'alcove', 'slideout', 'galley', 'washroom', 'cab', 'exterior', 'plan'];
 
 /**
@@ -21,14 +19,16 @@ const STOPS = ['lounge', 'alcove', 'slideout', 'galley', 'washroom', 'cab', 'ext
  * the labels are the point of that stop.
  */
 const CROPS = {
-  plan: { left: 0.38, top: 0.448, width: 0.295, height: 0.24 },
+  // Re-derived against the 2880 x 1800 capture: the old fractions were cut for the hand-captured
+  // frames and, at this framing, landed inside the cabin with the labels sliced off both edges.
+  plan: { left: 0.35, top: 0.33, width: 0.37, height: 0.40 },
   exterior: { left: 0.246, top: 0.228, width: 0.579, height: 0.537 },
 };
 
 /** A fractional crop resolved against one image's own pixel dimensions. */
 const box = (id, width, height) => {
   const c = CROPS[id];
-  if (!c) return { left: 0, top: 0, width, height: Math.round(height * (1 - UI_BAR)) };
+  if (!c) return { left: 0, top: 0, width, height };
   return {
     left: Math.round(c.left * width),
     top: Math.round(c.top * height),

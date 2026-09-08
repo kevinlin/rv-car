@@ -715,14 +715,27 @@ Known gaps, carried deliberately:
   them. Raking it pulls the face to -1705 at seat height and the seats burst through the
   windscreen. Clearing them needs a shear of 28 mm, which is no visible rake. Unblocking it means
   moving the cab furniture aft first.
-- **Window apertures read as white panels in black frames, not as dark glazing.** The frames are
-  scribed onto a solid body, so what fills them is body paint. Closing this needs a dark pane in
-  the aperture carrying a role `EXTERIOR_ROLES` can hide, so it does not black the windows out
-  from inside: one new role, one draw call.
-- **The livery is legible only on the off flank.** The exterior stop looks at the kerb flank, where
-  the deployed slide-out box covers the decal over exactly the span the wordmark occupies.
-- **Interior geometry shows through the cab/habitation step**, the 125 mm each side where the
-  2200 mm cab meets the 2450 mm body. Predates the sculpting pass.
+- ~~**Window apertures read as white panels in black frames.**~~ Closed by the exterior fidelity
+  pass: every aperture the photographs show glazed carries a `glass.tint` pane, stationed outboard
+  of the decal and inboard of the frame's outer face.
+- ~~**The livery is legible only on the off flank.**~~ Closed: the decal spans the full habitation
+  flank on both sides, and the slide-out is hidden at the exterior stop, so the kerb wordmark is
+  the thing the camera is pointed at.
+- ~~**Interior geometry shows through the cab/habitation step.**~~ Closed as a side effect of
+  hiding the whole interior at the exterior stop.
+- ~~**The livery renders desaturated.**~~ Fixed by measurement rather than by eye: the exterior
+  `environmentIntensity` went 0.45 -> 0.20, which puts the orange field at saturation 0.498
+  against the 0.46 to 0.51 the same wrap measures in three walkaround frames. The teal and the
+  near-black wordmark band came back with it.
+- **The livery's orange still reads gold rather than orange.** Saturation now matches the
+  photographs; hue does not. The field renders at 42 degrees against 15 to 27 in the frames and 32
+  in the flat artwork. This is the ACES curve's orange-to-yellow rotation at high luminance, and
+  **no brightness lever reaches it**: `environmentIntensity` crossed with `toneMappingExposure`
+  over thirteen combinations holds hue between 40 and 42 degrees throughout, while saturation
+  swings from 0.498 to 0.605. The remaining levers are a hue-preserving tone map — three ships
+  `AgXToneMapping` and `NeutralToneMapping` — or compensating in the artwork. The first re-tints
+  the whole app and every `?calibrate` number with it; the second reopens a palette the plan
+  settled. Neither is a tuning decision.
 - **The white-balance patches in `calibrate.ts` were mirrored with the furniture** during the rear
   service room correction rather than re-verified against a marked screenshot. Two of the three
   sample the lounge, and the lounge is the half of the cabin that swapped sides.
@@ -1611,3 +1624,147 @@ re-proportioned without the test needing new numbers.
   simply wrong.
 - `calibrate.ts`'s patches have now moved for the third pass running and still have not been
   re-verified against a marked screenshot.
+
+## Exterior fidelity — 2026-09-08
+
+Closing the gap between the exterior stop and the walkaround footage. The complaint was that it
+"looks nothing like the real vehicle photo", under the standing rule that where the model and the
+evidence disagree, the evidence wins. Planned in
+[plan_exterior-fidelity.md](plan_exterior-fidelity.md), which carries the phase-by-phase reasoning
+and the review corrections; this records what was built and what it measures.
+
+### The enabling change was a role list, not geometry
+
+`EXTERIOR_ROLES` named four roles while `exterior.glb` used ten. The skirt, every window reveal,
+the awning strip, the chrome and the rear lamps were therefore drawn at all seven interior stops
+and sat inside every `refreshProbe` capture. Five new roles — `body.trim`, `body.chrome`,
+`body.led`, `body.screen`, `glass.tint` — give the exterior its own materials for the six it had
+been borrowing, and `EXTERIOR_ROLES` now covers every role the collection uses. A test pins that
+invariant, because nothing else would catch the next role added in Blender.
+
+Completing the list is what made the rest cheap. `showExterior(false)` now hides the whole
+exterior, and its complement `showInterior` hides the whole cabin at the exterior stop — where the
+body is an opaque mass with no apertures, so none of it was visible anyway. That removed the need
+to split the `<module>_details` joins, which had been the expensive way to hide the slide-out, and
+it closed the 125 mm cab/habitation step gap for free.
+
+### Added
+
+- **A sky and a sun.** `three/addons/objects/Sky.js`, rendered once through `PMREMGenerator` and
+  swapped in as the scene environment at the exterior stop only — keyed on `id === 'exterior'`,
+  not on `view.kind === 'orbit'`, because the plan stop also orbits but looks at the interior.
+- **Glazing.** `_window` puts a `glass.tint` pane behind each reveal, at face stations rather than
+  centres: the flank is 1.225, the decal's outboard face 1.230, the pane 1.231–1.234, the frame
+  1.226 ± bevel. The off-flank service and washroom apertures deliberately get no pane, because
+  the photographs do not show those windows and a dark pane would make a known mismatch louder.
+- **The livery at full flank extent**, 3.9 × 1.75 m at z 0.30–2.05, redrawn to that aspect. No
+  alpha cut-outs: panes and frames sit outboard of the decal, so depth order does the occluding.
+- **The retracted kerb flank.** `slideout_box` owns its own paint batch, and the whole subtree is
+  hidden at the exterior stop — applied after `showExterior`, which selects by role and would
+  otherwise re-show the batch.
+- **`tools/capture_stops.mjs`**, replacing the deleted `docs/research/final/`. It drives
+  `tour.html?verify` in headless Chromium, waits for all ten modules and for a run of textured
+  frames, and writes `dist/captures/*.png` plus a `measured.json`. `pnpm thumbs` had been failing
+  outright since `a771cf4` deleted its source directory.
+
+### The sky is a deliberate departure from the evidence
+
+Every reference frame is shot indoors, in an exhibition hall with skylights, ceiling fixtures and
+a polished floor. There is no sky in any of them. The outdoor setting was proposed, raised with
+the owner as a departure, and reaffirmed — it is an appearance choice for a portfolio piece, not
+an evidence-driven one. **Retain it in later fidelity passes rather than "correcting" it back.**
+The part the evidence does constrain is the sun azimuth, which points from the front kerb quarter
+(runtime vector `6, 8, -6`) so the speculars land where the walkaround puts them.
+
+### Measured
+
+Captured at 2880 × 1800 by `pnpm capture`. Draw calls and triangles are exact; the frame rate is
+headless and uncapped, so it is a floor, not the spec's vsync-capped figure.
+
+| Stop | Draw calls | Triangles |
+|---|---|---|
+| lounge (`dinette`) | **46** | 76,210 |
+| slideout (`sofa`) | 40 | 71,890 |
+| alcove | 37 | 69,530 |
+| galley | 31 | 67,830 |
+| washroom | 30 | 66,138 |
+| cab | 30 | 61,722 |
+| exterior | **26** | 21,098 |
+| plan | **63** | 106,930 |
+
+| Axis | Ceiling | Result |
+|---|---|---|
+| Triangles | 350,000 | 106,988 |
+| Bytes, GLBs plus textures | 25 MB | 10.62 MB |
+| Envelope | 5998 × 2450 × 3200 mm | exact |
+| vitest + `tsc` | — | 151 tests, clean |
+
+The exterior stop fell from 57 draw calls to **26**: hiding the whole interior there is worth far
+more than the five new roles cost. The plan stop rose to **63 against a ceiling of 60**, which is
+the one budget this pass overruns — it is the only stop that draws the interior and the exterior
+together, so it pays for the new roles without collecting the saving. Not resolved by dropping the
+slide-out behaviour, which is a settled requirement.
+
+### Two claims in the plan that measurement contradicted
+
+- **Interior draw calls did not fall.** The worst interior stop reads 46 against a previously
+  recorded 45. The 45 predates two layout passes, so the two numbers are not comparable and the
+  fresh baseline the plan asked for was never taken before the work landed. What can be said is
+  that the ceiling of 40 is stale in both readings.
+- **The livery did not read as the reference**, and the 0.45 that was supposed to prevent that
+  had been set by eye. See below.
+
+### The capture script had three bugs worth recording
+
+All three produce a plausible-looking wrong image rather than an error, which is why they are
+written down:
+
+- **A hash-only navigation does not change the stop.** `main.ts` reads `location.hash` once at
+  startup and installs no `hashchange` listener, so `page.goto` between two hashes of one document
+  re-resolves nothing. Every capture after the first was the lounge, with the lounge's own draw
+  count attached to another stop's filename. Fixed with an inert `stop=` query param, which makes
+  each URL a real navigation.
+- **A hardcoded port.** Vite walks to 5174 when 5173 is taken, so the origin is read out of its
+  banner instead of assumed.
+- **`kill()` on the `pnpm` shim leaves vite holding the port**, and the next run then talks to a
+  stale server. The child is spawned detached and the process group is killed.
+
+The crop fractions in `make_render_thumbs.mjs` also had to be re-derived: they encoded the old
+hand-capture framing, and against a standardised capture the plan crop landed inside the cabin
+with its labels sliced off both edges.
+
+### The livery, tuned against the photographs
+
+The exterior `environmentIntensity` was 0.45, carrying a comment claiming it had been measured
+against `exterior-kerb-flank-2m38s.jpg`. It had been set by eye, and by eye was wrong: the orange
+field rendered `#f9e6b0` at saturation 0.293.
+
+What made the retune tractable was measuring the **photographs** rather than the artwork. Sampling
+the wrap in `exterior-kerb-flank-2m38s`, `exterior-kerb-three-quarter-3m14s` and
+`livery-wordmark-detail` puts the photographed orange at saturation 0.46 to 0.51 — not the flat
+artwork's 0.815. A real vehicle's wrap carries the same specular wash the render does, just less
+of it, so the artwork hex is a paint chip and never was the target.
+
+Sweeping the one value maps it cleanly: 0.45 -> 0.293, 0.30 -> 0.393, **0.20 -> 0.498**, 0.10 ->
+0.653, 0.05 -> 0.766. 0.20 lands inside the photographed band, and the teal and the near-black
+band recover with it.
+
+Three things ruled out along the way, each by measurement, because each is a plausible-sounding
+wrong answer:
+
+- **Not bloom, and not the interior lights.** Dousing either changes the frame by not one byte.
+  `RectAreaLight` is one-sided, so the cove strips never reached the outside of the body at all.
+- **Not the material.** `material.envMapIntensity` does nothing here — the decal carries no
+  `envMap` of its own, so the scene-level intensity is the only lever. Roughness moves saturation
+  by 0.02 across its whole range.
+- **Not the direct lights.** A 3x cut in the sun and the hemisphere together moves the field by
+  0.005.
+
+### Left over
+
+- Everything §14 still lists, including the livery's residual hue skew.
+- **The plan stop is 3 draw calls over its ceiling.**
+- **`fps` is not measured on the GPU at 1080p.** The capture runs headless and uncapped; the
+  spec's 120 fps figure has not been re-taken since this pass.
+- **The `?calibrate` patches still have not been re-verified against a marked screenshot**, for
+  the fourth pass running.

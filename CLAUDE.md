@@ -55,11 +55,18 @@ pnpm exec npm run bake                    # AO into the packed UV2 atlas, ~10 s
 pnpm exec npm run check:blend             # geometry checks against the saved .blend
 pnpm exec npm run check:models            # placement bounds, roles, exterior envelope
 pnpm exec npm run textures                # rectify photographs into public/textures/*.webp
-pnpm thumbs                               # overview-page imagery from docs/research/final
+pnpm capture                              # Playwright: re-render the eight stops to dist/captures
+pnpm thumbs                               # overview-page imagery, cropped from dist/captures
 ```
 
-`pnpm thumbs` needs no Blender: it crops the burnt-in `.ui` bar off the committed final renders
-and writes `public/renders/*.webp`. Re-run it after recapturing that comparison set.
+Neither `pnpm capture` nor `pnpm thumbs` needs Blender, but thumbs needs capture to have run
+first. `capture` drives `tour.html?verify` in headless Chromium, waits for all ten modules and the
+textures to settle, and writes `dist/captures/*.png` — gitignored, plus a `measured.json` of draw
+calls and triangles per stop. `thumbs` crops those into the **committed** `public/renders/*.webp`.
+Re-run both after anything that changes what a stop looks like. The two name their stops
+differently on purpose: the capture filenames are the zone names the overview page uses, and
+`capture_stops.mjs` owns the map from those to the `HOTSPOTS` ids (`lounge` → `dinette`,
+`slideout` → `sofa`).
 
 `dist/` is gitignored. `public/models/` is **committed**, along with `public/textures/` and
 `model/rv.blend`. The `.glb`s do regenerate from the `.blend`, but only on a machine with
