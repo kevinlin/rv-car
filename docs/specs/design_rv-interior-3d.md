@@ -727,15 +727,21 @@ Known gaps, carried deliberately:
   `environmentIntensity` went 0.45 -> 0.20, which puts the orange field at saturation 0.498
   against the 0.46 to 0.51 the same wrap measures in three walkaround frames. The teal and the
   near-black wordmark band came back with it.
-- **The livery's orange still reads gold rather than orange.** Saturation now matches the
-  photographs; hue does not. The field renders at 42 degrees against 15 to 27 in the frames and 32
-  in the flat artwork. This is the ACES curve's orange-to-yellow rotation at high luminance, and
-  **no brightness lever reaches it**: `environmentIntensity` crossed with `toneMappingExposure`
-  over thirteen combinations holds hue between 40 and 42 degrees throughout, while saturation
-  swings from 0.498 to 0.605. The remaining levers are a hue-preserving tone map — three ships
-  `AgXToneMapping` and `NeutralToneMapping` — or compensating in the artwork. The first re-tints
-  the whole app and every `?calibrate` number with it; the second reopens a palette the plan
-  settled. Neither is a tuning decision.
+- ~~**The livery's orange still reads gold rather than orange.**~~ Fixed by compensating in the
+  artwork — Option B of [plan_livery-hue.md](plan_livery-hue.md). The field renders at hue 26.2
+  against the 26.5 to 30.2 the wrap measures in three walkaround frames, saturation 0.494 inside
+  the same frames' band. **The orange in `model/side-livery.svg` is therefore no longer a sampled
+  colour.** It is authored at HSV 18.0 / 0.745 / 0.910, pre-rotated so that ACES lands it on the
+  photographs; the sampled `#e8912a` is recorded in the SVG header and superseded there. The
+  compensation is tied to `ACESFilmicToneMapping` and to the exterior `environmentIntensity` of
+  0.20, and a change to either makes the artwork wrong in the opposite direction. The teal and
+  the near-black band are untouched and remain sampled values.
+- **The tone curve still rotates orange toward yellow.** The artwork now cancels it for this one
+  decal at this one lighting. Nothing else that renders a saturated orange is compensated, and the
+  white body still clips at peak channel 246 against the photographs' `#7e8888` — the same root
+  cause, out of scope for the hue work. A hue-preserving curve (`AgXToneMapping`,
+  `NeutralToneMapping`) remains the treatment rather than the symptom, and taking it means
+  reverting this artwork compensation in the same pass.
 - **The white-balance patches in `calibrate.ts` were mirrored with the furniture** during the rear
   service room correction rather than re-verified against a marked screenshot. Two of the three
   sample the lounge, and the lounge is the half of the cabin that swapped sides.
@@ -1768,3 +1774,72 @@ wrong answer:
   spec's 120 fps figure has not been re-taken since this pass.
 - **The `?calibrate` patches still have not been re-verified against a marked screenshot**, for
   the fourth pass running.
+
+## Livery hue, compensated in the artwork — 2026-09-08
+
+The exterior fidelity pass fixed the livery's saturation and left its hue: the orange field
+rendered at 41.7 degrees against the 26.5 to 30.2 the same wrap measures in the walkaround frames.
+[plan_livery-hue.md](plan_livery-hue.md) carries the diagnosis and two candidate fixes. This
+records Option B, which pre-rotates the artwork so that what leaves ACES matches the photographs.
+It was taken because it cannot touch the interior at all: `body.graphic` is in
+`EXTERIOR_ROLES`, so the decal draws at the exterior and plan stops and nowhere else.
+
+### The offset is not a constant, so it was fitted rather than subtracted
+
+The plan's starting probe was 27 − 9.5 ≈ 17.5 degrees authored, from the single measured pair
+(32.5 authored renders at 41.7). Three rounds through
+`node tools/render_livery.mjs && pnpm capture && node tools/check_livery.mjs`:
+
+| Authored H / S | Rendered hue | Rendered saturation |
+|---|---|---|
+| 32.5 / 0.819 (as sampled) | 41.7 | 0.498 |
+| 16.0 / 0.819 | 22.6 | 0.581 |
+| 18.5 / 0.720 | 26.2 | 0.463 |
+| **18.0 / 0.745 (shipped)** | **26.2** | **0.494** |
+
+The authored-to-rendered hue slope is about 1.16, not 1.0, so the +9.5 offset at the artwork's own
+hue is only +6.6 by the time the field reaches 22.6 — one subtraction would have overshot to 22
+and it took a second point to see that.
+
+**Saturation had to be fitted alongside hue, which the plan did not anticipate.** ACES desaturates
+the yellow end hardest, so rotating the authored hue toward red partly undoes the desaturation
+that the earlier `environmentIntensity` retune had relied on: hue alone moved the field from 0.498
+to 0.581 and out of the photographed band. Pulling the authored saturation from 0.819 to 0.745
+puts it back. The two knobs pull against each other: every degree of hue taken out adds about
+0.005 of saturation, so the shipped value is the point where both land inside their bands, not
+the centre of either.
+
+The field's hue interquartile range is 26.0 to 26.2. The decal is one flat plane with a constant
+normal and nothing shadows it, so a single pre-rotation is uniformly correct here; the check
+reports the spread so that a future decal that wraps a corner or falls into shadow would show up.
+
+### Measured
+
+`node tools/check_livery.mjs dist/captures/exterior.png` passes. Teal and the near-black band are
+reported but not gated, and neither moved — they were not edited:
+
+| Field | Before | After |
+|---|---|---|
+| orange | `#edc977` hue 41.7, sat 0.498 | `#f2ae7a` hue **26.2**, sat **0.494** |
+| teal | `#304853` hue 199.4, sat 0.422 | `#304853` hue 199.4, sat 0.422 |
+| band | `#303c41` hue 196.7, sat 0.253 | `#303c41` hue 201.0, sat 0.242 |
+
+Draw calls and triangles are unchanged at every stop, which is the point of a texture-only change.
+151 tests and `tsc` clean; no test pinned a palette value.
+
+### The plan stop's check reading is not the livery
+
+`check_livery.mjs dist/captures/plan.png` reports hue 19.6 both before and after, byte for byte,
+from a blob that is 30% of the matching pixels at the bottom of the frame. That is interior
+woodwork, not the decal. The sectioned plan does show the decal, but not as the largest connected
+orange region, so the check's plan-stop reading measures something else and should not be read as
+a livery figure.
+
+### Left over
+
+- **The compensation is tied to the current curve and the current exterior lighting.** Taking
+  Option A later, `AgXToneMapping` or `NeutralToneMapping`, means reverting the artwork in the
+  same pass, or the orange overshoots toward red by the amount ACES was rotating it.
+- The white body still clips at peak channel 246 against the photographs' `#7e8888`. Same root
+  cause, deliberately out of scope.
+- The plan stop is still 3 draw calls over its ceiling, unchanged by this pass.

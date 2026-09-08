@@ -23,18 +23,35 @@
     flank window    y 0.29-1.91  ->  x 1071-1922   must sit inside the orange field
                     z 0.83-1.40  ->  y  341- 641
 
+  READ THIS BEFORE TOUCHING THE ORANGE. The orange below is NOT a sampled colour. It is
+  pre-compensated for the tone curve (ACESFilmicToneMapping, src/scene.ts) and the exterior
+  lighting (environmentIntensity 0.20, src/main.ts) in force on 2026-09-08. ACES rotates
+  saturated orange toward yellow, so the sampled #e8912a rendered at hue 41.7 against the
+  photographed wrap's 26.5-30.2. The authored hue is rotated down and the authored saturation
+  pulled back so that what leaves the renderer lands on the photographs instead of the artwork.
+
+  This is a compensation tied to that curve and that lighting. Swap in AgX or Neutral, or retune
+  the exterior environment, and the orange is wrong again, in the opposite direction.
+  Re-derive it with `node tools/check_livery.mjs dist/captures/exterior.png`; do not
+  read the value below as something measured off a frame. Recorded in
+  docs/specs/plan_livery-hue.md (Option B) and the design spec's §14.
+
   Colours sampled from the frames and white-balanced against the body panels, which read
   #7e8888 under the hall's light:
-    teal   #12657c   the leading edge band and the upper chevron
-    black  #191b1c   the wordmark's ground and the lower chevron
-    orange #e8912a   the main field, and the wordmark itself
+    teal   #12657c   the leading edge band and the upper chevron       — as sampled
+    black  #191b1c   the wordmark's ground and the lower chevron       — as sampled
+    orange #e8912a   the main field, and the wordmark itself           — SUPERSEDED
+
+  Authored today, orange only. Teal and black render close enough to the frames untouched:
+    orange #e86f3b   HSV 18.0deg / 0.745 / 0.910, from the sampled 32.5deg / 0.819 / 0.910
+                     renders at hue 26.2, saturation 0.494
 
   Rasterise with: node tools/render_livery.mjs
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 919" width="2048" height="919">
   <!-- The orange field: the dominant mass, enclosing the window, raked at its aft end and
        stopping short of the boarding door. Its forward end runs off the plane onto the cab. -->
-  <path d="M 760 250 L 980 150 L 2048 95 L 2048 700 L 1080 762 L 900 660 Z" fill="#e8912a"/>
+  <path d="M 760 250 L 980 150 L 2048 95 L 2048 700 L 1080 762 L 900 660 Z" fill="#e86f3b"/>
 
   <!-- Teal along the field's leading top edge, carried to the forward edge of the plane. Cut
        vinyl, so mitred rather than rounded. -->
@@ -52,10 +69,10 @@
   <path d="M 780 800 L 2048 690 L 2048 824 L 800 904 Z" fill="#191b1c"/>
 
   <!-- DACHIRV 大驰, orange on that band, where the reference puts it. -->
-  <text x="1210" y="818" fill="#e8912a" font-size="78" letter-spacing="11"
+  <text x="1210" y="818" fill="#e86f3b" font-size="78" letter-spacing="11"
         font-family="Avenir Next, Helvetica Neue, Arial, sans-serif" font-weight="600"
       >DACHIRV</text>
-  <text x="1666" y="816" fill="#e8912a" font-size="66"
+  <text x="1666" y="816" fill="#e86f3b" font-size="66"
         font-family="PingFang SC, Hiragino Sans GB, Heiti SC, sans-serif" font-weight="600"
       >大驰</text>
 </svg>
