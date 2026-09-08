@@ -51,6 +51,22 @@ export const buildUi = (opts: UiOptions): HTMLElement => {
     opts.onLabels(on);
   });
 
-  root.append(zones, finishes, toggle);
+  // Same stops as a native dropdown, for widths where eight buttons no longer fit. The
+  // stylesheet shows exactly one of the two. Its value follows body[data-stop], which goTo()
+  // stamps, so a hash arrival or a click on a wide-screen button leaves it correct.
+  const select = document.createElement('select');
+  select.className = 'ui-stops';
+  select.setAttribute('aria-label', 'Stop');
+  for (const h of HOTSPOTS) {
+    const o = document.createElement('option');
+    o.value = h.id;
+    o.textContent = h.label;
+    select.appendChild(o);
+  }
+  select.addEventListener('change', () => opts.onHotspot(select.value as StopId));
+  new MutationObserver(() => { select.value = document.body.dataset.stop ?? ''; })
+    .observe(document.body, { attributeFilter: ['data-stop'] });
+
+  root.append(zones, select, finishes, toggle);
   return root;
 };

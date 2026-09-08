@@ -356,24 +356,6 @@ export const HOTSPOTS: readonly Hotspot[] = [
     view: { kind: 'look', pitch: [-30 * D, 30 * D] },
   },
   {
-    // Three-quarter front, kerb side. Not the flat flank — the slide-out deploys to this one —
-    // but the flank with everything on it: the awning and its strip, the storage bay, the
-    // washer porthole, the control panel and the galley window, which is the walkaround the
-    // video actually films. The off flank is flatter and carries only the livery band. Since
-    // the vehicle is modelled deployed, the box is part of the subject rather than something
-    // to hide from. Full azimuth is unlimited, so the orbit reaches the off flank too. Target
-    // sits at the body's mid-height so the vehicle fills the frame without tipping.
-    id: 'exterior',
-    label: 'Exterior',
-    camera: { position: [6.9, 1.9, -4.6], target: [0.0, 0.4, 1.2] },
-    view: {
-      kind: 'orbit',
-      azimuth: [-Math.PI, Math.PI],
-      polar: [55 * D, 88 * D],
-      distance: [6.0, 14.0],
-    },
-  },
-  {
     // The floorplan the manufacturer never published, shown rather than drawn. Above the roof
     // line at 2.15, on the centreline, targeted at the middle of the OVERALL body rather than
     // of the habitation box: the vehicle runs Z -1.948 to 4.05, so its centre is 1.05 and a
@@ -397,6 +379,24 @@ export const HOTSPOTS: readonly Hotspot[] = [
       azimuth: [-Math.PI, Math.PI],
       polar: [0.05, 55 * D],
       distance: [5.0, 12.0],
+    },
+  },
+  {
+    // Three-quarter front, kerb side. Not the flat flank — the slide-out deploys to this one —
+    // but the flank with everything on it: the awning and its strip, the storage bay, the
+    // washer porthole, the control panel and the galley window, which is the walkaround the
+    // video actually films. The off flank is flatter and carries only the livery band. Since
+    // the vehicle is modelled deployed, the box is part of the subject rather than something
+    // to hide from. Full azimuth is unlimited, so the orbit reaches the off flank too. Target
+    // sits at the body's mid-height so the vehicle fills the frame without tipping.
+    id: 'exterior',
+    label: 'Exterior',
+    camera: { position: [6.9, 1.9, -4.6], target: [0.0, 0.4, 1.2] },
+    view: {
+      kind: 'orbit',
+      azimuth: [-Math.PI, Math.PI],
+      polar: [55 * D, 88 * D],
+      distance: [6.0, 14.0],
     },
   },
 ];

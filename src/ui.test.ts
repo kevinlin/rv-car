@@ -35,6 +35,24 @@ describe('buildUi', () => {
     expect(onHotspot).toHaveBeenCalledWith('galley');
   });
 
+  it('mirrors the stops in a dropdown and follows the stop the page is at', () => {
+    const onHotspot = vi.fn();
+    const el = buildUi({ onHotspot, onWood: vi.fn(), onLabels: vi.fn() });
+    document.body.appendChild(el);
+    const select = el.querySelector('.ui-stops') as HTMLSelectElement;
+    expect(select.options.length).toBe(HOTSPOTS.length);
+
+    select.value = 'plan';
+    select.dispatchEvent(new Event('change'));
+    expect(onHotspot).toHaveBeenCalledWith('plan');
+
+    document.body.dataset.stop = 'galley';
+    return new Promise<void>((r) => queueMicrotask(() => {
+      expect(select.value).toBe('galley');
+      r();
+    }));
+  });
+
   it('calls back with the variant id when a swatch is clicked', () => {
     const onWood = vi.fn();
     const el = buildUi({ onHotspot: vi.fn(), onWood, onLabels: vi.fn() });
