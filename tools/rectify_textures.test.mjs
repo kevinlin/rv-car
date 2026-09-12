@@ -266,3 +266,74 @@ test('invalid or unrepresentable roughness windows fail before writing', async (
   }
   await absent(join(dir, 'slope.webp'));
 });
+
+import { createHash } from 'node:crypto';
+
+test('omitting channel size preserves pre-change encoded bytes for tiled and untiled entries', async (t) => {
+  const dir = await temporary(t);
+  const entry = await slopeEntry(dir);
+  // Captured from the original writer before per-channel sizing was implemented (sharp 0.35.4).
+  const hashes = [
+    ['23df387c1123fb3e0258eafe8571e9953c3115abe6052d6b128d2f87f881ffa1'],
+    ['aaadb382c9c38d79eb0aca636e108ccd2cacc7ea5f2fa596841d8ae229bb43fb',
+      '5b443dbd51f60183e63c4ee0fb27a9e6a574c30d7ba3c40729d86c41620bdde4',
+      '0f9c6a656aa7c83ef8ea10e46004ed467efa96c600fb520b4bc0f068b1520eed'],
+    ['0ff32ccb43da9d997b4142bdf816c3e9e7c5047f4d917567e8aa8176e4aa4b6c'],
+    ['cd11a031dd74c06e88cf92fc6eaa4966009d3c889e059113d42d521bed35d9d7',
+      '93da5709049ecf6b03af1fa691e98d1ea6870880f7670a5777329dc77ee154ec',
+      '24686e383b99d2a79ea8a80ae612f648ea187bffecc5799c87f9f704013ac504'],
+  ];
+  let caseIndex = 0;
+  for (const tile of [true, false]) {
+    for (const pbr of [false, true]) {
+      const { normal, ...legacy } = entry;
+      await rectify({ ...legacy, tile, ...(pbr ? { normal, roughness: { min: 0.35, max: 0.6 } } : {}) }, dir);
+      const actual = [];
+      for (const suffix of pbr ? ['', '_n', '_r'] : ['']) {
+        actual.push(createHash('sha256').update(await readFile(join(dir, `slope${suffix}.webp`))).digest('hex'));
+      }
+      assert.deepEqual(actual, hashes[caseIndex++]);
+    }
+  }
+});
+
+test('channel sizes resize after mirroring and preserve decoded normal quadrant antisymmetry', async (t) => {
+  const dir = await temporary(t);
+  const entry = await slopeEntry(dir);
+  for (const tile of [true, false]) {
+    for (const size of [128, [128, 64]]) {
+      await rectify({ ...entry, tile, normal: { strength: 1, size }, roughness: { min: 0.35, max: 0.6, size } }, dir);
+      const [width, height] = Array.isArray(size) ? size : [size, size];
+      for (const suffix of ['_n', '_r']) {
+        const decoded = await decode(join(dir, `slope${suffix}.webp`));
+        assert.equal(decoded.info.width, width);
+        assert.equal(decoded.info.height, height);
+        if (tile && suffix === '_n') {
+          for (let y = 0; y < height / 2; y++) {
+            for (let x = 0; x < width / 2; x++) {
+              const a = pixel(decoded, x, y);
+              for (const [px, py, flipX, flipY] of [[width - 1 - x, y, true, false],
+                [x, height - 1 - y, false, true], [width - 1 - x, height - 1 - y, true, true]]) {
+                const b = pixel(decoded, px, py);
+                // Lanczos rounding may differ by one code value across complementary channels.
+                for (let c = 0; c < 3; c++) close(b[c], (c === 0 && flipX) || (c === 1 && flipY) ? 255 - a[c] : a[c], 1.01);
+              }
+            }
+          }
+        }
+      }
+      assert.equal((await decode(join(dir, 'slope.webp'))).info.width, entry.size);
+    }
+  }
+});
+
+test('invalid channel sizes fail before writing', async (t) => {
+  const dir = await temporary(t);
+  const entry = await slopeEntry(dir);
+  for (const channel of ['normal', 'roughness']) {
+    for (const size of [null, 0, -1, 1.5, '128', [], [128], [128, 0], [128, 64, 32]]) {
+      await assert.rejects(rectify({ ...entry, [channel]: { strength: 1, min: 0.35, max: 0.6, size } }, dir), /\.size/);
+    }
+  }
+  await absent(join(dir, 'slope.webp'));
+});

@@ -16,6 +16,7 @@
     "budget": "node tools/check_budget.mjs",
     "dump": "npx --yes tsx tools/dump_placements.ts",
     "starter": "npm run dump && /Applications/Blender.app/Contents/MacOS/Blender -b -P tools/make_starter_blend.py",
+    "check:textures": "node --test tools/check_textures.test.mjs && node tools/check_textures.mjs",
     "check:models": "node --test tools/check_models.test.mjs && node tools/check_models.mjs",
     "model": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/model_interior.py --",
     "bake": "/Applications/Blender.app/Contents/MacOS/Blender -b model/rv.blend --python-exit-code 1 -P tools/bake_ao.py",

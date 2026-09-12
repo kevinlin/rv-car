@@ -220,6 +220,12 @@ const deriveRoughness = (rgb, { min, max }) => {
 };
 
 export const rectify = async (entry, outputDir = resolve(ROOT, 'public/textures'), metadataDir = outputDir) => {
+  for (const channel of ['normal', 'roughness']) {
+    const size = entry[channel]?.size;
+    if (size !== undefined && !(Array.isArray(size) ? size.length === 2 && size.every(validSize) : validSize(size))) {
+      throw new Error(`${channel}.size must be a positive integer or [width, height]`);
+    }
+  }
   if (entry.normal && (!Number.isFinite(entry.normal.strength) || entry.normal.strength < 0)) {
     throw new Error('normal.strength must be a finite nonnegative number');
   }
@@ -296,13 +302,25 @@ export const rectify = async (entry, outputDir = resolve(ROOT, 'public/textures'
   return outPath;
 };
 
+const validSize = (value) => Number.isSafeInteger(value) && value > 0;
+
 const writeMap = async (pixels, w0, h0, outPath, entry, channel = 'albedo') => {
   const normal = channel === 'normal';
   const lossless = channel !== 'albedo';
   const raw = { raw: { width: w0, height: h0, channels: 3 } };
   const [outW, outH] = Array.isArray(entry.size) ? entry.size : [entry.size, entry.size];
+  const size = entry[channel]?.size ?? entry.size;
+  const [width, height] = Array.isArray(size) ? size : [size, size];
+  const encode = async (map) => {
+    if (width !== outW || height !== outH) {
+      // Materialise the composite first: sharp otherwise resizes BEFORE compositing.
+      const { data, info } = await map.raw().toBuffer({ resolveWithObject: true });
+      map = sharp(data, { raw: info }).resize(width, height, { fit: 'fill', kernel: 'lanczos3' });
+    }
+    await map.webp({ quality: entry.quality ?? 82, lossless }).toFile(outPath);
+  };
   if (entry.tile === false) {
-    await sharp(pixels, raw).webp({ quality: entry.quality ?? 82, lossless }).toFile(outPath);
+    await encode(sharp(pixels, raw));
     return;
   }
 
@@ -325,7 +343,7 @@ const writeMap = async (pixels, w0, h0, outPath, entry, channel = 'albedo') => {
     }
   }
 
-  await sharp({
+  await encode(sharp({
     create: { width: outW, height: outH, channels: 3, background: '#000' },
   })
     .composite([
@@ -333,9 +351,7 @@ const writeMap = async (pixels, w0, h0, outPath, entry, channel = 'albedo') => {
       { input: b, raw: raw.raw, left: w0, top: 0 },
       { input: c, raw: raw.raw, left: 0, top: h0 },
       { input: d, raw: raw.raw, left: w0, top: h0 },
-    ])
-    .webp({ quality: entry.quality ?? 82, lossless })
-    .toFile(outPath);
+    ]));
 };
 
 const main = async () => {
