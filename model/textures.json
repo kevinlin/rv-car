@@ -1,8 +1,11 @@
 {
-  "note": "Rectifier manifest. Corners are source pixels, ordered top-left, top-right, bottom-right, bottom-left. Several reference slices stack three photographs vertically, so corners are absolute pixels in the slice, not in a sub-photo. Run: pnpm exec npm run textures [out-name ...]",
+  "note": "Rectifier manifest. Corners are source pixels, ordered top-left, top-right, bottom-right, bottom-left. Several reference slices stack three photographs vertically, so corners are absolute pixels in the slice, not in a sub-photo. worldMm is the estimated real width of the crop in millimetres; a mirrored tile spans twice that width. Entries with normal or roughness opt into de-artefacting. Run: pnpm exec npm run textures [out-name ...]",
   "textures": [
     {
       "out": "walnut",
+      "worldMm": 136,
+      "normal": { "strength": 1.2 },
+      "roughness": { "min": 0.35, "max": 0.60 },
       "role": "wood.cabinet",
       "note": "Galley base-cabinet door face: flat, evenly lit, strong vertical figure, no hardware.",
       "source": "docs/research/reference/galley-wardrobe-dinette.jpg",
@@ -29,6 +32,7 @@
     },
     {
       "out": "herringbone",
+      "worldMm": 250,
       "role": "floor",
       "source": "docs/research/reference/underseat-drawers-washroom.jpg",
       "corners": [
@@ -54,6 +58,7 @@
     },
     {
       "out": "stone",
+      "normal": { "strength": 0 },
       "role": "worktop",
       "source": "docs/research/reference/galley-detail.jpg",
       "corners": [
@@ -81,6 +86,7 @@
     },
     {
       "out": "leather-grey",
+      "worldMm": 110,
       "role": "upholstery.seat",
       "source": "docs/research/reference/underseat-drawers-washroom.jpg",
       "corners": [
