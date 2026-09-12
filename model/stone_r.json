@@ -1,0 +1,9 @@
+{
+  "out": "stone",
+  "file": "stone_r.webp",
+  "range": {
+    "min": 0.322,
+    "max": 0.462
+  },
+  "meanGreen": 0.3887237548828125
+}

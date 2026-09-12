@@ -1,0 +1,9 @@
+{
+  "out": "leather-grey",
+  "file": "leather-grey_r.webp",
+  "range": {
+    "min": 0.699,
+    "max": 0.899
+  },
+  "meanGreen": 0.7774488262101715
+}

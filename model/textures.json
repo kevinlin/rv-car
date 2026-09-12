@@ -4,8 +4,13 @@
     {
       "out": "walnut",
       "worldMm": 136,
-      "normal": { "strength": 1.2 },
-      "roughness": { "min": 0.35, "max": 0.60 },
+      "normal": {
+        "strength": 0
+      },
+      "roughness": {
+        "min": 0.536,
+        "max": 0.786
+      },
       "role": "wood.cabinet",
       "note": "Galley base-cabinet door face: flat, evenly lit, strong vertical figure, no hardware.",
       "source": "docs/research/reference/galley-wardrobe-dinette.jpg",
@@ -28,11 +33,14 @@
         ]
       ],
       "size": 512,
-      "quality": 88
+      "quality": 88,
+      "scaleAnchor": "cabinet door stile width in the slice, ~0.72 px/mm",
+      "roughnessNote": "window serves nine variants across wood.cabinet, wood.trim and panel.locker; sized for the highest target among them (wood.cabinet/ash at 0.60)",
+      "normalNote": "strength 0 after render review at 0.8 and 0.15. Wood grain FIGURE is a colour boundary, not a height boundary, so the derived normal embosses tone as relief and the veneer reads as crumpled foil. Wrong in kind, not in amplitude. panel.locker gloss at 0.18 amplifies it."
     },
     {
       "out": "herringbone",
-      "worldMm": 250,
+      "worldMm": 143,
       "role": "floor",
       "source": "docs/research/reference/underseat-drawers-washroom.jpg",
       "corners": [
@@ -54,11 +62,22 @@
         ]
       ],
       "size": 512,
-      "quality": 88
+      "quality": 88,
+      "normal": {
+        "strength": 0
+      },
+      "roughness": {
+        "min": 0.735,
+        "max": 0.935
+      },
+      "scaleAnchor": "slippers on the floor beside the drawer, ~270 mm at ~0.70 px/mm",
+      "normalNote": "strength 0 after per-role render review: rosette from mirror-tiling a directional chevron, plus embossed JPEG striping"
     },
     {
       "out": "stone",
-      "normal": { "strength": 0 },
+      "normal": {
+        "strength": 0
+      },
       "role": "worktop",
       "source": "docs/research/reference/galley-detail.jpg",
       "corners": [
@@ -82,11 +101,17 @@
       "size": 512,
       "quality": 88,
       "note": "Bare worktop left of the plate: the flattest on-colour window in the slice.",
-      "contrast": 0.5
+      "contrast": 0.5,
+      "worldMm": 155,
+      "roughness": {
+        "min": 0.322,
+        "max": 0.462
+      },
+      "scaleAnchor": "dinner plate ~230 mm at 165 px and cutting board ~300 mm at 210 px, both ~0.71 px/mm"
     },
     {
       "out": "leather-grey",
-      "worldMm": 110,
+      "worldMm": 120,
       "role": "upholstery.seat",
       "source": "docs/research/reference/underseat-drawers-washroom.jpg",
       "corners": [
@@ -109,7 +134,16 @@
       ],
       "size": 512,
       "quality": 88,
-      "note": "Seat back, not a dinette chair face: the chairs are panelled everywhere, and this window samples 152,149,150 — the neutral grey the spec quotes as #808182 in shadow."
+      "note": "Seat back, not a dinette chair face: the chairs are panelled everywhere, and this window samples 152,149,150 — the neutral grey the spec quotes as #808182 in shadow.",
+      "normal": {
+        "strength": 0
+      },
+      "roughness": {
+        "min": 0.699,
+        "max": 0.899
+      },
+      "scaleAnchor": "seat back beside the 270 mm slippers, ~0.75 px/mm",
+      "normalNote": "strength 0 after per-role render review: pebbling unresolved at 0.75 px/mm; the only structure is specular highlights read as bumps"
     },
     {
       "out": "leather-camel",
@@ -134,7 +168,17 @@
         ]
       ],
       "size": 512,
-      "quality": 88
+      "quality": 88,
+      "worldMm": 107,
+      "normal": {
+        "strength": 0
+      },
+      "roughness": {
+        "min": 0.712,
+        "max": 0.912
+      },
+      "scaleAnchor": "bolster at the same standoff as the seat crop, ~0.75 px/mm",
+      "normalNote": "strength 0 after per-role render review: as leather-grey, plus a cross-shaped mirror seam artefact"
     },
     {
       "out": "leather-cream",
@@ -159,7 +203,17 @@
         ]
       ],
       "size": 512,
-      "quality": 88
+      "quality": 88,
+      "worldMm": 147,
+      "normal": {
+        "strength": 0
+      },
+      "roughness": {
+        "min": 0.74,
+        "max": 0.94
+      },
+      "scaleAnchor": "sofa cushion face at the same standoff, ~0.75 px/mm",
+      "normalNote": "strength 0 after per-role render review: as leather-grey, plus a hexagonal outline artefact"
     },
     {
       "out": "grp-ribbed",
@@ -184,7 +238,17 @@
         ]
       ],
       "size": 512,
-      "quality": 88
+      "quality": 88,
+      "worldMm": 106,
+      "normal": {
+        "strength": 0
+      },
+      "roughness": {
+        "min": 0.1,
+        "max": 0.2
+      },
+      "scaleAnchor": "washroom pod is 900 mm across and fills the frame, ~0.94 px/mm",
+      "normalNote": "strength 0 after per-role render review: embosses shelf edges and bottles from the photograph, not the GRP rib texture"
     },
     {
       "out": "damask",
@@ -211,7 +275,14 @@
       "size": 512,
       "quality": 88,
       "note": "Shower curtain. The pattern itself is high contrast, so the mirror tile keeps a visible motif; that is the material, not an artefact.",
-      "contrast": 0.5
+      "contrast": 0.5,
+      "worldMm": 88,
+      "normal": {
+        "strength": 0.3,
+        "size": 256
+      },
+      "scaleAnchor": "shower curtain, set back from the pod wall, ~0.80 px/mm",
+      "roughnessNote": "no roughness map: target 0.95 leaves no headroom under mean>=target"
     },
     {
       "out": "photo-wall",

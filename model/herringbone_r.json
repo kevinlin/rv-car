@@ -1,0 +1,9 @@
+{
+  "out": "herringbone",
+  "file": "herringbone_r.webp",
+  "range": {
+    "min": 0.735,
+    "max": 0.935
+  },
+  "meanGreen": 0.8337499281939338
+}

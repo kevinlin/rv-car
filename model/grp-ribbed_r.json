@@ -1,0 +1,9 @@
+{
+  "out": "grp-ribbed",
+  "file": "grp-ribbed_r.webp",
+  "range": {
+    "min": 0.1,
+    "max": 0.2
+  },
+  "meanGreen": 0.17262746773514093
+}

@@ -1,0 +1,9 @@
+{
+  "out": "walnut",
+  "file": "walnut_r.webp",
+  "range": {
+    "min": 0.536,
+    "max": 0.786
+  },
+  "meanGreen": 0.666256654028799
+}

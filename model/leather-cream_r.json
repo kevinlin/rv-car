@@ -1,0 +1,9 @@
+{
+  "out": "leather-cream",
+  "file": "leather-cream_r.webp",
+  "range": {
+    "min": 0.74,
+    "max": 0.94
+  },
+  "meanGreen": 0.7774481679878983
+}
