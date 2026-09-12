@@ -4,6 +4,36 @@ import { PLACEMENTS } from './data/vehicle';
 import { roleOf } from './finishes';
 import { DEFAULT_REGISTRY, type Registry, type Role } from './data/finishes';
 
+
+/**
+ * `computeTangents()` returns a zero-length tangent for any triangle whose UV island has no area —
+ * a seam the re-unwrap collapsed, or a face `smart_project` gave a single UV. Three does not treat
+ * that as an error, but the shader normalises the TBN, and normalising a zero vector is NaN. Those
+ * NaN fragments then reach `refreshProbe()`'s cubemap capture, and every material lit by that
+ * environment renders black: one collapsed island on a cabinet door blacks the whole cabin.
+ *
+ * Substituting any unit vector orthogonal to the normal is correct enough — the triangle has no UV
+ * area, so nothing samples a map across it, and only the TBN's validity matters.
+ */
+function repairTangents(geometry: THREE.BufferGeometry): number {
+  const tangent = geometry.getAttribute('tangent');
+  const normal = geometry.getAttribute('normal');
+  if (!tangent || !normal) return 0;
+  const n = new THREE.Vector3(), axis = new THREE.Vector3(), t = new THREE.Vector3();
+  let repaired = 0;
+  for (let i = 0; i < tangent.count; i++) {
+    t.set(tangent.getX(i), tangent.getY(i), tangent.getZ(i));
+    if (Number.isFinite(t.lengthSq()) && t.lengthSq() > 1e-12) continue;
+    n.set(normal.getX(i), normal.getY(i), normal.getZ(i));
+    axis.set(Math.abs(n.x) < 0.9 ? 1 : 0, Math.abs(n.x) < 0.9 ? 0 : 1, 0);
+    t.crossVectors(n, axis).normalize();
+    if (!Number.isFinite(t.lengthSq()) || t.lengthSq() < 1e-12) t.set(1, 0, 0);
+    tangent.setXYZ(i, t.x, t.y, t.z);
+    repaired++;
+  }
+  return repaired;
+}
+
 /** The authored modules share one AO atlas, so duplicate role materials can share a draw. */
 export function batchByRole(root: THREE.Object3D, registry: Registry = DEFAULT_REGISTRY): number {
   const owners = new Set([...PLACEMENTS.filter((p) => p.movable).map((p) => p.id), 'slideout_box']);
@@ -32,7 +62,10 @@ export function batchByRole(root: THREE.Object3D, registry: Registry = DEFAULT_R
         // Blender omits tangents on some primitives; AO needs only UVs.
         if (!needsTangents) geometry.deleteAttribute('tangent');
         if (!geometry.index) geometry.setIndex(Array.from({ length: geometry.getAttribute('position').count }, (_, i) => i));
-        if (needsTangents && !geometry.getAttribute('tangent')) geometry.computeTangents();
+        if (needsTangents && !geometry.getAttribute('tangent')) {
+          geometry.computeTangents();
+          repairTangents(geometry);
+        }
         const transform = new THREE.Matrix4().multiplyMatrices(inverse, mesh.matrixWorld);
         geometry.applyMatrix4(transform);
         // Baking a reflection loses the renderer's automatic front-face reversal.

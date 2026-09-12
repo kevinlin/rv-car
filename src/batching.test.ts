@@ -96,6 +96,38 @@ describe('role batching', () => {
     });
   });
 
+
+  it('repairs the zero-length tangents a collapsed UV island produces, which would black the cabin', () => {
+    // computeTangents() returns [0,0,0,1] for a triangle whose UV island has no area. Three does
+    // not treat that as an error, but the shader normalises the TBN and normalising a zero vector
+    // is NaN. Those fragments reach refreshProbe()'s cubemap, and every material lit by that
+    // environment renders black -- one collapsed island on a cabinet door blacks the whole cabin.
+    const registry = structuredClone(DEFAULT_REGISTRY);
+    registry['wood.cabinet'].variants = [{ id: 'mapped', label: 'Mapped', params: {
+      color: 0xffffff, roughness: 0.5, metalness: 0,
+      normalMap: { url: '/textures/does-not-need-to-load', srgb: false } } }];
+    registry['wood.cabinet'].active = 'mapped';
+
+    const collapsed = mesh();
+    const uv = collapsed.geometry.getAttribute('uv');
+    for (let i = 0; i < uv.count; i++) uv.setXY(i, 0.5, 0.5); // every vertex on one UV point
+    uv.needsUpdate = true;
+
+    const root = new THREE.Group();
+    root.add(collapsed);
+    batchByRole(root, registry);
+
+    const batch = root.getObjectByName('batch.wood.cabinet') as THREE.Mesh;
+    const tangent = batch.geometry.getAttribute('tangent');
+    expect(tangent).toBeDefined();
+    for (let i = 0; i < tangent.count; i++) {
+      const x = tangent.getX(i), y = tangent.getY(i), z = tangent.getZ(i);
+      const lengthSq = x * x + y * y + z * z;
+      expect(Number.isFinite(lengthSq)).toBe(true);
+      expect(lengthSq).toBeGreaterThan(1e-12);
+    }
+  });
+
   it('preserves mixed tangents and mirrored handedness in production order for a dormant mapped variant', () => {
     const registry = structuredClone(DEFAULT_REGISTRY);
     const slot = registry['wood.cabinet'];
