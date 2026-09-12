@@ -2,11 +2,12 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { PLACEMENTS } from './data/vehicle';
 import { roleOf } from './finishes';
+import { DEFAULT_REGISTRY, type Registry, type Role } from './data/finishes';
 
 /** The authored modules share one AO atlas, so duplicate role materials can share a draw. */
-export function batchByRole(root: THREE.Object3D): number {
+export function batchByRole(root: THREE.Object3D, registry: Registry = DEFAULT_REGISTRY): number {
   const owners = new Set([...PLACEMENTS.filter((p) => p.movable).map((p) => p.id), 'slideout_box']);
-  const buckets = new Map<THREE.Object3D, Map<string, THREE.Mesh[]>>();
+  const buckets = new Map<THREE.Object3D, Map<Role, THREE.Mesh[]>>();
   root.updateWorldMatrix(true, true);
   root.traverse((node) => {
     // GLTFLoader represents each multi-material primitive as its own child mesh.
@@ -25,7 +26,7 @@ export function batchByRole(root: THREE.Object3D): number {
   for (const [owner, roles] of buckets) {
     const inverse = owner.matrixWorld.clone().invert();
     for (const [role, meshes] of roles) {
-      const needsTangents = meshes.some((mesh) => mesh.material instanceof THREE.MeshStandardMaterial && mesh.material.normalMap);
+      const needsTangents = registry[role].variants.some((v) => v.params.normalMap);
       const geometries = meshes.map((mesh) => {
         const geometry = mesh.geometry.clone();
         // Blender omits tangents on some primitives; AO needs only UVs.

@@ -113,6 +113,40 @@ describe('applyFinishes', () => {
 });
 
 describe('texture resolution', () => {
+  it('round-trips all map slots and clears data maps in the unmapped variant', () => {
+    const registry = structuredClone(DEFAULT_REGISTRY);
+    const params = { color: 0xffffff, roughness: 0.5, metalness: 0 };
+    registry.floor = { active: 'mapped', variants: [
+      { id: 'mapped', label: 'Mapped', params: { ...params,
+        map: { url: '/synthetic-albedo' },
+        normalMap: { url: '/synthetic-normal', srgb: false },
+        roughnessMap: { url: '/synthetic-roughness', srgb: false }, normalScale: 0.4 } },
+      { id: 'plain', label: 'Plain', params },
+    ] };
+    const textures = new Map([
+      ['/synthetic-albedo', new THREE.Texture()],
+      ['/synthetic-normal', new THREE.Texture()],
+      ['/synthetic-roughness', new THREE.Texture()],
+    ]);
+    const mesh = meshWithMaterial('role.floor');
+    const material = mesh.material as THREE.MeshStandardMaterial;
+    const apply = () => applyFinishes(mesh, registry, (spec) => textures.get(spec.url)!);
+    apply();
+    const first = [material.map, material.normalMap, material.roughnessMap];
+    expect(first).toEqual([...textures.values()]);
+    expect(material.normalScale.toArray()).toEqual([0.4, 0.4]);
+    registry.floor.active = 'plain';
+    apply();
+    expect(material.map).toBe(first[0]);
+    expect(material.normalMap).toBeNull();
+    expect(material.roughnessMap).toBeNull();
+    registry.floor.active = 'mapped';
+    apply();
+    for (const [i, texture] of [material.map, material.normalMap, material.roughnessMap].entries()) {
+      expect(texture).toBe(first[i]);
+    }
+  });
+
   it('assigns a resolved texture to the material map', () => {
     const mesh = meshWithMaterial('role.floor');
     const registry = structuredClone(DEFAULT_REGISTRY);

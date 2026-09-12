@@ -31,6 +31,7 @@ export interface MaterialParams {
   readonly emissiveIntensity?: number;
   readonly map?: TextureSpec;
   readonly normalMap?: TextureSpec;
+  readonly roughnessMap?: TextureSpec;
   readonly normalScale?: number;
   readonly transparent?: boolean;
 }

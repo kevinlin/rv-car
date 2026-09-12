@@ -46,8 +46,9 @@ export const applyFinishes = (
       // Only override when the registry supplies one: the .glb-authored maps must survive
       // until every role has been migrated.
       if (p.map) material.map = resolve(p.map);
+      material.normalMap = p.normalMap ? resolve(p.normalMap) : null;
+      material.roughnessMap = p.roughnessMap ? resolve(p.roughnessMap) : null;
       if (p.normalMap) {
-        material.normalMap = resolve(p.normalMap);
         const s = p.normalScale ?? 1;
         material.normalScale.set(s, s);
       }

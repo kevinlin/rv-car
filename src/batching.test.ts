@@ -96,14 +96,39 @@ describe('role batching', () => {
     });
   });
 
-  it('reverses triangle winding and tangent handedness when baking a reflection', () => {
-    const root = new THREE.Group(), reflected = mesh();
-    reflected.material.normalMap = new THREE.Texture();
+  it('preserves mixed tangents and mirrored handedness in production order for a dormant mapped variant', () => {
+    const registry = structuredClone(DEFAULT_REGISTRY);
+    const slot = registry['wood.cabinet'];
+    slot.variants = [
+      { id: 'plain', label: 'Plain', params: { color: 0xffffff, roughness: 0.5, metalness: 0 } },
+      { id: 'mapped', label: 'Mapped', params: { color: 0xffffff, roughness: 0.5, metalness: 0,
+        normalMap: { url: '/synthetic-normal', srgb: false } } },
+    ];
+    slot.active = 'plain';
+    const root = new THREE.Group(), reflected = mesh(), unmirrored = mesh();
     reflected.geometry.computeTangents();
+    const vertexCount = reflected.geometry.getAttribute('position').count;
     reflected.scale.x = -1;
-    root.add(reflected);
-    batchByRole(root);
-    const batch = root.getObjectByName('batch.wood.cabinet') as THREE.Mesh;
+    root.add(reflected, unmirrored);
+    expect(reflected.material.normalMap).toBeNull();
+    expect(unmirrored.material.normalMap).toBeNull();
+    expect(unmirrored.geometry.getAttribute('tangent')).toBeUndefined();
+    batchByRole(root, registry);
+    const batch = root.getObjectByName('batch.wood.cabinet') as THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>;
+    const tangents = batch.geometry.getAttribute('tangent');
+    expect(tangents).toBeDefined();
+    expect(tangents.count).toBe(vertexCount * 2);
+    for (let i = 0; i < vertexCount; i++) {
+      expect(tangents.getW(i)).toBe(-1);
+      expect(tangents.getW(i + vertexCount)).toBe(1);
+    }
+    const normal = new THREE.Texture();
+    applyFinishes(root, registry, () => normal);
+    expect(batch.material.normalMap).toBeNull();
+    slot.active = 'mapped';
+    applyFinishes(root, registry, () => normal);
+    expect(batch.material.normalMap).toBe(normal);
+    expect(batch.geometry.getAttribute('tangent')).toBe(tangents);
     const { geometry } = batch, index = geometry.index!, positions = geometry.getAttribute('position');
     const a = new THREE.Vector3().fromBufferAttribute(positions, index.getX(0));
     const b = new THREE.Vector3().fromBufferAttribute(positions, index.getX(1));
