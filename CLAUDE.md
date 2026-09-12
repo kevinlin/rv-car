@@ -212,3 +212,7 @@ Three conventions worth knowing before editing geometry:
   beyond that. Pure functions are exported specifically so they can be tested without a canvas.
 - `noUncheckedIndexedAccess` is on. Index access needs a `!` or a guard.
 - Commits are `type: imperative summary`, one logical change each.
+
+## Agent output
+
+DO NOT send optional commentary. Answer only what was asked — no preamble, no unsolicited suggestions, no closing remarks.
