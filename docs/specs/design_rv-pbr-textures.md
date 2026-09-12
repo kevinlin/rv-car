@@ -97,8 +97,8 @@ Its reach is narrow, though. `q_70` is a path segment on the `itc.cn` CDN that s
 set; the brochure images come from the faisco CDN, which has no quality parameter and no larger
 original. **No manifest entry sources from sohu today**, so this changes nothing already shipped —
 it applies to new entries that draw on the sohu set, and to any existing entry deliberately
-re-sourced there. Moving an entry from a brochure image to a sohu photograph is a new crop, not a
-coordinate rescale, because the corners address a different photograph.
+re-sourced there. Moving an entry from a brochure image to a sohu photograph means choosing fresh
+corners, since they address a different photograph.
 
 **One material claim was confirmed rather than corrected.** The review states the flooring is
 高耐磨防水**复合地板革**, high-wear waterproof composite vinyl sheet. The registry already carries
@@ -279,6 +279,40 @@ in the registry comment the way the data layer tags a derived dimension.
 | `tyre-tread` | `tyre` | **new** | see §5 | — |
 | `wheel-face` | `wheel` | **new** | see §5 | yes |
 
+### Five candidate entries the evidence did not support
+
+§3's rule is that a channel ships only if the evidence carries it. Applied honestly during
+authoring, five of the thirteen planned map sets do not, and the arithmetic is not close:
+
+| Candidate | Characteristic feature | Best source scale | Feature in pixels | Outcome |
+|---|---|---|---|---|
+| `panel.wall` | soft-touch grain ~0.1 mm | 0.71 px/mm | 0.07 | no map |
+| `metal.brushed` | brush streak ~0.05 mm | 0.71 px/mm | 0.04 | no map |
+| `body.paint` | orange peel ~0.5 mm | 0.148 px/mm | 0.09 | no map |
+| `tyre` | tread block ~15 mm | 0.148 px/mm | 2.7 | no map |
+| `wheel` | cast texture ~0.3 mm | 0.148 px/mm | 0.05 | no map |
+
+`metal.brushed` fails twice over: brushed aluminium reads as anisotropic reflection, which a
+roughness map cannot produce at any resolution because the effect needs an anisotropic BRDF rather
+than a varying scalar.
+
+**The exterior gets nothing, and §5's option (a) is the casualty.** (a) was chosen because gloss
+falloff is low-frequency and a 1080-wide photograph carries low frequencies. The flaw is in the
+source, not the reasoning: the only exterior photograph is
+[exterior-hero.jpg](../research/reference/exterior-hero.jpg), a retouched studio shot in which the
+vehicle spans 885 px for 5998 mm — **0.148 px/mm** — and whose tonal variation across the flank is
+softbox lighting rather than material. Deriving roughness from it bakes a studio into the paint,
+which is the argument the parent spec's §9 already used to reject rectifying the livery. Every
+walkaround still is worse, at 640 px over 6 m.
+
+So the exterior lands on §5's option (c), deferred, reached by evidence rather than by preference.
+Improving it needs either photography that does not exist or a procedural map, and the latter
+reopens the no-procedural decision rather than fitting inside it. **Put to the owner with the
+arithmetic above and accepted on 2026-09-13**: the exterior ships no derived maps, and the
+procedural exception was not authorised.
+
+**Final scope: 8 map sets covering 12 interior roles**, against a planned 13 sets over 15 roles.
+
 `photo-wall` and `systems-panel` are decals (`colour: true`, `tile: false`) and gain nothing.
 `glass.tint` is excluded: a flat pane is flat, and a map on it buys an artefact, not a material.
 `body.graphic` is excluded for the reason in §5.
@@ -362,10 +396,19 @@ its own. Four things have to be pinned or `check_textures.mjs` asserts nothing u
   `walnut` serves `wood.cabinet` at 0.45, `wood.trim` at 0.35 and `panel.locker` at 0.12. Baking a
   target into the map would need three copies of the same grain. So the map stays target-agnostic
   and the registry constant carries the target.
-- A consequence worth stating rather than discovering: a role whose target roughness approaches 1.0
-  **cannot** carry a multiplicative map whose mean is below that target, because the required
-  constant exceeds 1. `textile.curtain` at 0.95 is the live case. That is the "failure, not a clamp"
-  rule below doing its job, and the answer is that the role ships no roughness map.
+- **The emitted mean must be at or above the highest target among the roles sharing that map**,
+  because the constant is `target / mean` and a constant over 1 is unrepresentable. Centring each
+  window on its target satisfies this and lands the constant near 1.0. `walnut` is the live
+  multi-role case and it passes with room: measured mean 0.4803 against targets 0.45, 0.35 and
+  0.12, giving 0.937, 0.729 and 0.250.
+
+  An earlier draft of this bullet said a role whose target approaches 1.0 **cannot** carry a
+  multiplicative map, and named `textile.curtain` at 0.95 as the case. That was too strong. The
+  constraint is on the mean, not on the target's height, so a window of `[0.90, 1.00]` serves 0.95
+  fine. What is true is that such a role has almost no headroom: the emitted mean is set by the
+  crop's luminance distribution rather than by the window midpoint — `walnut` landed at 0.4803
+  against a midpoint of 0.475 — so a small drift below the target pushes the constant over 1. Those
+  roles get their window biased upward rather than centred.
 - `mean` is measured on the **decoded, normalised green channel of the shipped WebP**, not on the
   pre-encode buffer, because the encoder moves it.
 - Targets live in a machine-readable block that the checker reads, not in a prose comment it would
@@ -534,8 +577,11 @@ it last, which would have invalidated phase 3's tuning.
 
 ## 9. Open questions
 
-1. ~~Which exterior option.~~ Closed 2026-09-12: (a), roughness maps only. `body.paint`, `tyre`
-   and `wheel` carry `strength: 0` and emit no normal map. See §5.
+1. ~~Which exterior option.~~ Closed twice. Chosen (a) on 2026-09-12, roughness maps only. Then
+   reopened during authoring and closed as (c), deferred, on 2026-09-13: the only exterior
+   photograph is a retouched studio shot at 0.148 px/mm whose variation is lighting rather than
+   material, so (a) had no source to derive from. `body.paint`, `tyre` and `wheel` get no maps of
+   any kind. A procedural exception was offered and declined. See §3's table and §5.
 2. Whether the three leather crops should share one normal map. They are three photographs of what
    is probably one hide; sharing would cut bytes and guarantee they read as one material, at the
    cost of the per-crop provenance the manifest otherwise holds.
@@ -554,7 +600,82 @@ it last, which would have invalidated phase 3's tuning.
 Carried forward from the parent, untouched: the mid-range phone frame rate has still never been
 measured on hardware, and §5 of this spec makes that gap materially larger.
 
-## 10. Review record
+## 10. Authoring results — 2026-09-13
+
+Eight map sets authored, then judged per role against a render. **Six of seven normal maps were
+dropped and one defect was found.** What ships: **7 roughness maps across 15 variants in 10 roles,
+and 1 normal map.**
+
+### The per-role verdicts
+
+| Map | What the derived normal actually contained | Verdict |
+|---|---|---|
+| `walnut` | the grain figure, embossed | **strength 0** |
+| `herringbone` | a 4-fold rosette plus diagonal JPEG striping | strength 0 |
+| `leather-grey` | flat, plus specular highlights read as bumps | strength 0 |
+| `leather-camel` | flat, plus a cross-shaped mirror seam artefact | strength 0 |
+| `leather-cream` | flat, plus a hexagonal outline artefact | strength 0 |
+| `grp-ribbed` | shelf edges and bottles from the photograph, not GRP ribs | strength 0 |
+| `damask` | a crisp woven motif | **keep, strength 0.3** |
+
+**`walnut` is the instructive one, and it failed in kind rather than in amplitude.** It was the
+best of the seven by inspection — genuine directional grain — and it was tried at 0.8 and again at
+0.15. Both read as crumpled foil. Wood grain figure is a **colour** boundary, not a height
+boundary, so deriving relief from its luminance invents geometry the material does not have. No
+strength fixes that, and `panel.locker`'s 0.18 gloss constant amplifies it. The flat original
+looked better.
+
+The leather cases fail the same way for a different reason: a specular highlight's position comes
+from light and view geometry, not local relief, so embossing one puts a bump where the lamp is.
+
+Roughness maps survived where normals did not, and the asymmetry is not luck. A wrong roughness
+value shifts gloss slightly; a wrong normal invents geometry, which the eye reads immediately.
+
+### A defect the normal maps exposed
+
+Enabling any normal map on the wood roles rendered **the entire interior flat `#111111`**, while
+the exterior stop was unaffected. Bisected to the wood roles specifically, and the chain is:
+
+`computeTangents()` returns `[0, 0, 0, 1]` for a triangle whose UV island has no area — a seam the
+re-unwrap collapsed. Three does not treat that as an error. The shader then normalises the TBN,
+and normalising a zero vector is NaN. Those NaN fragments reach `refreshProbe()`'s cubemap capture,
+and **every material lit by that environment renders black**: one collapsed island on a cabinet
+door blacks the whole cabin.
+
+`repairTangents()` in [batching.ts](../../src/batching.ts) substitutes a unit vector orthogonal to
+the normal. That is correct rather than approximate — the triangle has no UV area, so nothing
+samples a map across it and only the TBN's validity matters. A test in `batching.test.ts` fails
+without the guard.
+
+This is §8 risk 5 and the spec review's advisory finding 8 firing together. Both were recorded as
+prose; neither was tested for until a render went black.
+
+### Measured
+
+Draw calls and triangles **identical to baseline at all eight stops**, measured by capturing with
+the registry maps stashed and again with them applied: 46 / 37 / 40 / 31 / 30 / 30 / 26 / 63.
+
+| | Baseline | All 7 normals | Shipped |
+|---|---|---|---|
+| lounge fps | 58.9 | 45.2 | 58.2 |
+| plan fps | 57.9 | 41.9 | 55.7 |
+| texture bytes | 136 KB | 1.3 MB | 488 KB |
+
+fps is `pnpm capture` at 2880 x 1800, software-rasterised headless with no vsync. Valid as a
+like-for-like regression check, and **not** the spec's "60 fps at 1080p" figure, which the tool
+disclaims and which the parent spec recorded at 119-120 fps in a real browser. Total budget
+11.46 MB of 25 MB.
+
+`check_textures.mjs`: 15 mapped variants, every product within 0.0001 of its target, every constant
+inside [0, 1].
+
+### Still open
+
+The `herringbone` albedo is a 4-fold rosette, because mirror-tiling a directional chevron makes a
+flower. That is pre-existing and flat shading hid it; the normal map only made it visible. It
+belongs with §9's open question 6.
+
+## 11. Review record
 
 Reviewed once by `deep_reasoner` (job `job-2026-09-12T22-16-05-54420-spec-review`) before any
 implementation. Seven blocking and three advisory findings, all ten accepted, none declined, so
