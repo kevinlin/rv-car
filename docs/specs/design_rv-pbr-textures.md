@@ -76,7 +76,7 @@ its result is mostly negative. Recorded here so nobody runs it again.
 | Source | Native | Finding |
 |---|---|---|
 | `S1` brochure, 37 images on the faisco CDN | 1080 wide | **Byte-identical to the blobs in `0abe397`.** `galley-wardrobe-dinette.jpg` is 583,404 bytes in both places. The CDN URLs carry no `!WxH` resize suffix, so 1080 is native. No better version exists |
-| 搜狐汽车 review, 13 interior photos on `itc.cn` | 1080 × 810 | The best interior set, wider and brighter than any video frame. Served at `q_70`; `q_90` returns ~11 % more bytes at the same dimensions, decoded-pixel difference **not yet measured** |
+| 搜狐汽车 review, 13 interior photos on `itc.cn` | 1080 × 810 | The best interior set, wider and brighter than any video frame. Served at `q_70`; `q_90` returns ~11 % more bytes at the same dimensions, decoded-pixel difference measured: see below |
 | Douyin walkthrough | stills kept at ≤ 1280 × 720 | The only route to more real pixels on a single subject. A fresh 1080p frame is 1920 × 1080 |
 
 Three consequences:
@@ -87,12 +87,18 @@ helps. Nothing to be done about it.
 
 **Compression becomes geometry unless something stops it.** JPEG artefacts sit on 8 × 8 block
 boundaries, and a Sobel derivative turns a block boundary into a ridge. Stage 3 of §3 exists to
-suppress that. Whether the `q_90` re-fetch helps is an open measurement rather than an established
-win: more bytes at the same dimensions may be a different encode of identical decoded pixels, in
-which case it cannot improve the Sobel input at all. Phase 1 measures the decoded difference, and
-the answer decides whether the eight shipped albedo maps are re-cropped. The existing manifest
-entries also cite brochure images rather than the sohu set, so substituting one for the other is a
-new crop, not a coordinate rescale.
+suppress that. The `q_90` re-fetch was measured rather than assumed, because more bytes at the same dimensions
+could have been a re-encode of identical pixels. Decoding both and comparing sample by sample:
+**71.3 % of samples differ, mean delta 2.09, max delta 33.** It is a genuinely less-compressed
+decode, and a max delta of 33 is the block-boundary magnitude a Sobel would emboss, so the
+re-fetch is worth taking.
+
+Its reach is narrow, though. `q_70` is a path segment on the `itc.cn` CDN that serves the sohu
+set; the brochure images come from the faisco CDN, which has no quality parameter and no larger
+original. **No manifest entry sources from sohu today**, so this changes nothing already shipped —
+it applies to new entries that draw on the sohu set, and to any existing entry deliberately
+re-sourced there. Moving an entry from a brochure image to a sohu photograph is a new crop, not a
+coordinate rescale, because the corners address a different photograph.
 
 **One material claim was confirmed rather than corrected.** The review states the flooring is
 高耐磨防水**复合地板革**, high-wear waterproof composite vinyl sheet. The registry already carries
@@ -198,6 +204,33 @@ The Y convention is fixed and asserted: OpenGL-style (`+Y` up), matching `THREE.
 it gets `strength: 0` and must emit no `_n.webp`. That proves the switch works. It proves nothing
 about filter quality — the earlier draft claimed it would detect an undertuned stage 3, and it
 cannot, because an output that is never written carries no evidence about the output that is.
+
+### Normal maps are lossless WebP at 256, both by measurement
+
+**Lossy WebP cannot carry a normal map.** libwebp's lossy mode is YUV 4:2:0, so it chroma-subsamples
+exactly the R and G channels holding tangent-space X and Y. Measured on the emitted `walnut_n`:
+
+| Encoding | Bytes | Max deviation | Mirror antisymmetry error |
+|---|---|---|---|
+| lossless | 503,738 | 0 | **0** |
+| q95 | 138,754 | 97 | **118** |
+| q92 | 117,416 | 93 | 118 |
+| q80 | 71,514 | 103 | 109 |
+
+An antisymmetry error of 118 out of 255 means the mirror seam the §3 negation exists to get right
+is destroyed by the encoder afterwards. Lossless is not a preference here. PNG was measured too and
+is worse than lossless WebP at both sizes (695,708 bytes at 512).
+
+**The output size is 256, not 512.** `walnut`'s source window is 98 × 98 real pixels. Mirrored into
+a 2 × 2, a 512 output gives each quadrant 256 px from that 98 px source — a 2.6× upsample, applied
+to a *derivative*, which amplifies interpolation noise rather than revealing detail. At 256 each
+quadrant is 128 px, near 1:1 with the source. Measured cost: 144,286 bytes against 503,738, a 71 %
+saving for no real information. Albedo keeps its existing 512, because §2's luminance-only map is
+not a derivative and the size already ships.
+
+Projected: 10 normal maps at ~144 KB plus ~13 roughness maps at ~56 KB is about 2.2 MB, against
+14 MB of headroom. At 512 lossless it would have been 5.7 MB, which fits but spends 40 % of the
+remaining budget on upsampled noise.
 
 **Data maps are verified after decoding, never as written.** The existing writer emits lossy WebP,
 which can damage an otherwise correct normal field, so every assertion in §7 that concerns a
@@ -320,9 +353,19 @@ shader runs, and r185 then applies a roughness floor, adds geometry roughness de
 normal-map variance, and clamps the result at 1. Adding a normal map moves effective roughness on
 its own. Four things have to be pinned or `check_textures.mjs` asserts nothing useful:
 
-- `[min, max]` in the manifest are **final intended roughness**, and the emitted map is normalised
-  so its own mean is 1.0. The registry constant is then the target directly, which removes the
-  circularity.
+- `[min, max]` in the manifest are the emitted map's own decoded range, written directly with **no
+  mean normalisation.** An earlier draft of this section said the map is normalised so its decoded
+  mean is 1.0; that is unsatisfiable. Decoded samples lie in `[0, 1]`, so a mean of 1.0 forces every
+  sample to 1.0, and the only map meeting it is a constant one — which carries no variation and is
+  the one thing a roughness map exists to provide.
+- **The multiplier has to stay, because maps are shared across roles with different gloss.**
+  `walnut` serves `wood.cabinet` at 0.45, `wood.trim` at 0.35 and `panel.locker` at 0.12. Baking a
+  target into the map would need three copies of the same grain. So the map stays target-agnostic
+  and the registry constant carries the target.
+- A consequence worth stating rather than discovering: a role whose target roughness approaches 1.0
+  **cannot** carry a multiplicative map whose mean is below that target, because the required
+  constant exceeds 1. `textile.curtain` at 0.95 is the live case. That is the "failure, not a clamp"
+  rule below doing its job, and the answer is that the role ships no roughness map.
 - `mean` is measured on the **decoded, normalised green channel of the shipped WebP**, not on the
   pre-encode buffer, because the encoder moves it.
 - Targets live in a machine-readable block that the checker reads, not in a prose comment it would
@@ -377,19 +420,27 @@ Two things about that gate have to change, or it certifies nothing:
 
 Orange peel cannot be photo-derived. At 0.18 px/mm the best exterior photograph resolves
 nothing below ~50 mm. The same is true of tyre tread at 640 × 360 and of a wheel's cast texture.
-Three honest options, and this spec does not pick one alone. See §9 open question 1:
+Three options were put to the owner, who chose (a) on 2026-09-12. It is recorded here as decided:
 
-- **(a) Roughness only.** `body.paint`, `tyre` and `wheel` get windowed roughness maps, which are a
-  low-frequency signal a 1080-wide photograph does carry, and no normal maps. Consistent with
-  photo-derivation. Smallest, and probably enough: what the walkaround footage shows is gloss
-  falloff across panels, not visible peel.
+- **(a) Roughness only — CHOSEN.** `body.paint`, `tyre` and `wheel` get windowed roughness maps,
+  which are a low-frequency signal a 1080-wide photograph does carry, and **no normal maps**.
+  Consistent with photo-derivation, and it needs no exception to the no-procedural rule. What the
+  walkaround footage actually shows is gloss falloff across panels, not visible peel.
 - **(b) One procedural exception.** A low-amplitude generated orange peel on `body.paint` only,
   argued for explicitly as the one map in the project that is not photographic, and tagged
   `estimated` the way the data layer tags a derived dimension.
 - **(c) Defer the exterior.** Ship phases 1–3, re-scope with interior results in hand.
 
-**Recommendation: (a).** It keeps every map photographic, needs no new decision, and the exterior
-gap the walkaround actually shows is gloss, not microstructure.
+**Consequences of (a), which phase 4 implements.** All three exterior entries carry
+`"normal": {"strength": 0}` in the manifest, so no `_n.webp` is emitted for any of them and the
+§3 mirror's vector handling is never exercised on the exterior. `body.paint`'s roughness constant
+is re-derived per §4's rule like any other. Because no normal map reaches `body.paint`, r185 adds
+no geometry roughness there, which removes one of the two ways this pass could have moved the
+livery measurement; the fresh-capture and drift-tolerance gate still applies, because specular
+change from the roughness map alone remains possible.
+
+The exterior therefore ships 3 roughness maps and 0 normal maps, and the project's total falls
+from a candidate 13 normal maps to 10.
 
 ## 6. Blender's role
 
@@ -483,17 +534,17 @@ it last, which would have invalidated phase 3's tuning.
 
 ## 9. Open questions
 
-1. **Which exterior option** — §5's (a) roughness only, (b) one procedural exception for orange
-   peel, or (c) defer. Recommended (a).
+1. ~~Which exterior option.~~ Closed 2026-09-12: (a), roughness maps only. `body.paint`, `tyre`
+   and `wheel` carry `strength: 0` and emit no normal map. See §5.
 2. Whether the three leather crops should share one normal map. They are three photographs of what
    is probably one hide; sharing would cut bytes and guarantee they read as one material, at the
    cost of the per-crop provenance the manifest otherwise holds.
 3. Whether `panel.wall`, which has no map at all today, wants a normal map or only the roughness
    variation. A soft-touch bone panel is nearly featureless, and the honest answer may be neither.
-4. Whether the `q_90` re-fetch changes decoded pixels at all. Phase 0 measures it. If it does not,
-   the claim is withdrawn and the eight shipped albedo maps are left alone; if it does, re-cropping
-   the brochure-sourced entries is a coordinate rescale, but moving any entry to the sohu set is a
-   new crop rather than a rescale.
+4. ~~Whether the `q_90` re-fetch changes decoded pixels at all.~~ Closed by measurement: 71.3 % of
+   samples differ, mean 2.09, max 33. It is a real decode difference and worth taking, but only for
+   sohu-sourced crops, and no manifest entry sources from sohu today. Nothing already shipped
+   changes.
 5. Whether the derived `repeat` in phase 5 should ship at all. It is more faithful and it changes
    the look of every tiling surface at once, including ones nobody complained about.
 6. Whether `floor`'s herringbone is printed on the vinyl or was a wrong reading. §2 establishes the
